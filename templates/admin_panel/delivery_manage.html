@@ -1,0 +1,501 @@
+{% extends 'base/base.html' %}
+{% block title %}Delivery Management — Admin{% endblock %}
+{% block content %}
+<style>
+.dm-page { padding:36px 0; }
+.dm-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; gap:12px; flex-wrap:wrap; }
+.dm-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* KPI chips */
+.kpi-row { display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+.kpi-chip { flex:1; min-width:160px; background:#fff; border-radius:16px; padding:18px 22px; display:flex; align-items:center; gap:14px; border:1px solid #e8ede9; box-shadow:0 4px 16px rgba(0,0,0,0.05); }
+.kpi-chip .ki { font-size:1.7rem; width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.kpi-num { font-size:1.9rem; font-weight:900; line-height:1; }
+.kpi-label { font-size:.78rem; font-weight:600; color:#888; margin-top:4px; }
+
+/* Section card */
+.dm-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); margin-bottom:24px; }
+.dm-card-head { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid #eef3ee; background:#f9fcf9; }
+.dm-card-title { font-weight:700; font-size:1rem; color:#1a5d1a; display:flex; align-items:center; gap:10px; }
+.dm-card-title .th-icon { background:#e8f5e9; padding:7px; border-radius:10px; font-size:1rem; }
+
+/* Table */
+.dm-table { width:100%; border-collapse:collapse; }
+.dm-table th { background:#f5f8f5; padding:11px 20px; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; }
+.dm-table td { padding:13px 20px; border-top:1px solid #f0f5f0; font-size:.9rem; vertical-align:middle; }
+.dm-table tr:hover td { background:#fafcfa; }
+
+/* Delivery boy grid */
+.db-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; padding:20px; }
+.db-card {
+  background:#f9fcf9; border-radius:14px; padding:18px 20px;
+  border:1px solid #e4ece4; transition:all .2s; position:relative;
+}
+.db-card:hover { box-shadow:0 4px 16px rgba(34,107,46,0.1); border-color:#c8e6c9; }
+
+.db-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#226b2e,#4caf50); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800; margin-bottom:12px; }
+.db-name { font-weight:700; color:#1a3a1a; font-size:1rem; margin-bottom:4px; }
+.db-phone { font-size:.83rem; color:#555; margin-bottom:8px; }
+.db-meta { font-size:.78rem; color:#888; display:flex; flex-direction:column; gap:3px; margin-bottom:12px; }
+
+/* Status pill */
+.avail-on  { display:inline-flex; align-items:center; gap:5px; background:#e8f5e9; color:#2e7d32; font-size:.75rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+.avail-off { display:inline-flex; align-items:center; gap:5px; background:#fff8e1; color:#e65100; font-size:.75rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+
+/* DB action buttons */
+.db-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-toggle { font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:8px; border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:5px; transition:all .2s; }
+.btn-toggle-on  { background:#fff8e1; color:#e65100; }
+.btn-toggle-on:hover  { background:#ffe0b2; }
+.btn-toggle-off { background:#e8f5e9; color:#2e7d32; }
+.btn-toggle-off:hover { background:#c8e6c9; }
+.btn-del-db { font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:8px; background:#ffebee; color:#c62828; text-decoration:none; display:inline-flex; align-items:center; gap:5px; transition:all .2s; }
+.btn-del-db:hover { background:#ffcdd2; }
+
+/* Action buttons */
+.add-boy-btn { background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; padding:10px 22px; border-radius:12px; font-weight:700; font-size:.9rem; text-decoration:none; display:flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(34,107,46,0.25); transition:all .2s; }
+.add-boy-btn:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(34,107,46,0.3); color:#fff; }
+
+.btn-assign { display:inline-flex; align-items:center; gap:5px; background:#e8f5e9; color:#226b2e; padding:6px 14px; border-radius:8px; font-size:.82rem; font-weight:700; text-decoration:none; transition:all .2s; }
+.btn-assign:hover { background:#c8e6c9; }
+
+.status-od { background:#fff8e1; color:#e65100; padding:4px 10px; border-radius:20px; font-size:.73rem; font-weight:700; }
+.empty-msg { text-align:center; padding:40px; color:#aaa; }
+.empty-msg .ei { font-size:2.5rem; margin-bottom:10px; }
+
+.success-msg { background:#e8f5e9; color:#2e7d32; padding:14px 20px; border-radius:12px; border:1px solid #c8e6c9; margin-bottom:20px; font-weight:600; display:flex; align-items:center; gap:10px; }
+.error-msg { background:#ffebee; color:#c62828; padding:14px 20px; border-radius:12px; border:1px solid #ffcdd2; margin-bottom:20px; font-weight:600; }
+
+@media(max-width:700px){ .kpi-row { flex-direction:column; } .db-grid { grid-template-columns:1fr; } }
+
+/* ── Custom Center Delete Modal ── */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-modal-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 24px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-overlay.active .custom-modal-box {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.modal-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 4px solid #ffe4e4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.15);
+  animation: modalPulse 2s infinite;
+}
+
+@keyframes modalPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 18px 0;
+  line-height: 1.5;
+}
+
+.boy-highlight {
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-weight: 700;
+}
+
+.modal-warning-box {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: #d46b08;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-modal-confirm {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-modal-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.4);
+}
+</style>
+
+<div class="dm-page container">
+  <div class="dm-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">🛵</span>
+      Delivery Management
+    </h1>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{% url 'admin_panel:delivery_boy_add' %}" class="add-boy-btn">
+        <i class="fa-solid fa-user-plus"></i> Add Delivery Boy
+      </a>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      {% if 'error' in msg.tags %}
+        <div class="error-msg">⚠️ {{ msg }}</div>
+      {% else %}
+        <div class="success-msg">✅ {{ msg }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-chip">
+      <div class="ki" style="background:#e8f5e9;">🛵</div>
+      <div>
+        <div class="kpi-num" style="color:#226b2e;">{{ total_delivery_boys }}</div>
+        <div class="kpi-label">Total Delivery Boys</div>
+      </div>
+    </div>
+    <div class="kpi-chip">
+      <div class="ki" style="background:#fff8e1;">🟡</div>
+      <div>
+        <div class="kpi-num" style="color:#e65100;">{{ active_count }}</div>
+        <div class="kpi-label">Active Deliveries</div>
+      </div>
+    </div>
+    <div class="kpi-chip">
+      <div class="ki" style="background:#ffebee;">🔴</div>
+      <div>
+        <div class="kpi-num" style="color:#c62828;">{{ pending_assignment|length }}</div>
+        <div class="kpi-label">Awaiting Assignment</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delivery Boys List -->
+  <div class="dm-card">
+    <div class="dm-card-head">
+      <div class="dm-card-title">
+        <span class="th-icon">👤</span>
+        All Delivery Boys ({{ total_delivery_boys }})
+      </div>
+      <a href="{% url 'admin_panel:delivery_boy_add' %}" class="add-boy-btn" style="font-size:.82rem;padding:8px 16px;">
+        <i class="fa-solid fa-plus"></i> Add New
+      </a>
+    </div>
+    {% if delivery_boys %}
+    <div class="db-grid">
+      {% for boy in delivery_boys %}
+      <div class="db-card">
+        <div class="db-avatar">{{ boy.full_name|first|upper }}</div>
+        <div class="db-name">{{ boy.full_name }}</div>
+        <div class="db-phone"><i class="fa-solid fa-phone" style="color:#aaa;margin-right:5px;"></i>{{ boy.phone_number }}</div>
+        <div class="db-meta">
+          {% if boy.delivery_profile %}
+            {% if boy.delivery_profile.vehicle_type %}
+            <span>🛵 {{ boy.delivery_profile.vehicle_type }} {% if boy.delivery_profile.vehicle_number %}· {{ boy.delivery_profile.vehicle_number }}{% endif %}</span>
+            {% endif %}
+            <span>⭐ {{ boy.delivery_profile.rating_avg|floatformat:1 }} rating · {{ boy.delivery_profile.total_deliveries }} deliveries</span>
+          {% endif %}
+        </div>
+
+        <!-- Availability Status -->
+        <div style="margin-bottom:12px;">
+          {% if boy.delivery_profile and boy.delivery_profile.is_available %}
+            <span class="avail-on">🟢 Available</span>
+          {% else %}
+            <span class="avail-off">🟡 Unavailable</span>
+          {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="db-actions">
+          <form method="post" action="{% url 'admin_panel:delivery_boy_toggle' boy.pk %}" style="display:inline;">
+            {% csrf_token %}
+            {% if boy.delivery_profile and boy.delivery_profile.is_available %}
+              <button type="submit" class="btn-toggle btn-toggle-on">
+                <i class="fa-solid fa-pause"></i> Mark Busy
+              </button>
+            {% else %}
+              <button type="submit" class="btn-toggle btn-toggle-off">
+                <i class="fa-solid fa-play"></i> Mark Available
+              </button>
+            {% endif %}
+          </form>
+          <form method="post" id="boy-delete-form-{{ boy.pk }}" action="{% url 'admin_panel:delivery_boy_delete' boy.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="button" class="btn-del-db" onclick="promptDeleteDeliveryBoy('{{ boy.full_name|escapejs }}', 'boy-delete-form-{{ boy.pk }}')">
+              <i class="fa-solid fa-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-msg">
+      <div class="ei">🛵</div>
+      <p style="font-weight:600;">No delivery boys registered yet.</p>
+      <a href="{% url 'admin_panel:delivery_boy_add' %}" class="add-boy-btn" style="margin:16px auto;display:inline-flex;">
+        <i class="fa-solid fa-user-plus"></i> Add Your First Delivery Boy
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Active Deliveries -->
+  {% if active_deliveries %}
+  <div class="dm-card">
+    <div class="dm-card-head">
+      <div class="dm-card-title">
+        <span class="th-icon">🟡</span>
+        Active Deliveries — Out for Delivery
+      </div>
+      <span style="background:#fff8e1;color:#e65100;font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:20px;">{{ active_count }} active</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="dm-table">
+        <thead>
+          <tr>
+            <th>Order #</th><th>Customer</th><th>Amount</th><th>Delivery Boy</th><th>Placed</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in active_deliveries %}
+          <tr>
+            <td style="font-weight:700;color:#226b2e;">{{ order.order_number }}</td>
+            <td>
+              <div style="font-weight:600;">{{ order.user.full_name }}</div>
+              <div style="font-size:.78rem;color:#aaa;">{{ order.user.phone_number }}</div>
+            </td>
+            <td style="font-weight:800;color:#226b2e;">₹{{ order.total_amount }}</td>
+            <td>
+              {% if order.delivery_boy %}
+                <div style="font-weight:600;">{{ order.delivery_boy.full_name }}</div>
+              {% else %}
+                <span style="color:#c62828;font-weight:600;">Not assigned</span>
+              {% endif %}
+            </td>
+            <td style="font-size:.82rem;color:#aaa;">{{ order.placed_at|date:"d M, H:i" }}</td>
+            <td>
+              <a href="{% url 'admin_panel:order_detail' order.pk %}" class="btn-assign">
+                <i class="fa-solid fa-eye"></i> View
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Pending Assignment -->
+  {% if pending_assignment %}
+  <div class="dm-card">
+    <div class="dm-card-head">
+      <div class="dm-card-title">
+        <span class="th-icon" style="background:#ffebee;">🔴</span>
+        <span style="color:#c62828;">Awaiting Delivery Boy Assignment</span>
+      </div>
+      <span style="background:#ffebee;color:#c62828;font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:20px;">{{ pending_assignment|length }} pending</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="dm-table">
+        <thead>
+          <tr>
+            <th>Order #</th><th>Customer</th><th>Amount</th><th>Placed</th><th>Assign</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in pending_assignment %}
+          <tr>
+            <td style="font-weight:700;color:#226b2e;">{{ order.order_number }}</td>
+            <td>
+              <div style="font-weight:600;">{{ order.user.full_name }}</div>
+              <div style="font-size:.78rem;color:#aaa;">{{ order.user.phone_number }}</div>
+            </td>
+            <td style="font-weight:800;color:#226b2e;">₹{{ order.total_amount }}</td>
+            <td style="font-size:.82rem;color:#aaa;">{{ order.placed_at|date:"d M, H:i" }}</td>
+            <td>
+              <a href="{% url 'admin_panel:order_detail' order.pk %}" class="btn-assign">
+                <i class="fa-solid fa-user-check"></i> Assign Boy
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Professional Center Delete Modal -->
+<div id="deleteModal" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="modal-header-icon">
+      <div class="modal-icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <h3 class="modal-title">Delete Delivery Boy?</h3>
+    <p class="modal-desc">
+      Are you sure you want to delete <span id="modalBoyName" class="boy-highlight"></span>?
+    </p>
+    <div class="modal-warning-box">
+      <i class="fa-solid fa-circle-info" style="font-size:1.1rem;color:#e67e22;"></i>
+      <span>This action cannot be undone. All active driver details will be removed.</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn-modal-confirm" id="confirmDeleteBtn">
+        <i class="fa-solid fa-trash"></i> Yes, Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let activeDeleteFormId = null;
+
+function promptDeleteDeliveryBoy(boyName, formId) {
+  activeDeleteFormId = formId;
+  document.getElementById('modalBoyName').textContent = boyName;
+  
+  const modal = document.getElementById('deleteModal');
+  modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  modal.classList.remove('active');
+  activeDeleteFormId = null;
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  if (activeDeleteFormId) {
+    const targetForm = document.getElementById(activeDeleteFormId);
+    if (targetForm) {
+      targetForm.submit();
+    }
+  }
+});
+
+// Close modal when clicking backdrop
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+</script>
+{% endblock %}

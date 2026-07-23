@@ -1,0 +1,175 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Active Delivery: {{ order.order_number }}{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  #map { height: 400px; border-radius: 12px; margin-bottom: 20px; z-index: 1; }
+  .tracking-info { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; }
+  .stat-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="flex-between mb-md">
+    <h1 class="section-title" style="margin: 0;">Delivering Order #{{ order.order_number }}</h1>
+    <span class="badge" style="background: var(--clr-primary);">{{ order.get_payment_method_display }}</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Map Column -->
+    <div>
+      <div id="map"></div>
+      
+      <div style="display: flex; gap: 10px;">
+        <button id="start-real-gps" class="btn btn-primary" style="flex: 1;"><i class="fa-solid fa-location-crosshairs"></i> Use Real GPS</button>
+        <button id="start-simulation" class="btn btn-accent" style="flex: 1;"><i class="fa-solid fa-play"></i> Simulate Movement</button>
+      </div>
+      <p id="status-msg" style="margin-top: 10px; color: #4caf50;"></p>
+    </div>
+
+    <!-- Info Column -->
+    <div class="tracking-info">
+      <h3 style="margin-bottom: 15px;">Customer Details</h3>
+      <p><i class="fa-solid fa-user" style="color: var(--clr-primary); width: 20px;"></i> {{ order.address.full_name }}</p>
+      <p><i class="fa-solid fa-phone" style="color: var(--clr-primary); width: 20px;"></i> {{ order.address.phone }}</p>
+      <p><i class="fa-solid fa-location-dot" style="color: var(--clr-primary); width: 20px;"></i> {{ order.address.street_address }}, {{ order.address.city }}</p>
+      
+      <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="stat-card">
+          <div style="font-size: 0.8rem; color: #aaa;">Distance Left</div>
+          <div id="distance-display" style="font-size: 1.5rem; font-weight: bold; color: var(--clr-accent);">-- km</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size: 0.8rem; color: #aaa;">ETA</div>
+          <div id="eta-display" style="font-size: 1.5rem; font-weight: bold; color: #4caf50;">-- min</div>
+        </div>
+      </div>
+      
+      <button class="btn btn-primary btn-full mt-lg" onclick="alert('Order marked as delivered!')">Mark as Delivered</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Coordinates
+    const storeLat = {{ tracking.store_lat|default:28.9845 }};
+    const storeLng = {{ tracking.store_lng|default:77.7064 }};
+    const custLat = {{ tracking.customer_lat }};
+    const custLng = {{ tracking.customer_lng }};
+    const orderId = "{{ order.order_number }}";
+    const deliveryBoyId = {{ request.user.id|default:1 }};
+    
+    // Setup Map
+    const map = L.map('map').setView([storeLat, storeLng], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(map);
+
+    // Custom Icons
+    const storeIcon = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/3081/3081840.png', iconSize: [35, 35] });
+    const custIcon = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/2555/2555523.png', iconSize: [35, 35] });
+    const bikeIcon = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/3112/3112952.png', iconSize: [45, 45] });
+
+    L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map).bindPopup("Store");
+    L.marker([custLat, custLng], {icon: custIcon}).addTo(map).bindPopup("Customer");
+    
+    // Current Position Marker
+    let currentMarker = L.marker([storeLat, storeLng], {icon: bikeIcon}).addTo(map);
+
+    // Fit bounds
+    map.fitBounds([
+        [storeLat, storeLng],
+        [custLat, custLng]
+    ], {padding: [50, 50]});
+
+    // WebSocket Connection
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/delivery-boy/${deliveryBoyId}/`;
+    const socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+        document.getElementById('status-msg').innerText = "🟢 Connected to server. Ready to broadcast.";
+    };
+    socket.onerror = (e) => {
+        document.getElementById('status-msg').innerText = "🔴 Connection error!";
+        document.getElementById('status-msg').style.color = "red";
+    };
+
+    function sendLocation(lat, lng) {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                order_id: orderId,
+                lat: lat,
+                lng: lng
+            }));
+            currentMarker.setLatLng([lat, lng]);
+        }
+    }
+
+    // SIMULATION LOGIC
+    let simInterval;
+    document.getElementById('start-simulation').addEventListener('click', function() {
+        this.disabled = true;
+        document.getElementById('start-real-gps').disabled = true;
+        document.getElementById('status-msg').innerText = "🚴‍♂️ Simulating movement to customer...";
+        
+        let steps = 100;
+        let currentStep = 0;
+        
+        simInterval = setInterval(() => {
+            currentStep++;
+            // Interpolate position
+            let lat = storeLat + ((custLat - storeLat) * (currentStep / steps));
+            let lng = storeLng + ((custLng - storeLng) * (currentStep / steps));
+            
+            // Add slight randomness for realism
+            lat += (Math.random() - 0.5) * 0.0001;
+            lng += (Math.random() - 0.5) * 0.0001;
+            
+            sendLocation(lat, lng);
+            
+            if (currentStep >= steps) {
+                clearInterval(simInterval);
+                document.getElementById('status-msg').innerText = "✅ Arrived at destination!";
+            }
+        }, 1000); // Send ping every 1 second
+    });
+
+    // REAL GPS LOGIC
+    document.getElementById('start-real-gps').addEventListener('click', function() {
+        this.disabled = true;
+        document.getElementById('start-simulation').disabled = true;
+        document.getElementById('status-msg').innerText = "📍 Acquiring GPS signal...";
+        
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    sendLocation(lat, lng);
+                    document.getElementById('status-msg').innerText = `📡 Broadcasting: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                },
+                (error) => {
+                    document.getElementById('status-msg').innerText = "🔴 GPS Error: " + error.message;
+                    document.getElementById('status-msg').style.color = "red";
+                },
+                { enableHighAccuracy: true }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
+    });
+});
+</script>
+{% endblock %}

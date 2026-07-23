@@ -1,0 +1,248 @@
+{% extends 'base/base.html' %}
+{% block title %}Products Management — Admin{% endblock %}
+{% block content %}
+<style>
+.admin-page { padding:30px 0; }
+.admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+.admin-header h1 { font-size:1.8rem; font-weight:800; color:var(--clr-primary); }
+.toolbar { background:var(--clr-surface); border-radius:12px; padding:14px 20px; margin-bottom:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; border:1px solid rgba(255,255,255,0.07); }
+.toolbar input { flex:1; min-width:200px; background:var(--clr-bg); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 14px; color:var(--clr-text); font-size:.9rem; }
+.table-wrap { background:var(--clr-surface); border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); }
+.admin-table { width:100%; border-collapse:collapse; }
+.admin-table th { background:rgba(255,255,255,0.04); padding:12px 14px; text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--clr-text-muted); font-weight:600; white-space:nowrap; }
+.admin-table td { padding:12px 14px; border-top:1px solid rgba(255,255,255,0.05); vertical-align:middle; font-size:.9rem; }
+.admin-table tr:hover td { background:rgba(255,255,255,0.03); }
+.product-thumb { width:44px; height:44px; border-radius:10px; object-fit:cover; background:rgba(255,255,255,0.05); }
+.product-thumb-placeholder { width:44px; height:44px; border-radius:10px; background:rgba(26,93,26,0.15); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+.product-cell { display:flex; align-items:center; gap:12px; }
+.badge-active   { background:rgba(46,213,115,0.15); color:#2ed573; padding:4px 9px; border-radius:20px; font-size:.73rem; font-weight:600; }
+.badge-inactive { background:rgba(255,71,87,0.15);  color:#ff4757; padding:4px 9px; border-radius:20px; font-size:.73rem; font-weight:600; }
+.badge-new { background:rgba(255,193,7,0.15); color:#ffc107; padding:3px 8px; border-radius:20px; font-size:.7rem; font-weight:600; margin-left:4px; }
+.stock-ok  { color:#2ed573; font-weight:700; }
+.stock-low { color:#ffc107; font-weight:700; }
+.stock-out { color:#ff4757; font-weight:700; }
+.act-links { display:flex; gap:6px; }
+.btn-edit { background:rgba(116,185,255,0.15); color:#74b9ff; border:none; padding:5px 12px; border-radius:7px; cursor:pointer; font-size:.8rem; font-weight:600; text-decoration:none; }
+.btn-del  { background:rgba(255,71,87,0.15);  color:#ff4757; border:none; padding:5px 12px; border-radius:7px; cursor:pointer; font-size:.8rem; font-weight:600; text-decoration:none; }
+.orig-price { text-decoration:line-through; color:var(--clr-text-muted); font-size:.8rem; margin-right:4px; }
+.disc-pct { background:rgba(46,213,115,0.15); color:#2ed573; padding:2px 6px; border-radius:6px; font-size:.7rem; font-weight:700; }
+
+/* ── Custom Center Delete Modal ── */
+.custom-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.custom-modal-overlay.active { opacity: 1; visibility: visible; }
+.custom-modal-box {
+  background: #ffffff; width: 100%; max-width: 440px; border-radius: 24px; padding: 32px 28px;
+  text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: scale(0.9) translateY(20px); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
+.modal-header-icon { display: flex; justify-content: center; margin-bottom: 18px; }
+.modal-icon-circle {
+  width: 68px; height: 68px; border-radius: 50%; background: #fef2f2; color: #dc2626; border: 4px solid #ffe4e4;
+  display: flex; align-items: center; justify-content: center; font-size: 1.7rem; box-shadow: 0 8px 18px rgba(220, 38, 38, 0.15);
+  animation: modalPulse 2s infinite;
+}
+@keyframes modalPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.modal-title { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; }
+.modal-desc { font-size: 0.95rem; color: #64748b; margin: 0 0 18px 0; line-height: 1.5; }
+.prod-highlight { color: #0f172a; background: #f1f5f9; padding: 3px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 700; }
+.modal-warning-box {
+  background: #fffbe6; border: 1px solid #ffe58f; border-radius: 14px; padding: 12px 16px; font-size: 0.85rem;
+  color: #d46b08; display: flex; align-items: center; gap: 10px; text-align: left; margin-bottom: 24px; font-weight: 600;
+}
+.modal-actions { display: flex; gap: 12px; }
+.btn-modal-cancel { flex: 1; padding: 13px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.2s; }
+.btn-modal-cancel:hover { background: #f1f5f9; color: #0f172a; }
+.btn-modal-confirm {
+  flex: 1; padding: 13px; border-radius: 14px; border: none; background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+}
+.btn-modal-confirm:hover { background: linear-gradient(135deg, #dc2626, #b91c1c); transform: translateY(-1px); color: #fff; }
+</style>
+
+<div class="admin-page container">
+  <div class="admin-header">
+    <h1>🛍 Products Management</h1>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{% url 'admin_panel:import_page' %}" class="btn btn-outline" style="font-size:.9rem;">📥 Bulk Import</a>
+      <a href="{% url 'admin_panel:product_create' %}" class="btn btn-primary">+ Add Product</a>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+    </div>
+  </div>
+
+  {% if messages %}{% for msg in messages %}
+  <div style="background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-weight:600;">✓ {{ msg }}</div>
+  {% endfor %}{% endif %}
+
+  <form class="toolbar" method="get">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="🔍 Search product name…">
+    <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Search</button>
+    {% if search_query %}<a href="{% url 'admin_panel:product_list' %}" class="btn btn-outline">Clear</a>{% endif %}
+    <span style="margin-left:auto;font-size:.85rem;color:var(--clr-text-muted);">{{ page_obj.paginator.count }} products total</span>
+  </form>
+
+  <div class="table-wrap">
+    {% if page_obj.object_list %}
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Brand</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in page_obj %}
+        <tr>
+          <td>
+            <div class="product-cell">
+              {% if product.main_image %}
+              <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="product-thumb">
+              {% else %}
+              <div class="product-thumb-placeholder">🛍</div>
+              {% endif %}
+              <div>
+                <div style="font-weight:600;font-size:.9rem;">
+                  {{ product.name|truncatechars:40 }}
+                  {% if product.is_new_launch %}<span class="badge-new">NEW</span>{% endif %}
+                </div>
+                <div style="font-size:.75rem;color:var(--clr-text-muted);margin-top:2px;">{{ product.slug|truncatechars:30 }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:.85rem;">{{ product.category.name|default:"—" }}</td>
+          <td style="font-size:.85rem;">{{ product.brand.name|default:"—" }}</td>
+          <td>
+            <div>
+              {% if product.price and product.price != product.discount_price %}
+              <span class="orig-price">₹{{ product.price }}</span>
+              {% endif %}
+              <span style="font-weight:800;color:var(--clr-primary);">₹{{ product.discount_price }}</span>
+            </div>
+            {% if product.price and product.discount_price and product.price > product.discount_price %}
+            <span class="disc-pct">
+              -{{ product.price|floatformat:0 | add:"-0" }}% OFF
+            </span>
+            {% endif %}
+          </td>
+          <td>
+            {% if product.stock == 0 %}
+            <span class="stock-out">⭕ 0</span>
+            {% elif product.stock <= 5 %}
+            <span class="stock-low">⚠ {{ product.stock }}</span>
+            {% else %}
+            <span class="stock-ok">✓ {{ product.stock }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if product.is_active %}
+            <span class="badge-active">Active</span>
+            {% else %}
+            <span class="badge-inactive">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="act-links">
+              <a href="{% url 'admin_panel:product_edit' product.pk %}" class="btn-edit">✏ Edit</a>
+              <button type="button" class="btn-del" onclick="promptDeleteProduct('{{ product.name|escapejs }}', '{% url "admin_panel:product_delete" product.pk %}')">🗑</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="display:flex;justify-content:center;gap:8px;padding:20px;align-items:center;">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}" class="btn btn-outline" style="font-size:.85rem;">← Prev</a>
+      {% endif %}
+      <span style="padding:8px 18px;background:var(--clr-primary);border-radius:8px;font-weight:600;color:#fff;">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}" class="btn btn-outline" style="font-size:.85rem;">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--clr-text-muted);">
+      <div style="font-size:3rem;margin-bottom:12px;">🛍</div>
+      <p>No products found{% if search_query %} for "{{ search_query }}"{% endif %}.
+        <a href="{% url 'admin_panel:product_create' %}" style="color:var(--clr-primary);">Add one →</a>
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Professional Center Delete Modal -->
+<div id="deleteModal" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="modal-header-icon">
+      <div class="modal-icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <h3 class="modal-title">Delete Product?</h3>
+    <p class="modal-desc">
+      Are you sure you want to delete <span id="modalProductName" class="prod-highlight"></span>?
+    </p>
+    <div class="modal-warning-box">
+      <i class="fa-solid fa-circle-info" style="font-size:1.1rem;color:#e67e22;"></i>
+      <span>This product will be permanently removed from your catalog.</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <a href="#" class="btn-modal-confirm" id="confirmDeleteBtn">
+        <i class="fa-solid fa-trash"></i> Delete Product
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function promptDeleteProduct(productName, deleteUrl) {
+  document.getElementById('modalProductName').textContent = productName;
+  document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+  
+  const modal = document.getElementById('deleteModal');
+  modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  modal.classList.remove('active');
+}
+
+// Close modal when clicking backdrop
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+</script>
+{% endblock %}

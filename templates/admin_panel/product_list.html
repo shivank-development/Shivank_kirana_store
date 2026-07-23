@@ -1,0 +1,254 @@
+{% extends 'base/base.html' %}
+{% block title %}Manage Products — Admin{% endblock %}
+
+{% block content %}
+<style>
+.pl-page { padding: 36px 0; }
+
+/* Header */
+.pl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+.pl-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+.btn-add-product {
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff;
+  padding:11px 24px; border-radius:12px; font-weight:700; font-size:.92rem;
+  text-decoration:none; display:flex; align-items:center; gap:8px;
+  box-shadow:0 4px 14px rgba(34,107,46,0.25); transition:all .2s;
+}
+.btn-add-product:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(34,107,46,0.3); color:#fff; }
+
+/* Search + Filter bar */
+.pl-toolbar { background:#fff; border-radius:16px; padding:16px 22px; margin-bottom:22px; border:1px solid #e4ece4; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.pl-toolbar form { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.pl-search { flex:1; min-width:220px; padding:11px 16px; border:2px solid #dce8dc; border-radius:12px; font-size:.92rem; color:#333; background:#f8faf8; outline:none; transition:all .2s; }
+.pl-search:focus { border-color:#226b2e; background:#fff; box-shadow:0 0 0 3px rgba(34,107,46,0.08); }
+.btn-search { background:#226b2e; color:#fff; padding:11px 20px; border-radius:12px; border:none; cursor:pointer; font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:6px; transition:all .2s; }
+.btn-search:hover { background:#1a5d1a; }
+.btn-clear-search { background:#f1f5f1; color:#555; padding:11px 18px; border-radius:12px; font-weight:600; font-size:.9rem; text-decoration:none; transition:all .2s; }
+.btn-clear-search:hover { background:#e5ece5; }
+
+/* Stats bar */
+.pl-stats { display:flex; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
+.pl-stat { background:#fff; border-radius:12px; padding:12px 18px; border:1px solid #e4ece4; display:flex; align-items:center; gap:10px; font-size:.85rem; font-weight:600; color:#555; }
+.pl-stat .sv { font-size:1.2rem; font-weight:900; }
+
+/* Table card */
+.pl-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.pl-table { width:100%; border-collapse:collapse; }
+.pl-table th { background:#f5f8f5; padding:12px 16px; font-size:.73rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; white-space:nowrap; }
+.pl-table td { padding:13px 16px; border-top:1px solid #f0f5f0; vertical-align:middle; }
+.pl-table tr:hover td { background:#fafcfa; }
+
+/* Product image */
+.prod-img { width:52px; height:52px; object-fit:contain; border-radius:10px; background:#f5f5f5; padding:4px; border:1px solid #eee; }
+.prod-img-placeholder { width:52px; height:52px; border-radius:10px; background:#f0f4f0; display:flex; align-items:center; justify-content:center; color:#ccc; font-size:1.2rem; border:1px solid #e8ede8; }
+
+/* Product info */
+.prod-name { font-weight:700; color:#1a3a1a; font-size:.95rem; margin-bottom:3px; }
+.prod-brand { font-size:.77rem; color:#aaa; display:flex; align-items:center; gap:4px; }
+.prod-flags { display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; }
+.prod-flag { font-size:.65rem; padding:2px 7px; border-radius:6px; font-weight:700; }
+.pf-featured { background:#fff8e1; color:#f57f17; }
+.pf-new      { background:#e8f5e9; color:#2e7d32; }
+.pf-combo    { background:#e3f2fd; color:#1565c0; }
+
+/* Price */
+.prod-price { font-weight:900; color:#1a7a1a; font-size:1rem; }
+.prod-mrp { font-size:.75rem; text-decoration:line-through; color:#bbb; margin-top:2px; }
+.discount-pct { font-size:.72rem; background:#e8f5e9; color:#2e7d32; padding:2px 7px; border-radius:6px; font-weight:700; margin-top:3px; display:inline-block; }
+
+/* Stock */
+.stock-ok   { font-weight:800; color:#2e7d32; font-size:1rem; }
+.stock-low  { font-weight:800; color:#e65100; font-size:1rem; }
+.stock-out  { font-weight:800; color:#c62828; font-size:1rem; }
+.stock-label { font-size:.72rem; color:#aaa; margin-top:2px; }
+
+/* Status badge */
+.badge-active   { display:inline-flex; align-items:center; gap:4px; background:#e8f5e9; color:#2e7d32; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+.badge-inactive { display:inline-flex; align-items:center; gap:4px; background:#ffebee; color:#c62828; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+
+/* Action buttons */
+.act-row { display:flex; gap:6px; justify-content:flex-end; }
+.btn-edit-prod {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 14px; border-radius:10px;
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff;
+  font-size:.78rem; font-weight:700; text-decoration:none;
+  box-shadow:0 3px 8px rgba(34,107,46,0.2); transition:all .2s;
+}
+.btn-edit-prod:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,107,46,0.3); color:#fff; }
+.btn-del-prod {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 12px; border-radius:10px;
+  background:#ffebee; color:#c62828; border:1px solid #ffcdd2;
+  font-size:.78rem; font-weight:700; text-decoration:none; transition:all .2s;
+}
+.btn-del-prod:hover { background:#ffcdd2; }
+
+/* Empty */
+.pl-empty { text-align:center; padding:64px 20px; color:#aaa; }
+.pl-empty .ei { font-size:3rem; margin-bottom:12px; }
+
+/* Pagination */
+.pl-pagination { display:flex; gap:8px; justify-content:center; padding:20px; flex-wrap:wrap; }
+.pg-btn { padding:8px 18px; border-radius:10px; background:#f5f8f5; border:1px solid #e0eae0; color:#333; font-weight:600; font-size:.88rem; text-decoration:none; transition:all .2s; }
+.pg-btn:hover { background:#e8f5e9; border-color:#c8e6c9; }
+.pg-cur { background:#e8f5e9; border-color:#a5d6a7; color:#226b2e; font-weight:800; pointer-events:none; }
+
+@media(max-width:700px){ .pl-header { flex-direction:column; align-items:flex-start; } }
+</style>
+
+<div class="pl-page container">
+  <div class="pl-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">📦</span>
+      Products
+    </h1>
+    <a href="{% url 'admin_panel:product_create' %}" class="btn-add-product">
+      <i class="fa-solid fa-plus"></i> Add Product
+    </a>
+  </div>
+
+  <!-- Search + Filter -->
+  <div class="pl-toolbar">
+    <form method="get">
+      <input type="text" name="q" value="{{ search_query }}" class="pl-search"
+             placeholder="🔍 Search by product name, brand...">
+      <button type="submit" class="btn-search">
+        <i class="fa-solid fa-magnifying-glass"></i> Search
+      </button>
+      {% if search_query %}
+        <a href="{% url 'admin_panel:product_list' %}" class="btn-clear-search">✕ Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="pl-card">
+    <div style="overflow-x:auto;">
+      <table class="pl-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name & Brand</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in page_obj %}
+          <tr>
+            <!-- Image -->
+            <td>
+              {% if product.image_main %}
+                <img src="{{ product.image_main.url }}" alt="{{ product.name }}" class="prod-img">
+              {% else %}
+                <div class="prod-img-placeholder"><i class="fa-regular fa-image"></i></div>
+              {% endif %}
+            </td>
+
+            <!-- Name & Brand -->
+            <td>
+              <div class="prod-name">{{ product.name|truncatechars:50 }}</div>
+              <div class="prod-brand">
+                {% if product.brand %}<span>{{ product.brand.name }}</span>{% endif %}
+                {% if product.weight %}<span>• {{ product.weight }}</span>{% endif %}
+                {% if product.category %}<span style="color:#aaa;">• {{ product.category.name }}</span>{% endif %}
+              </div>
+              <div class="prod-flags">
+                {% if product.is_featured %}<span class="prod-flag pf-featured">⭐ Featured</span>{% endif %}
+                {% if product.is_new_launch %}<span class="prod-flag pf-new">🆕 New</span>{% endif %}
+                {% if product.is_combo_deal %}<span class="prod-flag pf-combo">🎁 Combo</span>{% endif %}
+              </div>
+            </td>
+
+            <!-- Price -->
+            <td>
+              <div class="prod-price">₹{{ product.discount_price|default:product.price }}</div>
+              {% if product.discount_price and product.discount_price < product.price %}
+                <div class="prod-mrp">₹{{ product.price }}</div>
+                {% widthratio product.price|add:"-1" product.price 100 as dummy %}
+                <span class="discount-pct">
+                  {{ product.price|add:"-"|add:product.discount_price }} off
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Stock -->
+            <td>
+              {% if product.stock == 0 %}
+                <div class="stock-out">0</div>
+                <div class="stock-label" style="color:#c62828;">⭕ Out of stock</div>
+              {% elif product.stock <= product.min_stock_alert %}
+                <div class="stock-low">{{ product.stock }}</div>
+                <div class="stock-label" style="color:#e65100;">⚠️ Low stock</div>
+              {% else %}
+                <div class="stock-ok">{{ product.stock }}</div>
+                <div class="stock-label">in stock</div>
+              {% endif %}
+            </td>
+
+            <!-- Status -->
+            <td>
+              {% if product.is_active %}
+                <span class="badge-active">🟢 Active</span>
+              {% else %}
+                <span class="badge-inactive">🔴 Inactive</span>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="act-row">
+                <a href="{% url 'admin_panel:product_edit' product.id %}" class="btn-edit-prod">
+                  <i class="fa-solid fa-pen"></i> Edit
+                </a>
+                <a href="{% url 'admin_panel:product_delete' product.id %}" class="btn-del-prod">
+                  <i class="fa-solid fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="pl-empty">
+                <div class="ei">📦</div>
+                <p style="font-weight:600;">No products found.</p>
+                {% if search_query %}
+                  <a href="{% url 'admin_panel:product_list' %}" style="color:#226b2e;font-weight:600;">Clear search →</a>
+                {% else %}
+                  <a href="{% url 'admin_panel:product_create' %}" class="btn-add-product" style="margin:16px auto;display:inline-flex;">
+                    <i class="fa-solid fa-plus"></i> Add First Product
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pl-pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="pg-btn">← Prev</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="pg-btn pg-cur">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}" class="pg-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="pg-btn">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

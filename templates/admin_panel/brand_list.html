@@ -1,0 +1,211 @@
+{% extends 'base/base.html' %}
+{% block title %}Manage Brands — Admin{% endblock %}
+
+{% block content %}
+<style>
+.bl-page { padding: 36px 0; }
+
+/* Header */
+.bl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+.bl-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+.btn-add-brand {
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff;
+  padding:11px 24px; border-radius:12px; font-weight:700; font-size:.92rem;
+  text-decoration:none; display:flex; align-items:center; gap:8px;
+  box-shadow:0 4px 14px rgba(34,107,46,0.25); transition:all .2s;
+}
+.btn-add-brand:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(34,107,46,0.3); color:#fff; }
+
+/* Messages */
+.alert-success { background:#e8f5e9; color:#2e7d32; padding:14px 20px; border-radius:12px; border:1px solid #c8e6c9; margin-bottom:20px; font-weight:600; display:flex; align-items:center; gap:10px; }
+.alert-error   { background:#ffebee; color:#c62828; padding:14px 20px; border-radius:12px; border:1px solid #ffcdd2; margin-bottom:20px; font-weight:600; }
+
+/* Stats summary */
+.bl-stats { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+.bl-stat { background:#fff; border-radius:12px; padding:12px 20px; border:1px solid #e4ece4; display:flex; align-items:center; gap:10px; font-size:.88rem; font-weight:600; color:#555; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+.bl-stat .bsn { font-size:1.4rem; font-weight:900; }
+
+/* Table card */
+.bl-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.bl-table { width:100%; border-collapse:collapse; }
+.bl-table th { background:#f5f8f5; padding:13px 18px; font-size:.73rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; white-space:nowrap; }
+.bl-table td { padding:14px 18px; border-top:1px solid #f0f5f0; vertical-align:middle; }
+.bl-table tr:hover td { background:#fafcfa; }
+
+/* Brand logo */
+.brand-logo { width:52px; height:52px; object-fit:contain; border-radius:12px; background:#fff; padding:4px; border:1px solid #eee; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.brand-logo-ph { width:52px; height:52px; border-radius:12px; background:linear-gradient(135deg,#f5f8f5,#e8ede8); display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#ccc; border:1px dashed #dce8dc; }
+
+/* Brand name */
+.brand-name { font-weight:700; color:#1a3a1a; font-size:.97rem; margin-bottom:4px; }
+.brand-slug { font-family:monospace; font-size:.77rem; color:#aaa; background:#f5f8f5; padding:3px 8px; border-radius:6px; display:inline-block; }
+
+/* Product count */
+.prod-count { display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:.88rem; background:#e8f5e9; color:#226b2e; padding:4px 10px; border-radius:20px; }
+.prod-count-zero { color:#ccc; font-size:.88rem; }
+
+/* Status badges */
+.badge-active   { display:inline-flex; align-items:center; gap:5px; background:#e8f5e9; color:#2e7d32; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+.badge-inactive { display:inline-flex; align-items:center; gap:5px; background:#ffebee; color:#c62828; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+
+/* Action buttons */
+.act-row { display:flex; gap:7px; justify-content:flex-end; align-items:center; }
+.btn-edit-brand {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:8px 16px; border-radius:10px;
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff;
+  font-size:.8rem; font-weight:700; text-decoration:none;
+  box-shadow:0 3px 10px rgba(34,107,46,0.2); transition:all .2s;
+}
+.btn-edit-brand:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,107,46,0.3); color:#fff; }
+.btn-del-brand {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:8px 12px; border-radius:10px;
+  background:#ffebee; color:#c62828; border:1px solid #ffcdd2;
+  font-size:.8rem; font-weight:700; text-decoration:none; transition:all .2s;
+}
+.btn-del-brand:hover { background:#ffcdd2; }
+
+/* Empty */
+.bl-empty { text-align:center; padding:64px 20px; color:#aaa; }
+.bl-empty .ei { font-size:3rem; margin-bottom:12px; }
+
+/* Pagination */
+.bl-pagination { display:flex; gap:8px; justify-content:center; padding:20px; flex-wrap:wrap; }
+.pg-btn { padding:8px 18px; border-radius:10px; background:#f5f8f5; border:1px solid #e0eae0; color:#333; font-weight:600; font-size:.88rem; text-decoration:none; transition:all .2s; }
+.pg-btn:hover { background:#e8f5e9; border-color:#c8e6c9; }
+.pg-cur { background:#e8f5e9; border-color:#a5d6a7; color:#226b2e; font-weight:800; pointer-events:none; }
+</style>
+
+<div class="bl-page container">
+  <div class="bl-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">🏷️</span>
+      Brands
+    </h1>
+    <a href="{% url 'admin_panel:brand_create' %}" class="btn-add-brand">
+      <i class="fa-solid fa-plus"></i> Add Brand
+    </a>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for msg in messages %}
+      {% if 'error' in msg.tags %}
+        <div class="alert-error">⚠️ {{ msg }}</div>
+      {% else %}
+        <div class="alert-success">✅ {{ msg }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  <!-- Stats -->
+  {% if page_obj %}
+  <div class="bl-stats">
+    <div class="bl-stat">
+      <span class="bsn" style="color:#226b2e;">{{ page_obj.paginator.count }}</span>
+      <span>Total Brands</span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Table card -->
+  <div class="bl-card">
+    {% if page_obj.object_list %}
+    <div style="overflow-x:auto;">
+      <table class="bl-table">
+        <thead>
+          <tr>
+            <th>Logo</th>
+            <th>Name & Slug</th>
+            <th>Products</th>
+            <th>Status</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for brand in page_obj %}
+          <tr>
+            <!-- Logo -->
+            <td>
+              {% if brand.logo %}
+                <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="brand-logo">
+              {% else %}
+                <div class="brand-logo-ph"><i class="fa-regular fa-image"></i></div>
+              {% endif %}
+            </td>
+
+            <!-- Name + Slug -->
+            <td>
+              <div class="brand-name">{{ brand.name }}</div>
+              <span class="brand-slug">{{ brand.slug }}</span>
+            </td>
+
+            <!-- Product count -->
+            <td>
+              {% with cnt=brand.products.count %}
+                {% if cnt > 0 %}
+                  <span class="prod-count"><i class="fa-solid fa-box" style="font-size:.7rem;"></i> {{ cnt }}</span>
+                {% else %}
+                  <span class="prod-count-zero">0 products</span>
+                {% endif %}
+              {% endwith %}
+            </td>
+
+            <!-- Status -->
+            <td>
+              {% if brand.is_active %}
+                <span class="badge-active">🟢 Active</span>
+              {% else %}
+                <span class="badge-inactive">🔴 Inactive</span>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="act-row">
+                <a href="{% url 'admin_panel:brand_edit' brand.id %}" class="btn-edit-brand">
+                  <i class="fa-solid fa-pen"></i> Edit
+                </a>
+                <a href="{% url 'admin_panel:brand_delete' brand.id %}" class="btn-del-brand">
+                  <i class="fa-solid fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="bl-pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="pg-btn">← Prev</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="pg-btn pg-cur">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}" class="pg-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="pg-btn">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bl-empty">
+      <div class="ei">🏷️</div>
+      <p style="font-weight:600;">No brands found.</p>
+      <a href="{% url 'admin_panel:brand_create' %}" class="btn-add-brand" style="margin:16px auto;display:inline-flex;">
+        <i class="fa-solid fa-plus"></i> Add First Brand
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

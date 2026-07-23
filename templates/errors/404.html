@@ -1,0 +1,64 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}404 - Page Not Found — Shivank Kirana Store{% endblock %}
+
+{% block content %}
+<style>
+  .err-page { padding: 60px 20px; text-align: center; background: #f8fafc; min-height: 75vh; display: flex; align-items: center; justify-content: center; }
+  .err-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 48px 32px; max-width: 600px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+  .err-code { font-size: 5rem; font-weight: 900; background: linear-gradient(135deg, #166534, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin-bottom: 12px; }
+  .err-icon { font-size: 3.5rem; margin-bottom: 16px; display: inline-block; animation: float 3s ease-in-out infinite; }
+  .err-title { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
+  .err-msg { font-size: .95rem; color: #64748b; margin-bottom: 28px; line-height: 1.6; }
+  
+  .err-search { margin-bottom: 28px; }
+  .err-search-form { display: flex; gap: 8px; max-width: 440px; margin: 0 auto; }
+  .err-search-input { flex: 1; padding: 12px 18px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: .92rem; outline: none; transition: border-color .2s; }
+  .err-search-input:focus { border-color: #166534; }
+  .err-search-btn { background: #166534; color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: background .2s; }
+  .err-search-btn:hover { background: #14532d; }
+
+  .err-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-err-home { background: #166534; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background .2s; }
+  .btn-err-home:hover { background: #14532d; color: white; }
+  .btn-err-outline { background: white; color: #334155; border: 1.5px solid #cbd5e1; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all .2s; }
+  .btn-err-outline:hover { background: #f8fafc; border-color: #94a3b8; color: #0f172a; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+</style>
+
+<div class="err-page">
+  <div class="err-card">
+    <div class="err-icon">🛍️</div>
+    <div class="err-code">404</div>
+    <h1 class="err-title">Page or Item Not Found</h1>
+    <p class="err-msg">
+      The page or link you tried to access (<code>{{ request.path }}</code>) does not exist or may have been moved.
+    </p>
+
+    <!-- Search Form -->
+    <div class="err-search">
+      <form action="/search/" method="GET" class="err-search-form">
+        <input type="text" name="q" class="err-search-input" placeholder="Search products (e.g. Atta, Oil, Milk)..." required>
+        <button type="submit" class="err-search-btn">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+      </form>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="err-actions">
+      <a href="/" class="btn-err-home">
+        <i class="fa-solid fa-house"></i> Go to Homepage
+      </a>
+      <a href="/shop/" class="btn-err-outline">
+        <i class="fa-solid fa-store"></i> Browse Shop
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

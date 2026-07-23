@@ -1,0 +1,572 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Checkout - Shivank Kirana Store{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+  <div class="container">
+    
+    <div class="checkout-header">
+      <h1 class="checkout-title">Secure Checkout</h1>
+      <div class="secure-badge"><i class="fa-solid fa-lock"></i> SSL Encrypted</div>
+    </div>
+
+    <form method="POST" action="{% url 'checkout:place_order' %}" id="checkout-form" class="checkout-layout">
+      {% csrf_token %}
+      
+      <!-- ─── LEFT: DETAILS & PAYMENT ─── -->
+      <div class="checkout-main">
+        
+        <!-- Delivery Details -->
+        <div class="checkout-card">
+          <div class="card-header">
+            <h2><span class="step-num">1</span> Delivery Details</h2>
+            <span class="card-header-badge"><i class="fa-solid fa-truck-fast"></i> Express Local Delivery</span>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Full Name <span class="req-star">*</span></label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-user input-ic"></i>
+                  <input type="text" name="full_name" value="{{ user.full_name }}" required placeholder="e.g. Shivank Saini">
+                </div>
+              </div>
+              <div class="form-group half">
+                <label>Phone Number <span class="req-star">*</span></label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-phone input-ic"></i>
+                  <input type="tel" name="phone" value="{{ user.phone_number }}" required placeholder="e.g. 9876543210">
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Delivery Address <span class="req-star">*</span></label>
+              <div class="input-icon-wrap">
+                <i class="fa-solid fa-house-chimney input-ic" style="top:16px;"></i>
+                <textarea name="address" rows="2" required placeholder="House No., Flat/Building Name, Street, Area"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group half">
+                <label>City</label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-city input-ic"></i>
+                  <input type="text" name="city" value="Meerut" readonly class="bg-readonly">
+                </div>
+              <div class="form-group half">
+                <label>Pincode <span class="req-star">*</span></label>
+                <div class="input-icon-wrap">
+                  <i class="fa-solid fa-location-dot input-ic"></i>
+                  <input type="text" name="pincode" id="pincode-input" required pattern="[0-9]{6}" placeholder="250001">
+                </div>
+                <div id="pincode-status" style="margin-top: 6px; font-size: 0.82rem;"></div>
+              </div>
+            </div>
+            
+            <div class="form-group mb-0">
+              <label>Delivery Instructions (Optional)</label>
+              <div class="input-icon-wrap">
+                <i class="fa-solid fa-comment-dots input-ic"></i>
+                <input type="text" name="instructions" placeholder="e.g. Leave at door, call before delivery">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-card">
+          <div class="card-header">
+            <h2><span class="step-num">2</span> Payment Method</h2>
+            <span class="card-header-badge"><i class="fa-solid fa-shield-halved"></i> 100% Safe &amp; Secure</span>
+          </div>
+          <div class="card-body">
+            
+            <!-- UPI Option -->
+            <label class="payment-option" id="opt-upi">
+              <div class="opt-header">
+                <div class="radio-wrap">
+                  <input type="radio" name="payment_method" value="upi" onchange="togglePayment('upi')">
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="opt-label">
+                  <div class="opt-title-row">
+                    <strong>Pay via Any UPI App</strong>
+                    <span class="opt-badge-tag opt-badge-rec">RECOMMENDED</span>
+                  </div>
+                  <span class="opt-subtext">Instant payment using Google Pay, PhonePe, Paytm, BHIM, CRED</span>
+                </div>
+                <div class="opt-icon-brand">
+                  <i class="fa-solid fa-qrcode"></i>
+                </div>
+              </div>
+              
+              <div class="opt-content" id="content-upi" style="display:none;">
+                <div class="upi-instructions-card">
+                  <div class="upi-step-list">
+                    <div class="upi-step-item">
+                      <i class="fa-solid fa-circle-check"></i>
+                      <span>Scan QR code below or send <strong>₹{{ total|floatformat:2 }}</strong> to UPI ID:</span>
+                    </div>
+                    <div style="margin-left: 24px; margin-bottom: 8px;">
+                      <span class="upi-copy-box">
+                        <span id="upi-id-text">{{ upi_id }}</span>
+                        <button type="button" class="btn-copy-id" onclick="copyUpiId('{{ upi_id }}', this)">
+                          <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                      </span>
+                    </div>
+                    <div class="upi-step-item">
+                      <i class="fa-solid fa-circle-check"></i>
+                      <span>Enter your UPI Name / Mobile No. below to confirm transaction:</span>
+                    </div>
+                  </div>
+
+                  <div class="qr-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa={{ upi_id }}&pn=Shivank%20Kirana&am={{ total }}&cu=INR" alt="UPI QR Code">
+                    <span class="qr-caption"><i class="fa-solid fa-shield-heart"></i> Scan with GPay, PhonePe, Paytm</span>
+                  </div>
+
+                  <div class="form-group mt-3 mb-0">
+                    <label>Confirm UPI Payment Name / Username <span class="req-star">*</span></label>
+                    <div class="input-icon-wrap">
+                      <i class="fa-solid fa-user-check input-ic"></i>
+                      <input type="text" name="utr_number" id="utr_number" placeholder="e.g. Shivank Saini / 9876543210">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <!-- COD Option -->
+            <label class="payment-option" id="opt-cod">
+              <div class="opt-header">
+                <div class="radio-wrap">
+                  <input type="radio" name="payment_method" value="cod" onchange="togglePayment('cod')">
+                  <span class="custom-radio"></span>
+                </div>
+                <div class="opt-label">
+                  <div class="opt-title-row">
+                    <strong>Cash on Delivery (COD)</strong>
+                    <span class="opt-badge-tag opt-badge-cod">DOORSTEP CASH</span>
+                  </div>
+                  <span class="opt-subtext">Pay remaining amount in cash upon delivery</span>
+                </div>
+                <div class="opt-icon-brand">
+                  <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+              </div>
+              
+              <div class="opt-content" id="content-cod" style="display: none;">
+                <div class="upi-instructions-card">
+                  <div class="cod-alert-box">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem; flex-shrink: 0; color: #d97706;"></i>
+                    <div>
+                      To avoid fake orders &amp; confirm doorstep delivery, please pay a nominal advance of <strong>₹49</strong> via UPI. 
+                      Remaining <strong>₹{{ total|add:"-49"|floatformat:2 }}</strong> will be paid in cash at delivery!
+                    </div>
+                  </div>
+
+                  <div class="upi-step-list mt-3">
+                    <div class="upi-step-item">
+                      <i class="fa-solid fa-circle-check"></i>
+                      <span>Pay ₹49 advance to UPI ID: <strong>{{ upi_id }}</strong></span>
+                    </div>
+                  </div>
+
+                  <div class="qr-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa={{ upi_id }}&pn=Shivank%20Kirana&am=49&cu=INR" alt="₹49 Advance QR Code">
+                    <span class="qr-caption"><i class="fa-solid fa-lock"></i> Scan to pay ₹49 advance</span>
+                  </div>
+
+                  <div class="form-group mt-3 mb-0">
+                    <label>Confirm Advance Payment Name / Username <span class="req-star">*</span></label>
+                    <div class="input-icon-wrap">
+                      <i class="fa-solid fa-user-check input-ic"></i>
+                      <input type="text" name="cod_advance_utr" id="cod_advance_utr" placeholder="e.g. Shivank Saini / 9876543210">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ─── RIGHT: ORDER REVIEW (Redesigned) ─── -->
+      <div class="checkout-sidebar">
+        <div class="or-card">
+
+          <!-- Header -->
+          <div class="or-head">
+            <span class="or-head-title">
+              <i class="fa-solid fa-receipt"></i> Order Review
+            </span>
+            <span class="or-head-badge">{{ cart_count }} item{% if cart_count != 1 %}s{% endif %}</span>
+          </div>
+
+          <!-- Product List -->
+          <div class="or-list">
+            {% for item in cart_items %}
+            <div class="or-item">
+              <div class="or-thumb-wrap">
+                {% if item.product.image_main %}
+                  <img src="{{ item.product.image_main.url }}" alt="{{ item.product.name }}" class="or-thumb">
+                {% else %}
+                  <div class="or-thumb or-thumb-ph"><i class="fa-solid fa-box"></i></div>
+                {% endif %}
+                <span class="or-qty">{{ item.quantity }}</span>
+              </div>
+              <div class="or-meta">
+                <div class="or-name">{{ item.product.name|truncatechars:28 }}</div>
+                {% if item.product.brand %}
+                  <div class="or-brand">{{ item.product.brand.name }}</div>
+                {% endif %}
+                <div class="or-unit-price">₹{{ item.product.selling_price }} × {{ item.quantity }}</div>
+              </div>
+              <div class="or-price">₹{{ item.subtotal }}</div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Free delivery notice -->
+          {% if delivery_charge == 0 %}
+          <div class="or-notice or-notice-green">
+            <i class="fa-solid fa-truck-fast"></i>&nbsp; 🎉 FREE delivery on this order!
+          </div>
+          {% else %}
+          <div class="or-notice or-notice-orange">
+            <i class="fa-solid fa-circle-info"></i>&nbsp; Add more for FREE delivery above ₹799
+          </div>
+          {% endif %}
+
+          <!-- Price Breakdown -->
+          <div class="or-breakdown">
+            <div class="or-brow">
+              <span>Subtotal ({{ cart_count }} items)</span>
+              <span>₹{{ subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="or-brow">
+              <span>Delivery Charge</span>
+              <span {% if delivery_charge == 0 %}class="or-free-tag"{% endif %}>
+                {% if delivery_charge == 0 %}FREE{% else %}₹{{ delivery_charge|floatformat:2 }}{% endif %}
+              </span>
+            </div>
+            {% if coupon_discount > 0 %}
+            <div class="or-brow" style="color:#2e7d32;font-weight:700;">
+              <span>🎟️ Coupon Discount ({{ applied_coupon_code }})</span>
+              <span>- ₹{{ coupon_discount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Grand Total -->
+          <div class="or-total">
+            <span class="or-total-lbl">Total to Pay</span>
+            <span class="or-total-val" id="final-total">₹{{ total|floatformat:2 }}</span>
+          </div>
+
+          <!-- Place Order Button -->
+          <div class="or-btn-wrap">
+            <button type="submit" class="or-submit-btn" id="btn-submit">
+              <i class="fa-solid fa-lock"></i> Place Order Securely
+            </button>
+          </div>
+
+          <!-- Trust Bar -->
+          <div class="or-trust">
+            <span><i class="fa-solid fa-shield-halved"></i> Secure</span>
+            <span><i class="fa-solid fa-rotate-left"></i> Easy Returns</span>
+            <span><i class="fa-solid fa-headset"></i> Support</span>
+          </div>
+
+          <div class="or-terms">
+            By placing this order, you agree to our
+            <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a>.
+          </div>
+
+        </div>
+      </div>
+      
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function copyUpiId(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.style.background = '#059669';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '#1b5e20';
+      }, 2000);
+    });
+  }
+
+  function togglePayment(method) {
+    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+    document.getElementById('opt-' + method).classList.add('selected');
+    
+    if (method === 'upi') {
+      document.getElementById('content-upi').style.display = 'block';
+      document.getElementById('content-cod').style.display = 'none';
+      document.getElementById('utr_number').required = true;
+      document.getElementById('cod_advance_utr').required = false;
+    } else {
+      document.getElementById('content-upi').style.display = 'none';
+      document.getElementById('content-cod').style.display = 'block';
+      document.getElementById('utr_number').required = false;
+      document.getElementById('cod_advance_utr').required = true;
+    }
+  }
+  
+  // Do NOT auto-expand — user must click an option to see details
+  document.getElementById('utr_number').required = false;
+  document.getElementById('cod_advance_utr').required = false;
+
+  // Live Pincode Verification
+  const pincodeInput = document.getElementById('pincode-input');
+  if (pincodeInput) {
+    function checkPincode() {
+      const val = pincodeInput.value.trim();
+      const statusDiv = document.getElementById('pincode-status');
+      const submitBtn = document.getElementById('btn-submit');
+      if (val.length === 6) {
+        statusDiv.innerHTML = '<span style="color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Checking delivery...</span>';
+        fetch('/checkout/check-pincode/?pincode=' + val)
+          .then(res => res.json())
+          .then(data => {
+            if (data.deliverable) {
+              statusDiv.innerHTML = '<span style="color:#166534;font-weight:700;"><i class="fa-solid fa-circle-check"></i> ' + data.message + '</span>';
+              if (submitBtn) submitBtn.disabled = false;
+            } else {
+              statusDiv.innerHTML = '<span style="color:#dc2626;font-weight:800;"><i class="fa-solid fa-circle-xmark"></i> ' + data.message + '</span>';
+              if (submitBtn) submitBtn.disabled = true;
+            }
+          })
+          .catch(() => { statusDiv.innerHTML = ''; });
+      } else {
+        statusDiv.innerHTML = '';
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }
+    pincodeInput.addEventListener('input', checkPincode);
+    if (pincodeInput.value.trim().length === 6) {
+      checkPincode();
+    }
+  }
+  
+  // Prevent double submission
+  document.getElementById('checkout-form').addEventListener('submit', function() {
+    const btn = document.getElementById('btn-submit');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+    btn.disabled = true;
+  });
+</script>
+
+<style>
+.checkout-layout {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+}
+
+.checkout-main {
+  width: 100% !important;
+}
+
+.checkout-sidebar {
+  width: 100% !important;
+}
+
+/* ══ ORDER REVIEW CARD ══════════════════════════════════ */
+.or-card {
+  width: 100% !important;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 18px rgba(0,0,0,.06);
+  overflow: hidden;
+  position: static !important;
+}
+
+/* Head */
+.or-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%);
+  color: white;
+}
+.or-head-title {
+  font-size: .95rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.or-head-badge {
+  background: rgba(255,255,255,.22);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* List */
+.or-list {
+  padding: 14px 16px;
+  max-height: 270px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.or-list::-webkit-scrollbar { width: 3px; }
+.or-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+/* Item row */
+.or-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  border: 1px solid #eef0f2;
+  transition: box-shadow .15s;
+}
+.or-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); background: #fff; }
+
+.or-thumb-wrap { position: relative; flex-shrink: 0; }
+.or-thumb {
+  width: 52px; height: 52px;
+  border-radius: 9px;
+  object-fit: cover;
+  border: 1px solid #eee;
+  background: #f5f5f5;
+  display: block;
+}
+.or-thumb-ph {
+  display: flex; align-items: center; justify-content: center;
+  color: #ccc; font-size: 1.3rem;
+}
+.or-qty {
+  position: absolute;
+  top: -7px; right: -7px;
+  width: 20px; height: 20px;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 10px; font-weight: 800;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,.2);
+}
+
+.or-meta { flex: 1; min-width: 0; }
+.or-name {
+  font-size: .82rem; font-weight: 700; color: #1a1a1a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.or-brand { font-size: .72rem; color: #2e7d32; font-weight: 600; margin-top: 2px; }
+.or-unit-price { font-size: .72rem; color: #999; margin-top: 3px; }
+.or-price { font-size: .9rem; font-weight: 800; color: #111; flex-shrink: 0; }
+
+/* Notice */
+.or-notice {
+  margin: 2px 16px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: .75rem; font-weight: 600;
+  display: flex; align-items: center;
+}
+.or-notice-green { background: #e8f5e9; color: #2e7d32; }
+.or-notice-orange { background: #fff3e0; color: #e65100; }
+
+/* Breakdown */
+.or-breakdown {
+  margin: 10px 16px 0;
+  padding: 10px 0;
+  border-top: 1.5px dashed #e9ecef;
+  border-bottom: 1.5px dashed #e9ecef;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.or-brow {
+  display: flex; justify-content: space-between;
+  font-size: .83rem; color: #555;
+}
+.or-free-tag { color: #2e7d32; font-weight: 800; }
+
+/* Grand total */
+.or-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+  border-top: 3px solid #2e7d32;
+  margin-top: 10px;
+}
+.or-total-lbl { font-size: .9rem; font-weight: 700; color: #333; }
+.or-total-val { font-size: 1.4rem; font-weight: 900; color: #1b5e20; letter-spacing: -.5px; }
+
+/* Submit button */
+.or-btn-wrap { padding: 14px 16px 8px; }
+.or-submit-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #1b5e20 0%, #43a047 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem; font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(46,125,50,.38);
+  transition: transform .15s, box-shadow .15s;
+  letter-spacing: .3px;
+}
+.or-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 26px rgba(46,125,50,.50);
+}
+.or-submit-btn:active { transform: translateY(0); }
+.or-submit-btn:disabled { background: #aaa; box-shadow: none; cursor: not-allowed; }
+
+/* Trust bar */
+.or-trust {
+  display: flex; justify-content: space-around;
+  padding: 10px 16px;
+  font-size: .7rem; color: #888;
+  border-top: 1px solid #f0f0f0;
+}
+.or-trust span { display: flex; align-items: center; gap: 4px; }
+.or-trust i { color: #2e7d32; }
+
+/* Terms */
+.or-terms {
+  text-align: center;
+  font-size: .69rem; color: #bbb;
+  padding: 6px 16px 14px;
+  line-height: 1.5;
+}
+.or-terms a { color: #2e7d32; text-decoration: none; }
+</style>
+{% endblock %}

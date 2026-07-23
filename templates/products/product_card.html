@@ -1,0 +1,129 @@
+{% load static %}
+<!-- ★ PRODUCT CARD ────────────────────────────────────── -->
+<div class="product-card" data-product-card data-product-id="{{ product.id }}">
+  
+  <!-- ─── Image ─── -->
+  <div class="product-card-image-wrap">
+    <a href="{{ product.get_absolute_url }}" class="product-image-link">
+      {% if product.image_main %}
+        <img 
+          src="{{ product.image_main.url }}" 
+          alt="{{ product.name }}"
+          class="product-image"
+          loading="lazy"
+          onerror="this.onerror=null; this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend', '<div class=\'product-image-placeholder\'><i class=\'fa-solid fa-box-open\' style=\'font-size: 2.2rem; color: #ccc;\'></i></div>');"
+        >
+      {% else %}
+        <div class="product-image-placeholder">
+          <i class="fa-solid fa-box-open" style="font-size: 2.2rem; color: #ccc;"></i>
+        </div>
+      {% endif %}
+    </a>
+    
+    <!-- Badges overlay -->
+    <div class="product-badges">
+      {% if product.discount_percent > 0 %}
+        <span class="badge badge-discount">{{ product.discount_percent }}% OFF</span>
+      {% endif %}
+      {% if product.is_new_launch %}
+        <span class="badge badge-new">NEW</span>
+      {% endif %}
+      {% if product.is_combo_deal %}
+        <span class="badge badge-combo">COMBO</span>
+      {% endif %}
+      {% if not product.in_stock %}
+        <span class="badge badge-out-of-stock">OUT OF STOCK</span>
+      {% endif %}
+    </div>
+    
+    <!-- Wishlist button -->
+    <button 
+      class="wishlist-btn fa-{% if user_wishlist and product.id in user_wishlist %}solid{% else %}regular{% endif %} fa-heart"
+      data-wishlist-toggle="{{ product.id }}"
+      aria-label="Add to wishlist"
+      {% if user_wishlist and product.id in user_wishlist %}style="color: #e91e63;"{% endif %}
+    ></button>
+    
+    <!-- Quick view -->
+    <a href="{{ product.get_absolute_url }}" class="quick-view-btn">
+      <i class="fa-solid fa-eye"></i> Quick View
+    </a>
+  </div>
+  
+  <!-- ─── Info ─── -->
+  <div class="product-card-body">
+    <!-- Brand -->
+    {% if product.brand %}
+      <a href="/brand/{{ product.brand.slug }}/" class="product-brand">
+        {{ product.brand.name }}
+      </a>
+    {% endif %}
+    
+    <!-- Product name -->
+    <h3 class="product-name">
+      <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+    </h3>
+    
+    <!-- Weight / Size -->
+    {% if product.weight %}
+      <span class="product-weight">{{ product.weight }}</span>
+    {% endif %}
+    
+    <!-- Rating -->
+    {% if product.rating_count > 0 %}
+    <div class="product-rating">
+      <span class="stars">
+        {% for i in "12345"|make_list %}
+          {% if forloop.counter <= product.rating_avg %}★{% else %}☆{% endif %}
+        {% endfor %}
+      </span>
+      <span class="rating-count">({{ product.rating_count }})</span>
+      {% if product.bought_count > 0 %}
+        <span class="bought-count">{{ product.bought_count }}+ bought</span>
+      {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Price -->
+    <div class="product-price-row">
+      <span class="price-main">₹{{ product.discount_price|default:product.price }}</span>
+      {% if product.discount_price and product.discount_price < product.price %}
+        <span class="price-mrp">₹{{ product.price }}</span>
+      {% endif %}
+    </div>
+    
+    <!-- Stock Status -->
+    <div class="product-stock-status">
+      {% if product.in_stock %}
+        <span class="stock-dot stock-in"></span>
+        <span class="stock-label stock-label-in">In Stock</span>
+      {% else %}
+        <span class="stock-dot stock-out"></span>
+        <span class="stock-label stock-label-out">Out of Stock</span>
+      {% endif %}
+    </div>
+    
+    <!-- ─── Actions ─── -->
+    <div class="product-card-actions">
+      <!-- Quantity selector -->
+      <div class="qty-selector">
+        <button class="qty-btn" onclick="changeQty(this, -1)">−</button>
+        <input type="number" class="qty-input" data-qty value="1" min="1" max="{{ product.stock|default:10 }}">
+        <button class="qty-btn" onclick="changeQty(this, 1)">+</button>
+      </div>
+      
+      <!-- Add to Cart -->
+      <button 
+        class="btn btn-primary add-to-cart-btn"
+        data-add-to-cart="{{ product.id }}"
+        {% if not product.in_stock %}disabled style="background: var(--clr-text-muted);"{% endif %}
+      >
+        {% if product.in_stock %}
+          <i class="fa-solid fa-cart-plus"></i> Add
+        {% else %}
+          Out of Stock
+        {% endif %}
+      </button>
+    </div>
+  </div>
+</div>

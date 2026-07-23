@@ -1,0 +1,16 @@
+{% extends 'base/base.html' %}
+{% block title %}Delete {{ type }}{% endblock %}
+
+{% block content %}
+<div class="card p-xl text-center" style="max-width: 500px; margin: 0 auto; margin-top: 50px;">
+  <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: var(--clr-danger); margin-bottom: 20px;"></i>
+  <h2 style="margin-bottom: 15px;">Confirm Deletion</h2>
+  <p style="color: #aaa; margin-bottom: 25px;">Are you sure you want to delete the {{ type|lower }} "<strong>{{ object }}</strong>"? This action cannot be undone.</p>
+  
+  <form method="post" style="display: flex; gap: 15px; justify-content: center;">
+    {% csrf_token %}
+    <a href="{% url cancel_url %}" class="btn btn-outline">Cancel</a>
+    <button type="submit" class="btn" style="background: var(--clr-danger); border-color: var(--clr-danger);">Yes, Delete</button>
+  </form>
+</div>
+{% endblock %}

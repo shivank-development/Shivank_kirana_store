@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Contact Us — Shivank Kirana Store{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/policy.css' %}">{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <div class="policy-layout">
+
+      <aside class="policy-sidebar">
+        <h3>Customer Care</h3>
+        <nav class="policy-nav">
+          <a href="{% url 'about-us' %}"><i class="fa-solid fa-store"></i> About Us</a>
+          <a href="{% url 'privacy-policy' %}"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="{% url 'return-policy' %}"><i class="fa-solid fa-rotate-left"></i> Return Policy</a>
+          <a href="{% url 'shipping-policy' %}"><i class="fa-solid fa-truck"></i> Shipping Policy</a>
+          <a href="{% url 'faqs' %}"><i class="fa-solid fa-circle-question"></i> FAQs</a>
+          <a href="{% url 'contact-us' %}" class="active"><i class="fa-solid fa-headset"></i> Contact Us</a>
+        </nav>
+        <div style="height:1px;background:#eee;margin:14px 0;"></div>
+        <div class="policy-nav">
+          <a href="#reach-us"><i class="fa-solid fa-phone"></i> Reach Us</a>
+          <a href="#store-location"><i class="fa-solid fa-map-pin"></i> Location</a>
+          <a href="#business-hours"><i class="fa-solid fa-clock"></i> Hours</a>
+          <a href="#support-form"><i class="fa-solid fa-paper-plane"></i> Message</a>
+        </div>
+      </aside>
+
+      <div class="policy-content">
+        <div class="policy-hero">
+          <div class="policy-hero-icon">💬</div>
+          <div>
+            <h1>Contact Us</h1>
+            <p>Hum hamesha aapki madad ke liye ready hain — 7 AM to 10 PM</p>
+          </div>
+        </div>
+
+        <!-- Reach Us -->
+        <section class="policy-section" id="reach-us">
+          <h2><span class="sec-icon">📞</span> Reach Us</h2>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="c-icon" style="background:#e8f5e9;"><span style="font-size:28px;">📱</span></div>
+              <h4>WhatsApp</h4>
+              <a href="https://wa.me/917599342112" target="_blank">+91 7599342112</a>
+              <p style="margin-top:6px;font-size:12px;color:#999;">Fastest response!</p>
+            </div>
+            <div class="contact-card">
+              <div class="c-icon" style="background:#e3f2fd;"><span style="font-size:28px;">📞</span></div>
+              <h4>Phone Call</h4>
+              <a href="tel:+917599342112">+91 7599342112</a>
+              <p style="margin-top:6px;font-size:12px;color:#999;">7 AM – 10 PM</p>
+            </div>
+            <div class="contact-card">
+              <div class="c-icon" style="background:#fce4ec;"><span style="font-size:28px;">✉️</span></div>
+              <h4>Email</h4>
+              <a href="mailto:support@shivankkirana.com">support@shivankkirana.com</a>
+              <p style="margin-top:6px;font-size:12px;color:#999;">Reply within 24 hours</p>
+            </div>
+            <div class="contact-card">
+              <div class="c-icon" style="background:#fff3e0;"><span style="font-size:28px;">📸</span></div>
+              <h4>Instagram</h4>
+              <a href="https://instagram.com/lovely_lavi_saini" target="_blank">@lovely_lavi_saini</a>
+              <p style="margin-top:6px;font-size:12px;color:#999;">DM for quick help</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Store Location -->
+        <section class="policy-section" id="store-location">
+          <h2><span class="sec-icon">📍</span> Store Location</h2>
+          <p><strong>Shivank Kirana Store</strong><br>288, Main Market, Meerut — 250404<br>Uttar Pradesh, India</p>
+          <div class="highlight-box">📍 Google Maps par "Shivank Kirana Store" search karein ya oopar diya address use karein.</div>
+        </section>
+
+        <!-- Business Hours -->
+        <section class="policy-section" id="business-hours">
+          <h2><span class="sec-icon">🕐</span> Business Hours</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon">📅</div>
+              <h4>Monday – Saturday</h4>
+              <p>7:00 AM – 10:00 PM</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">📅</div>
+              <h4>Sunday</h4>
+              <p>8:00 AM – 9:00 PM</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">🎉</div>
+              <h4>Holidays</h4>
+              <p>Limited hours — WhatsApp pe check karein</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Message Form -->
+        <section class="policy-section" id="support-form">
+          <h2><span class="sec-icon">✉️</span> Send Us a Message</h2>
+          <p>Koi bhi sawal ya feedback ke liye neeche form bharo:</p>
+          <form style="margin-top:16px;" onsubmit="handleContactForm(event)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div>
+                <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Aapka Naam</label>
+                <input type="text" id="contact-name" placeholder="e.g. Rahul Sharma" style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;" required>
+              </div>
+              <div>
+                <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Phone / Email</label>
+                <input type="text" id="contact-contact" placeholder="+91 99999 99999" style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;" required>
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Subject</label>
+              <select id="contact-subject" style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;">
+                <option>Order related issue</option>
+                <option>Payment problem</option>
+                <option>Return/Refund request</option>
+                <option>Product inquiry</option>
+                <option>Delivery complaint</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div style="margin-bottom:20px;">
+              <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:6px;">Message</label>
+              <textarea id="contact-message" rows="5" placeholder="Apna sawaal ya feedback yahan likhein..." style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;resize:vertical;" required></textarea>
+            </div>
+            <button type="submit" style="background:linear-gradient(135deg,#2e7d32,#4caf50);color:#fff;border:none;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;">
+              <i class="fa-solid fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+          <div id="contact-success" style="display:none;margin-top:16px;" class="highlight-box">
+            ✅ Aapka message mil gaya! Hum 2 ghante ke andar WhatsApp ya email pe reply karenge.
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function handleContactForm(e) {
+  e.preventDefault();
+  document.getElementById('contact-success').style.display = 'block';
+  e.target.style.display = 'none';
+}
+</script>
+{% endblock %}

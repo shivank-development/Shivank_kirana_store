@@ -1,0 +1,178 @@
+{% extends 'base/base.html' %}
+{% block title %}Brands Management — Admin{% endblock %}
+{% block content %}
+<style>
+.admin-page { padding:30px 0; }
+.admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+.admin-header h1 { font-size:1.8rem; font-weight:800; color:var(--clr-primary); }
+.table-wrap { background:var(--clr-surface); border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); }
+.admin-table { width:100%; border-collapse:collapse; }
+.admin-table th { background:rgba(255,255,255,0.04); padding:14px 18px; text-align:left; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; color:var(--clr-text-muted); font-weight:600; }
+.admin-table td { padding:14px 18px; border-top:1px solid rgba(255,255,255,0.05); vertical-align:middle; font-size:.92rem; }
+.admin-table tr:hover td { background:rgba(255,255,255,0.03); }
+.logo-thumb { width:48px; height:48px; border-radius:10px; object-fit:contain; background:rgba(255,255,255,0.05); padding:4px; }
+.logo-placeholder { width:48px; height:48px; border-radius:10px; background:rgba(26,93,26,0.15); display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.badge-active   { background:rgba(46,213,115,0.15); color:#2ed573; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:600; }
+.badge-inactive { background:rgba(255,71,87,0.15);  color:#ff4757; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:600; }
+.act-links { display:flex; gap:8px; }
+.btn-edit { background:rgba(116,185,255,0.15); color:#74b9ff; border:none; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:.82rem; font-weight:600; text-decoration:none; }
+.btn-del  { background:rgba(255,71,87,0.15);  color:#ff4757; border:none; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:.82rem; font-weight:600; text-decoration:none; }
+
+/* ── Custom Center Delete Modal ── */
+.custom-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.custom-modal-overlay.active { opacity: 1; visibility: visible; }
+.custom-modal-box {
+  background: #ffffff; width: 100%; max-width: 440px; border-radius: 24px; padding: 32px 28px;
+  text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: scale(0.9) translateY(20px); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
+.modal-header-icon { display: flex; justify-content: center; margin-bottom: 18px; }
+.modal-icon-circle {
+  width: 68px; height: 68px; border-radius: 50%; background: #fef2f2; color: #dc2626; border: 4px solid #ffe4e4;
+  display: flex; align-items: center; justify-content: center; font-size: 1.7rem; box-shadow: 0 8px 18px rgba(220, 38, 38, 0.15);
+  animation: modalPulse 2s infinite;
+}
+@keyframes modalPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.modal-title { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; }
+.modal-desc { font-size: 0.95rem; color: #64748b; margin: 0 0 18px 0; line-height: 1.5; }
+.brand-highlight { color: #0f172a; background: #f1f5f9; padding: 3px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 700; }
+.modal-warning-box {
+  background: #fffbe6; border: 1px solid #ffe58f; border-radius: 14px; padding: 12px 16px; font-size: 0.85rem;
+  color: #d46b08; display: flex; align-items: center; gap: 10px; text-align: left; margin-bottom: 24px; font-weight: 600;
+}
+.modal-actions { display: flex; gap: 12px; }
+.btn-modal-cancel { flex: 1; padding: 13px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.2s; }
+.btn-modal-cancel:hover { background: #f1f5f9; color: #0f172a; }
+.btn-modal-confirm {
+  flex: 1; padding: 13px; border-radius: 14px; border: none; background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+}
+.btn-modal-confirm:hover { background: linear-gradient(135deg, #dc2626, #b91c1c); transform: translateY(-1px); color: #fff; }
+</style>
+
+<div class="admin-page container">
+  <div class="admin-header">
+    <h1>🏷 Brands Management</h1>
+    <div style="display:flex;gap:10px;">
+      <a href="{% url 'admin_panel:brand_create' %}" class="btn btn-primary">+ Add Brand</a>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+    </div>
+  </div>
+
+  {% if messages %}{% for msg in messages %}
+  <div style="background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-weight:600;">✓ {{ msg }}</div>
+  {% endfor %}{% endif %}
+
+  <div class="table-wrap">
+    {% if page_obj.object_list %}
+    <table class="admin-table">
+      <thead>
+        <tr><th>Logo</th><th>Brand Name</th><th>Slug</th><th>Sort Order</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for brand in page_obj %}
+        <tr>
+          <td>
+            {% if brand.logo %}<img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="logo-thumb">
+            {% else %}<div class="logo-placeholder">🏷</div>{% endif %}
+          </td>
+          <td style="font-weight:600;">{{ brand.name }}</td>
+          <td style="font-family:monospace;font-size:.85rem;color:var(--clr-text-muted);">{{ brand.slug }}</td>
+          <td style="text-align:center;">{{ brand.sort_order }}</td>
+          <td>
+            {% if brand.is_active %}<span class="badge-active">Active</span>
+            {% else %}<span class="badge-inactive">Inactive</span>{% endif %}
+          </td>
+          <td>
+            <div class="act-links">
+              <a href="{% url 'admin_panel:brand_edit' brand.pk %}" class="btn-edit">✏ Edit</a>
+              <button type="button" class="btn-del" onclick="promptDeleteBrand('{{ brand.name|escapejs }}', '{% url "admin_panel:brand_delete" brand.pk %}')">🗑 Delete</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if page_obj.has_other_pages %}
+    <div style="display:flex;justify-content:center;gap:8px;padding:20px;">
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline" style="font-size:.85rem;">← Prev</a>{% endif %}
+      <span style="padding:8px 16px;background:var(--clr-primary);border-radius:8px;font-weight:600;color:#fff;">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline" style="font-size:.85rem;">Next →</a>{% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--clr-text-muted);">
+      <div style="font-size:3rem;margin-bottom:12px;">🏷</div>
+      <p>No brands yet. <a href="{% url 'admin_panel:brand_create' %}" style="color:var(--clr-primary);">Add your first brand →</a></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Professional Center Delete Modal -->
+<div id="deleteModal" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="modal-header-icon">
+      <div class="modal-icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <h3 class="modal-title">Delete Brand?</h3>
+    <p class="modal-desc">
+      Are you sure you want to delete brand <span id="modalBrandName" class="brand-highlight"></span>?
+    </p>
+    <div class="modal-warning-box">
+      <i class="fa-solid fa-circle-info" style="font-size:1.1rem;color:#e67e22;"></i>
+      <span>Products associated with this brand will no longer display the brand tag.</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <a href="#" class="btn-modal-confirm" id="confirmDeleteBtn">
+        <i class="fa-solid fa-trash"></i> Delete Brand
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function promptDeleteBrand(brandName, deleteUrl) {
+  document.getElementById('modalBrandName').textContent = brandName;
+  document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+  
+  const modal = document.getElementById('deleteModal');
+  modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  modal.classList.remove('active');
+}
+
+// Close modal when clicking backdrop
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+</script>
+{% endblock %}

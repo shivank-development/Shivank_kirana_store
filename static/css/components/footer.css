@@ -1,0 +1,242 @@
+/* ════════════════════════════════════════════════════════
+   FOOTER — Shivank Kirana Store
+   ════════════════════════════════════════════════════════ */
+
+.site-footer {
+  background: var(--clr-primary-dark);
+  color: rgba(255,255,255,0.85);
+  padding: 16px 0 0;
+  margin-top: auto;
+}
+
+.footer-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-sm);
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.footer-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 8px;
+  text-decoration: none;
+}
+
+.footer-brand-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.footer-brand-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.1;
+}
+
+.footer-brand-tagline {
+  font-size: 0.75rem;
+  color: var(--clr-primary-light);
+  font-weight: 500;
+}
+
+.footer-desc {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.footer-contact-items { display: flex; flex-direction: column; gap: 4px; }
+
+.footer-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-contact-item:hover { color: var(--clr-primary-light); }
+
+.footer-contact-item i {
+  width: 16px;
+  color: var(--clr-primary-light);
+}
+
+/* Footer column */
+.footer-col-title {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.footer-col-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: var(--clr-primary-light);
+  border-radius: 2px;
+}
+
+.footer-links { display: flex; flex-direction: column; gap: 4px; }
+
+.footer-link {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footer-link:hover { color: var(--clr-primary-light); transform: translateX(3px); }
+
+/* Social buttons */
+.footer-social {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.social-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all var(--transition-bounce);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.social-btn:hover, .social-icon:hover {
+  background: var(--clr-primary-light);
+  color: var(--clr-primary-dark);
+  transform: translateY(-3px) scale(1.05);
+}
+
+.social-yt:hover {
+  background: #FF0000 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-3px) scale(1.05) !important;
+}
+
+/* Newsletter */
+.newsletter-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.newsletter-input::placeholder { color: rgba(255,255,255,0.4); }
+.newsletter-input:focus { border-color: var(--clr-primary-light); }
+
+/* Bottom bar */
+.footer-bottom {
+  background: transparent;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 16px;
+  padding: 8px 0;                 
+}
+
+.footer-bottom-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-copyright {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-bottom-links a {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+}
+
+.footer-bottom-links a:hover { color: rgba(255,255,255,0.8); }
+
+.footer-payment-icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.footer-payment-icon {
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+}
+
+/* Creator badge */
+.footer-creator {
+  text-align: center;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.1);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.footer-creator a {
+  color: var(--clr-primary-light);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1023px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+}
+
+@media (max-width: 767px) {
+  .site-footer { padding-top: 16px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 16px; }
+  .footer-bottom-inner { flex-direction: column; text-align: center; }
+  body { padding-bottom: 70px; }
+}

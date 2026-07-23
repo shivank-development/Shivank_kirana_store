@@ -1,0 +1,451 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} — Shivank Kirana Store{% endblock %}
+
+{% block extra_css %}
+<style>
+.pd-page { padding: 32px 0 60px; background: #f5f8f5; min-height: 80vh; }
+
+/* Breadcrumbs */
+.breadcrumbs { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: #888; margin-bottom: 24px; flex-wrap: wrap; }
+.breadcrumbs a { color: #226b2e; text-decoration: none; font-weight: 600; }
+.breadcrumbs a:hover { text-decoration: underline; }
+
+/* Detail Card Layout */
+.pd-card {
+  background: #fff; border-radius: 24px; border: 1px solid #e4ece4;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.06); padding: 32px;
+  display: grid; grid-template-columns: 1fr 1.1fr; gap: 36px;
+  margin-bottom: 32px; align-items: start;
+}
+
+/* Gallery */
+.pd-gallery { display: flex; flex-direction: column; gap: 16px; }
+.pd-main-img-wrap {
+  position: relative; border-radius: 20px; overflow: hidden;
+  border: 1px solid #e8ede8; background: #fff; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+}
+.pd-main-img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s; }
+.pd-main-img-wrap:hover .pd-main-img { transform: scale(1.05); }
+
+.pd-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #ccc; font-size: 3rem; }
+
+/* Badges */
+.pd-badge-list { position: absolute; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; z-index: 2; }
+.pd-badge { padding: 4px 12px; border-radius: 20px; font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.pd-badge-disc { background: linear-gradient(135deg,#226b2e,#4caf50); color: #fff; }
+.pd-badge-new  { background: #e3f2fd; color: #1565c0; }
+
+.pd-wish-btn {
+  position: absolute; top: 16px; right: 16px; width: 44px; height: 44px;
+  border-radius: 50%; background: #fff; border: 1px solid #e0eae0; color: #888;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all .2s; z-index: 5;
+}
+.pd-wish-btn:hover, .pd-wish-btn.active { color: #e91e63; border-color: #f8bbd0; background: #fff5f8; transform: scale(1.1); }
+
+/* Thumbnails */
+.pd-thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+.pd-thumb {
+  width: 72px; height: 72px; border-radius: 12px; border: 2px solid #e8ede8;
+  background: #fff; padding: 4px; cursor: pointer; opacity: .7; transition: all .2s; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.pd-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.pd-thumb.active, .pd-thumb:hover { opacity: 1; border-color: #226b2e; }
+
+/* Info Column */
+.pd-info { display: flex; flex-direction: column; }
+.pd-brand { font-size: .8rem; font-weight: 800; color: #226b2e; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; text-decoration: none; display: inline-block; }
+.pd-title { font-size: 2.1rem; font-weight: 900; color: #1a3a1a; line-height: 1.25; margin: 0 0 12px; }
+
+.pd-meta-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.pd-stock-chip { font-size: .8rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+.stock-in  { background: #e8f5e9; color: #2e7d32; }
+.stock-low { background: #fff3e0; color: #e65100; }
+.stock-out { background: #ffebee; color: #c62828; }
+
+/* Price Block */
+.pd-price-box {
+  background: #f9fcf9; border: 1px solid #eef3ee; border-radius: 16px;
+  padding: 16px 20px; margin-bottom: 22px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.pd-price-curr { font-size: 2.4rem; font-weight: 900; color: #226b2e; }
+.pd-price-mrp  { font-size: 1.2rem; color: #aaa; text-decoration: line-through; }
+.pd-price-save { font-size: .8rem; font-weight: 800; background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 6px; }
+
+.pd-short-desc { font-size: .95rem; color: #666; line-height: 1.6; margin-bottom: 24px; }
+
+/* Actions */
+.pd-actions { display: grid; grid-template-columns: 130px 1fr; gap: 14px; margin-bottom: 24px; }
+.qty-control-lg { display: flex; align-items: center; justify-content: space-between; border: 2px solid #dce8dc; border-radius: 14px; background: #fff; height: 52px; padding: 0 6px; }
+.qty-btn-lg { width: 36px; height: 36px; border: none; background: none; font-size: 1.1rem; color: #226b2e; font-weight: 900; cursor: pointer; border-radius: 8px; }
+.qty-btn-lg:hover { background: #e8f5e9; }
+.qty-input-lg { width: 44px; text-align: center; border: none; background: transparent; font-weight: 800; font-size: 1.1rem; color: #1a3a1a; outline: none; }
+
+.btn-add-cart-lg {
+  height: 52px; background: linear-gradient(135deg,#226b2e,#1a5d1a); color: #fff;
+  border: none; border-radius: 14px; font-weight: 800; font-size: 1.05rem;
+  display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(34,107,46,0.3); transition: all .2s;
+}
+.btn-add-cart-lg:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(34,107,46,0.35); color: #fff; }
+.btn-add-cart-lg:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+.btn-wa-lg {
+  grid-column: 1 / -1; height: 48px; background: #25d366; color: #fff;
+  border-radius: 14px; font-weight: 800; font-size: .95rem; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 4px 14px rgba(37,211,102,0.25); transition: all .2s;
+}
+.btn-wa-lg:hover { background: #1ebe57; color: #fff; }
+
+/* Promises */
+.pd-promises { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f8faf8; border: 1px solid #e4ece4; border-radius: 16px; padding: 14px; text-align: center; }
+.pd-promise { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .75rem; font-weight: 700; color: #555; }
+.pd-promise i { font-size: 1.2rem; color: #226b2e; margin-bottom: 2px; }
+
+/* Tabs Section */
+.pd-tabs-card { background: #fff; border-radius: 20px; border: 1px solid #e4ece4; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 36px; }
+.pd-tabs-head { display: flex; background: #f9fcf9; border-bottom: 1px solid #eef3ee; }
+.pd-tab-btn { flex: 1; padding: 16px; border: none; background: none; font-weight: 800; font-size: .95rem; color: #888; cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; }
+.pd-tab-btn.active { color: #226b2e; border-bottom-color: #226b2e; background: #fff; }
+.pd-tab-body { padding: 28px; }
+.pd-tab-pane { display: none; }
+.pd-tab-pane.active { display: block; }
+
+@media(max-width: 900px) { .pd-card { grid-template-columns: 1fr; gap: 24px; padding: 20px; } .pd-title { font-size: 1.6rem; } }
+
+/* ─── Bulk Pricing ─── */
+.bulk-pricing-box {
+  background: #f0faf2; border: 1.5px solid #b2dfbb; border-radius: 16px;
+  padding: 18px 20px; margin-bottom: 22px;
+}
+.bulk-pricing-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .9rem; font-weight: 800; color: #1a5d1a;
+  margin-bottom: 14px; text-transform: uppercase; letter-spacing: .04em;
+}
+.bulk-pricing-title i { color: #226b2e; font-size: 1rem; }
+.bulk-tiers { display: flex; flex-direction: column; gap: 8px; }
+.bulk-tier {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  align-items: center; gap: 10px;
+  background: #fff; border: 1.5px solid #dceede; border-radius: 12px;
+  padding: 12px 16px; transition: all .2s; cursor: default;
+}
+.bulk-tier:hover, .bulk-tier.tier-active {
+  border-color: #226b2e; background: #e8f5e9;
+  box-shadow: 0 2px 12px rgba(34,107,46,0.10);
+}
+.bulk-tier-qty {
+  font-size: .82rem; font-weight: 700; color: #555;
+}
+.bulk-tier-qty strong { color: #1a3a1a; font-size: .95rem; }
+.bulk-tier-price { font-size: 1.1rem; font-weight: 900; color: #226b2e; text-align: center; }
+.bulk-tier-badge {
+  text-align: right;
+}
+.bulk-tier-badge span {
+  display: inline-block; background: linear-gradient(135deg,#226b2e,#2e8b44);
+  color: #fff; font-size: .72rem; font-weight: 800; padding: 3px 10px;
+  border-radius: 20px; letter-spacing: .02em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pd-page">
+  <div class="container">
+
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs">
+      <a href="/">Home</a>
+      <span><i class="fa-solid fa-chevron-right"></i></span>
+      <a href="/shop/">Shop</a>
+      <span><i class="fa-solid fa-chevron-right"></i></span>
+      {% if product.category %}
+        <a href="{% url 'categories:detail' product.category.slug %}">{{ product.category.name }}</a>
+        <span><i class="fa-solid fa-chevron-right"></i></span>
+      {% endif %}
+      <span style="color:#333;font-weight:600;">{{ product.name }}</span>
+    </nav>
+
+    <!-- Main Card -->
+    <div class="pd-card">
+
+      <!-- Gallery Column -->
+      <div class="pd-gallery">
+        <div class="pd-main-img-wrap">
+          <!-- Badges -->
+          <div class="pd-badge-list">
+            {% if product.discount_percent > 0 %}
+              <span class="pd-badge pd-badge-disc">{{ product.discount_percent }}% OFF</span>
+            {% endif %}
+            {% if product.is_new_launch %}
+              <span class="pd-badge pd-badge-new">NEW</span>
+            {% endif %}
+          </div>
+
+          <!-- Wishlist button -->
+          <button class="pd-wish-btn {% if in_wishlist %}active{% endif %}"
+                  onclick="toggleWishlist({{ product.id }}, this)">
+            <i class="fa-{% if in_wishlist %}solid{% else %}regular{% endif %} fa-heart"></i>
+          </button>
+
+          <!-- Main Image -->
+          {% if product.image_main %}
+            <img src="{{ product.image_main.url }}"
+                 alt="{{ product.name }}"
+                 id="pd-main-img"
+                 class="pd-main-img"
+                 onerror="this.style.display='none'; document.getElementById('pd-ph-wrap').style.display='flex';">
+            <div id="pd-ph-wrap" class="pd-ph" style="display:none;">
+              <i class="fa-solid fa-box-open"></i>
+              <span style="font-size:.85rem;">Image Coming Soon</span>
+            </div>
+          {% else %}
+            <div class="pd-ph">
+              <i class="fa-solid fa-box-open"></i>
+              <span style="font-size:.85rem;">Image Coming Soon</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Thumbnails — only show if gallery images exist -->
+        {% if gallery_images %}
+        <div class="pd-thumbs">
+          {% if product.image_main %}
+            <div class="pd-thumb active" onclick="changePdImage('{{ product.image_main.url }}', this)">
+              <img src="{{ product.image_main.url }}" alt="Main">
+            </div>
+          {% endif %}
+          {% for img in gallery_images %}
+            <div class="pd-thumb" onclick="changePdImage('{{ img.image.url }}', this)">
+              <img src="{{ img.image.url }}" alt="Gallery image {{ forloop.counter }}">
+            </div>
+          {% endfor %}
+        </div>
+        {% elif product.image_main %}
+        {# Only main image — show a single thumb so user knows it's clickable #}
+        <div class="pd-thumbs">
+          <div class="pd-thumb active" onclick="changePdImage('{{ product.image_main.url }}', this)">
+            <img src="{{ product.image_main.url }}" alt="Main">
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Info Column -->
+      <div class="pd-info">
+        {% if product.brand %}
+          <a href="{% url 'brands:detail' product.brand.slug %}" class="pd-brand">{{ product.brand.name }}</a>
+        {% endif %}
+
+        <h1 class="pd-title">{{ product.name }}</h1>
+
+        <!-- Meta row -->
+        <div class="pd-meta-row">
+          <span class="pd-stock-chip {% if product.stock > 10 %}stock-in{% elif product.stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+            {% if product.stock > 10 %}
+              🟢 In Stock
+            {% elif product.stock > 0 %}
+              ⚠️ Only {{ product.stock }} left!
+            {% else %}
+              🔴 Out of Stock
+            {% endif %}
+          </span>
+          {% if product.weight %}
+            <span style="font-size:.85rem;color:#888;font-weight:600;">Net Wt: {{ product.weight }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Price Box -->
+        <div class="pd-price-box">
+          <span class="pd-price-curr">₹{{ product.discount_price|default:product.price }}</span>
+          {% if product.discount_price and product.discount_price < product.price %}
+            <span class="pd-price-mrp">₹{{ product.price }}</span>
+            <span class="pd-price-save">Save ₹{{ product.savings }}</span>
+          {% endif %}
+          <span style="font-size:.8rem;color:#aaa;margin-left:auto;">per {{ product.unit|default:"item" }}</span>
+        </div>
+
+        {% if bulk_prices %}
+        <!-- Bulk Pricing — Buy More, Save More -->
+        <div class="bulk-pricing-box">
+          <div class="bulk-pricing-title">
+            <i class="fa-solid fa-chart-simple"></i>
+            Buy More, Save More
+          </div>
+          <div class="bulk-tiers" id="bulk-tiers">
+            {% for tier in bulk_prices %}
+            <div class="bulk-tier" data-min-qty="{{ tier.min_quantity }}">
+              <div class="bulk-tier-qty">
+                <strong>{{ tier.min_quantity }}+</strong> units
+              </div>
+              <div class="bulk-tier-price">₹{{ tier.price_per_unit }}<span style="font-size:.7rem;font-weight:600;color:#888;">/unit</span></div>
+              <div class="bulk-tier-badge">
+                {% if tier.discount_label %}
+                  <span>{{ tier.discount_label }}</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if product.description %}
+          <div class="pd-short-desc">{{ product.description|truncatewords:25 }}</div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="pd-actions">
+          <div class="qty-control-lg">
+            <button class="qty-btn-lg" type="button" onclick="changePdQty(-1)">−</button>
+            <input type="number" id="detail-qty" class="qty-input-lg" value="1" min="1" max="{{ product.stock|default:10 }}" readonly>
+            <button class="qty-btn-lg" type="button" onclick="changePdQty(1)">+</button>
+          </div>
+
+          <button class="btn-add-cart-lg" onclick="addToCartDetail({{ product.id }})" {% if product.stock == 0 %}disabled{% endif %}>
+            <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+          </button>
+
+          <a href="https://wa.me/{{ WHATSAPP_NUMBER|default:'917599342112' }}?text=Hi!%20I%20want%20to%20order%20{{ product.name|urlencode }}"
+             class="btn-wa-lg" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i> Order via WhatsApp
+          </a>
+        </div>
+
+        <!-- Delivery Promises -->
+        <div class="pd-promises">
+          <div class="pd-promise">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Same Day Delivery</span>
+          </div>
+          <div class="pd-promise">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Fresh & Quality Guarantee</span>
+          </div>
+          <div class="pd-promise">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Easy Returns</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="pd-tabs-card">
+      <div class="pd-tabs-head">
+        <button class="pd-tab-btn active" onclick="switchPdTab('desc', this)">Product Description</button>
+        <button class="pd-tab-btn" onclick="switchPdTab('rev', this)">Customer Reviews ({{ review_count|default:0 }})</button>
+      </div>
+      <div class="pd-tab-body">
+        <div class="pd-tab-pane active" id="pane-desc">
+          <div style="color:#555;line-height:1.8;font-size:.95rem;">
+            {% if product.description %}
+              {{ product.description|linebreaks }}
+            {% else %}
+              <p>Fresh grocery item from Shivank Kirana Store, Meerut.</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="pd-tab-pane" id="pane-rev">
+          {% if reviews %}
+            {% for r in reviews %}
+              <div style="border-bottom:1px solid #eee;padding-bottom:12px;margin-bottom:12px;">
+                <div style="font-weight:700;color:#333;">{{ r.user.full_name }}</div>
+                <div style="font-size:.8rem;color:#aaa;">{{ r.created_at|date:"d M Y" }}</div>
+                <p style="color:#555;margin-top:6px;">{{ r.comment }}</p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p style="color:#aaa;">No reviews yet. Be the first to review this product!</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changePdImage(url, el) {
+  const img = document.getElementById('pd-main-img');
+  if (img) img.src = url;
+  document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function changePdQty(delta) {
+  const input = document.getElementById('detail-qty');
+  let val = parseInt(input.value) || 1;
+  const max = parseInt(input.getAttribute('max')) || 10;
+  val += delta;
+  if (val < 1) val = 1;
+  if (val > max) val = max;
+  input.value = val;
+  highlightBulkTier(val);
+}
+
+function highlightBulkTier(qty) {
+  const tiers = document.querySelectorAll('.bulk-tier');
+  if (!tiers.length) return;
+  let activeTier = null;
+  tiers.forEach(tier => {
+    tier.classList.remove('tier-active');
+    const minQty = parseInt(tier.dataset.minQty) || 0;
+    if (qty >= minQty) activeTier = tier;
+  });
+  if (activeTier) activeTier.classList.add('tier-active');
+}
+
+// Highlight on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const qty = parseInt(document.getElementById('detail-qty')?.value) || 1;
+  highlightBulkTier(qty);
+});
+
+function addToCartDetail(productId) {
+  const qty = parseInt(document.getElementById('detail-qty').value) || 1;
+  const btn = document.querySelector('.btn-add-cart-lg');
+  if (typeof addToCart === 'function') {
+    addToCart(productId, qty, btn);
+  } else {
+    fetch(`/cart/add/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ product_id: productId, quantity: qty })
+    }).then(r => r.json()).then(d => {
+      if(d.success) alert('Added to Cart!');
+    });
+  }
+}
+
+function switchPdTab(tab, btn) {
+  document.querySelectorAll('.pd-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pd-tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+}
+
+function getCookie(name) {
+  let v = null;
+  if (document.cookie) {
+    document.cookie.split(';').forEach(c => {
+      c = c.trim();
+      if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+    });
+  }
+  return v;
+}
+</script>
+{% endblock %}

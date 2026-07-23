@@ -1,0 +1,168 @@
+{% extends 'base/base.html' %}
+{% block title %}Orders Management — Admin{% endblock %}
+{% block content %}
+<style>
+.admin-page { padding:30px 0; }
+.admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+.admin-header h1 { font-size:1.8rem; font-weight:800; color:var(--clr-primary); }
+.filter-bar { background:var(--clr-surface); border-radius:12px; padding:16px 20px; margin-bottom:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; border:1px solid rgba(255,255,255,0.07); }
+.filter-bar input, .filter-bar select { background:var(--clr-bg); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 14px; color:var(--clr-text); font-size:.9rem; }
+.filter-bar input { min-width:200px; }
+.stat-chips { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.chip { border-radius:10px; padding:10px 18px; font-size:.85rem; font-weight:600; border:1px solid; cursor:pointer; text-decoration:none; }
+.chip-all      { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); color:var(--clr-text); }
+.chip-placed   { background:rgba(116,185,255,0.1);  border-color:rgba(116,185,255,0.3); color:#74b9ff; }
+.chip-confirmed{ background:rgba(162,155,254,0.1);  border-color:rgba(162,155,254,0.3); color:#a29bfe; }
+.chip-out      { background:rgba(255,165,2,0.1);    border-color:rgba(255,165,2,0.3);   color:#ffa502; }
+.chip-delivered{ background:rgba(46,213,115,0.1);   border-color:rgba(46,213,115,0.3);  color:#2ed573; }
+.chip-cancelled{ background:rgba(255,71,87,0.1);    border-color:rgba(255,71,87,0.3);   color:#ff4757; }
+.table-wrap { background:var(--clr-surface); border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); }
+.admin-table { width:100%; border-collapse:collapse; }
+.admin-table th { background:rgba(255,255,255,0.04); padding:12px 16px; text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--clr-text-muted); font-weight:600; white-space:nowrap; }
+.admin-table td { padding:12px 16px; border-top:1px solid rgba(255,255,255,0.05); vertical-align:middle; font-size:.9rem; }
+.admin-table tr:hover td { background:rgba(255,255,255,0.03); }
+.status-pill { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:600; white-space:nowrap; }
+.s-placed     { background:rgba(116,185,255,0.15); color:#74b9ff; }
+.s-confirmed  { background:rgba(162,155,254,0.15); color:#a29bfe; }
+.s-packed     { background:rgba(255,193,7,0.15);   color:#ffc107; }
+.s-out_for_delivery { background:rgba(255,165,2,0.15); color:#ffa502; }
+.s-delivered  { background:rgba(46,213,115,0.15);  color:#2ed573; }
+.s-cancelled  { background:rgba(255,71,87,0.15);   color:#ff4757; }
+.s-returned   { background:rgba(99,110,114,0.15);  color:#aaa; }
+.pay-upi { background:rgba(98,0,238,0.15); color:#9c27b0; }
+.pay-cod { background:rgba(33,150,243,0.15); color:#2196f3; }
+.pay-pill { padding:3px 9px; border-radius:20px; font-size:.73rem; font-weight:600; }
+.pay-received { background:rgba(46,213,115,0.15); color:#2ed573; }
+.pay-pending  { background:rgba(255,193,7,0.15); color:#ffc107; }
+.pay-rejected { background:rgba(255,71,87,0.15); color:#ff4757; }
+.cod-badge { display:inline-flex; align-items:center; gap:4px; font-size:.73rem; padding:3px 8px; border-radius:20px; background:rgba(255,165,2,0.12); color:#ffa502; }
+.cod-confirmed { background:rgba(46,213,115,0.12); color:#2ed573; }
+.btn-view { color:var(--clr-primary); font-size:.85rem; text-decoration:none; font-weight:600; }
+.btn-view:hover { text-decoration:underline; }
+.empty-state { text-align:center; padding:60px; color:var(--clr-text-muted); }
+</style>
+
+<div class="admin-page container">
+  <div class="admin-header">
+    <h1>📦 Orders Management</h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  {% if messages %}{% for msg in messages %}
+  <div style="background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-weight:600;">✓ {{ msg }}</div>
+  {% endfor %}{% endif %}
+
+  <!-- Quick Status Filter Chips -->
+  <div class="stat-chips">
+    <a href="{% url 'admin_panel:order_list' %}" class="chip chip-all">All Orders</a>
+    <a href="?status=placed"            class="chip chip-placed">🔵 Placed</a>
+    <a href="?status=confirmed"         class="chip chip-confirmed">🟣 Confirmed</a>
+    <a href="?status=out_for_delivery"  class="chip chip-out">🟠 Out for Delivery</a>
+    <a href="?status=delivered"         class="chip chip-delivered">🟢 Delivered</a>
+    <a href="?status=cancelled"         class="chip chip-cancelled">🔴 Cancelled</a>
+    <a href="?method=UPI"               class="chip" style="background:rgba(98,0,238,0.1);border-color:rgba(98,0,238,0.3);color:#9c27b0;">💜 UPI</a>
+    <a href="?method=COD"               class="chip" style="background:rgba(33,150,243,0.1);border-color:rgba(33,150,243,0.3);color:#2196f3;">💙 COD</a>
+  </div>
+
+  <!-- Search + Filter -->
+  <form class="filter-bar" method="get">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="🔍 Search order number…">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All Statuses</option>
+      {% for val, label in status_choices %}
+      <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Search</button>
+    {% if search_query or status_filter %}
+    <a href="{% url 'admin_panel:order_list' %}" class="btn btn-outline">Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- Orders Table -->
+  <div class="table-wrap">
+    {% if page_obj.object_list %}
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Pay Status</th>
+          <th>COD</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in page_obj %}
+        <tr>
+          <td style="font-family:monospace;font-weight:700;">
+            <a href="{% url 'admin_panel:order_detail' order.pk %}" class="btn-view">{{ order.order_number }}</a>
+          </td>
+          <td>
+            <div style="font-weight:600;font-size:.9rem;">{{ order.user.full_name }}</div>
+            <div style="font-size:.78rem;color:var(--clr-text-muted);">{{ order.user.phone }}</div>
+          </td>
+          <td style="text-align:center;font-weight:600;">{{ order.items.count }}</td>
+          <td style="font-weight:800;color:var(--clr-primary);">₹{{ order.total_amount }}</td>
+          <td>
+            <span class="pay-pill {% if order.payment_method == 'UPI' %}pay-upi{% else %}pay-cod{% endif %}">
+              {{ order.payment_method }}
+            </span>
+          </td>
+          <td>
+            <span class="pay-pill pay-{{ order.payment_status }}">
+              {% if order.payment_status == 'received' %}✅ Paid
+              {% elif order.payment_status == 'pending' %}⏳ Pending
+              {% elif order.payment_status == 'rejected' %}❌ Rejected
+              {% else %}{{ order.payment_status }}{% endif %}
+            </span>
+          </td>
+          <td>
+            {% if order.payment_method == 'COD' %}
+            <form method="post" action="{% url 'admin_panel:order_toggle_cod' order.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="cod-badge {% if order.cod_call_confirmed %}cod-confirmed{% endif %}" title="Click to toggle COD call confirmation">
+                📞 {% if order.cod_call_confirmed %}Confirmed{% else %}Not Confirmed{% endif %}
+              </button>
+            </form>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <span class="status-pill s-{{ order.status }}">{{ order.get_status_display }}</span>
+          </td>
+          <td style="font-size:.8rem;color:var(--clr-text-muted);white-space:nowrap;">{{ order.placed_at|date:"d M, H:i" }}</td>
+          <td>
+            <a href="{% url 'admin_panel:order_detail' order.pk %}" class="btn-view">View →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="display:flex;justify-content:center;gap:8px;padding:20px;align-items:center;">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&q={{ search_query }}" class="btn btn-outline" style="font-size:.85rem;">← Prev</a>
+      {% endif %}
+      <span style="padding:8px 18px;background:var(--clr-primary);border-radius:8px;font-weight:600;color:#fff;">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&q={{ search_query }}" class="btn btn-outline" style="font-size:.85rem;">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+      <div style="font-size:3rem;margin-bottom:12px;">📦</div>
+      <p>No orders found{% if status_filter %} with status "{{ status_filter }}"{% endif %}{% if search_query %} for "{{ search_query }}"{% endif %}.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,544 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Your Cart — Shivank Kirana Store{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════
+   CART PAGE — PROFESSIONAL REDESIGN
+═══════════════════════════════════ */
+.cart-page { padding: 36px 0 60px; background: #f5f8f5; min-height: 75vh; }
+
+/* Header */
+.cart-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:28px; flex-wrap:wrap; gap:12px;
+}
+.cart-title { font-size:1.8rem; font-weight:900; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+.cart-count-badge { background:#e8f5e9; color:#226b2e; font-size:.85rem; font-weight:800; padding:4px 12px; border-radius:20px; }
+.btn-continue { display:inline-flex; align-items:center; gap:8px; color:#226b2e; font-weight:700; font-size:.9rem; text-decoration:none; padding:9px 18px; border:2px solid #c8e6c9; border-radius:12px; background:#fff; transition:all .2s; }
+.btn-continue:hover { background:#e8f5e9; border-color:#a5d6a7; }
+
+/* Layout */
+.cart-layout { display:grid; grid-template-columns:1fr 380px; gap:24px; align-items:start; }
+
+/* ── Items Card ── */
+.cart-items-card { background:#fff; border-radius:20px; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); overflow:hidden; }
+.cart-items-head { padding:16px 24px; border-bottom:1px solid #eef3ee; background:#f9fcf9; font-weight:800; font-size:.95rem; color:#1a5d1a; display:flex; align-items:center; gap:8px; }
+
+/* Cart Item Row */
+.cart-item { display:grid; grid-template-columns:90px 1fr auto; gap:18px; padding:20px 24px; border-bottom:1px solid #f0f5f0; align-items:center; transition:background .15s; }
+.cart-item:last-child { border-bottom:none; }
+.cart-item:hover { background:#fafcfa; }
+
+/* Image */
+.item-img-wrap { width:90px; height:90px; border-radius:14px; background:#f5f8f5; border:1px solid #e8ede8; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:6px; flex-shrink:0; }
+.item-img-wrap img { width:100%; height:100%; object-fit:contain; }
+.item-img-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2rem; color:#ddd; }
+
+/* Details */
+.item-details { display:flex; flex-direction:column; gap:4px; }
+.item-brand { font-size:.72rem; font-weight:800; color:#aaa; text-transform:uppercase; letter-spacing:.06em; }
+.item-name { font-size:.97rem; font-weight:700; color:#1a3a1a; text-decoration:none; line-height:1.3; }
+.item-name:hover { color:#226b2e; }
+.item-weight { font-size:.76rem; color:#bbb; margin-bottom:4px; }
+.item-price-row { display:flex; align-items:center; gap:8px; margin-top:2px; }
+.item-price { font-size:1rem; font-weight:900; color:#226b2e; }
+.item-mrp { font-size:.78rem; color:#bbb; text-decoration:line-through; }
+.item-unit { font-size:.75rem; color:#bbb; }
+
+/* Actions */
+.item-actions { display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+.qty-wrap { display:flex; align-items:center; background:#f5f8f5; border:2px solid #e4ece4; border-radius:12px; overflow:hidden; }
+.qty-btn { width:34px; height:34px; background:none; border:none; cursor:pointer; font-size:.85rem; color:#226b2e; font-weight:800; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.qty-btn:hover:not(:disabled) { background:#e8f5e9; }
+.qty-btn:disabled { opacity:.4; cursor:not-allowed; }
+.qty-input { width:38px; height:34px; text-align:center; border:none; background:transparent; font-weight:800; font-size:.92rem; color:#1a3a1a; }
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.btn-remove { background:none; border:none; color:#e53935; font-size:.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; padding:6px 10px; border-radius:9px; transition:background .15s; }
+.btn-remove:hover { background:#ffebee; }
+
+/* Subtotal */
+.item-subtotal { font-size:1.05rem; font-weight:900; color:#1a7a1a; text-align:right; min-width:76px; white-space:nowrap; }
+
+/* ── Coupon Box ── */
+.coupon-card-sec {
+  background: #f8faf8; border: 1.5px solid #dceede; border-radius: 16px;
+  padding: 16px; margin-bottom: 20px;
+}
+.coupon-sec-title {
+  font-size: .88rem; font-weight: 800; color: #1a5d1a; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.coupon-chips-list {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px;
+}
+.coupon-chip-btn {
+  background: #e8f5e9; border: 1.5px dashed #226b2e; color: #1a5d1a;
+  padding: 6px 12px; border-radius: 20px; font-size: .78rem; font-weight: 800;
+  cursor: pointer; transition: all .15s; white-space: nowrap; display: flex; align-items: center; gap: 5px;
+}
+.coupon-chip-btn:hover { background: #226b2e; color: #fff; border-style: solid; }
+
+.coupon-input-wrap { display: flex; gap: 8px; }
+.cp-field {
+  flex: 1; padding: 10px 14px; border: 1.5px solid #dce8dc; border-radius: 12px;
+  font-size: .9rem; font-weight: 800; font-family: monospace; letter-spacing: 1.5px;
+  text-transform: uppercase; outline: none; background: #fff; color: #1a5d1a;
+}
+.cp-field:focus { border-color: #226b2e; box-shadow: 0 0 0 3px rgba(34,107,46,0.1); }
+
+.btn-cp-apply {
+  background: #226b2e; color: #fff; border: none; padding: 10px 20px; border-radius: 12px;
+  font-weight: 800; font-size: .88rem; cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.btn-cp-apply:hover { background: #1a5d1a; }
+.btn-cp-remove { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+.btn-cp-remove:hover { background: #e53935; color: #fff; }
+
+.cp-msg-box { font-size: .82rem; font-weight: 700; margin-top: 10px; display: none; }
+.cp-msg-success { color: #2e7d32; display: block; }
+.cp-msg-error   { color: #c62828; display: block; }
+
+/* ── Summary Card ── */
+.summary-card { background:#fff; border-radius:20px; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); padding:24px; position:sticky; top:90px; }
+.summary-title { font-size:1.05rem; font-weight:900; color:#1a3a1a; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #eef3ee; display:flex; align-items:center; gap:8px; }
+.summary-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:11px; font-size:.88rem; color:#555; }
+.summary-row .label { color:#888; }
+.summary-row.discount { color:#2e7d32; font-weight:700; }
+.summary-divider { height:1px; background:#eef3ee; margin:14px 0; }
+.summary-row.total { font-size:1.1rem; font-weight:900; color:#1a3a1a; margin-bottom:18px; }
+.summary-row.total .value { color:#226b2e; }
+
+/* Savings alert */
+.savings-alert { background:linear-gradient(135deg,#e8f5e9,#f1f8e9); border:1px solid #c8e6c9; border-radius:12px; padding:12px 16px; font-size:.82rem; font-weight:700; color:#2e7d32; display:flex; align-items:center; gap:8px; margin-bottom:18px; }
+
+/* Free delivery banner */
+.free-del-banner { background:#e3f2fd; border:1px solid #bbdefb; border-radius:12px; padding:10px 14px; font-size:.8rem; color:#1565c0; font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:18px; }
+
+/* Checkout button */
+.btn-checkout { display:flex; width:100%; justify-content:center; align-items:center; gap:10px; padding:15px; font-size:1.05rem; font-weight:800; background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; border-radius:14px; text-decoration:none; box-shadow:0 6px 20px rgba(34,107,46,0.3); transition:all .2s; border:none; cursor:pointer; }
+.btn-checkout:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(34,107,46,0.35); color:#fff; }
+.secure-note { text-align:center; font-size:.75rem; color:#aaa; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:5px; }
+
+/* Trust badges */
+.trust-badges { display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap; }
+.trust-badge { font-size:.72rem; color:#888; display:flex; align-items:center; gap:4px; font-weight:600; }
+
+/* ── Empty Cart ── */
+.empty-cart { background:#fff; border-radius:20px; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); padding:72px 24px; text-align:center; }
+.empty-cart .ec-icon { font-size:5rem; margin-bottom:16px; }
+.empty-cart h2 { font-size:1.6rem; font-weight:900; color:#1a3a1a; margin-bottom:8px; }
+.empty-cart p { color:#aaa; font-size:.95rem; margin-bottom:24px; }
+.btn-shop { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; padding:13px 28px; border-radius:14px; font-weight:800; font-size:.95rem; text-decoration:none; box-shadow:0 4px 16px rgba(34,107,46,0.25); transition:all .2s; }
+.btn-shop:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(34,107,46,0.3); color:#fff; }
+
+/* Responsive */
+@media(max-width:900px){ .cart-layout { grid-template-columns:1fr; } .summary-card { position:static; } }
+@media(max-width:560px){ .cart-item { grid-template-columns:72px 1fr; } .item-subtotal { grid-column:1/-1; text-align:left; font-size:.95rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+  <div class="container">
+
+    <div class="cart-header">
+      <h1 class="cart-title">
+        🛒 Your Cart
+        <span class="cart-count-badge">{{ cart_count }} item{{ cart_count|pluralize }}</span>
+      </h1>
+      <a href="/shop/" class="btn-continue">
+        <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+      </a>
+    </div>
+
+    {% if items %}
+    <div class="cart-layout">
+
+      <!-- ── Items ── -->
+      <div class="cart-items-card">
+        <div class="cart-items-head">
+          <i class="fa-solid fa-bag-shopping"></i> Cart Items
+        </div>
+
+        {% for item in items %}
+        <div class="cart-item" data-item-id="{{ item.id }}">
+
+          <!-- Image -->
+          <div class="item-img-wrap">
+            {% if item.product.image_main %}
+              <img src="{{ item.product.image_main.url }}"
+                   alt="{{ item.product.name }}"
+                   loading="lazy"
+                   onerror="this.parentElement.innerHTML='<div class=\'item-img-ph\'>📦</div>'">
+            {% else %}
+              <div class="item-img-ph">📦</div>
+            {% endif %}
+          </div>
+
+          <!-- Details -->
+          <div class="item-details">
+            {% if item.product.brand %}
+              <span class="item-brand">{{ item.product.brand.name }}</span>
+            {% endif %}
+            <a href="{% url 'products:detail' item.product.slug %}" class="item-name">
+              {{ item.product.name }}
+            </a>
+            {% if item.product.weight %}
+              <span class="item-weight">{{ item.product.weight }}</span>
+            {% endif %}
+            <div class="item-price-row">
+              <span class="item-price">₹{{ item.product.discount_price }}</span>
+              {% if item.product.discount_price < item.product.price %}
+                <span class="item-mrp">₹{{ item.product.price }}</span>
+              {% endif %}
+              <span class="item-unit">/ {{ item.product.unit|default:"item" }}</span>
+            </div>
+            <!-- Actions -->
+            <div class="item-actions">
+              <div class="qty-wrap">
+                <button class="qty-btn" type="button"
+                  onclick="updateCartItem({{ item.id }}, parseInt(document.getElementById('qty-{{ item.id }}').value) - 1, this)">
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <input type="number" id="qty-{{ item.id }}" class="qty-input"
+                       value="{{ item.quantity }}" min="1" max="{{ item.product.stock|default:10 }}" readonly>
+                <button class="qty-btn" type="button"
+                  onclick="updateCartItem({{ item.id }}, parseInt(document.getElementById('qty-{{ item.id }}').value) + 1, this)">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <button class="btn-remove" onclick="removeCartItem({{ item.id }})">
+                <i class="fa-solid fa-trash-can"></i> Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- Subtotal -->
+          <div class="item-subtotal" id="subtotal-{{ item.id }}">₹{{ item.subtotal }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- ── Summary Column ── -->
+      <div>
+
+        <!-- ── Coupon Box ── -->
+        <div class="coupon-card-sec">
+          <div class="coupon-sec-title">
+            <i class="fa-solid fa-ticket" style="color:#226b2e;"></i> Apply Promo Coupon / Offer
+          </div>
+
+          {% if available_coupons %}
+          <div class="coupon-chips-list">
+            {% for cp in available_coupons %}
+            <button type="button" class="coupon-chip-btn" onclick="applyCouponCode('{{ cp.code }}')">
+              <i class="fa-solid fa-tag"></i> {{ cp.code }}
+              <span>({% if cp.discount_type == 'percent' %}{{ cp.discount_value }}% OFF{% else %}₹{{ cp.discount_value }} OFF{% endif %})</span>
+            </button>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="coupon-input-wrap">
+            <input type="text" id="coupon-input" class="cp-field" placeholder="ENTER CODE..." value="{{ applied_coupon_code|default:'' }}">
+            {% if applied_coupon_code %}
+              <button type="button" id="btn-coupon-submit" class="btn-cp-apply btn-cp-remove" onclick="removeCoupon()">Remove</button>
+            {% else %}
+              <button type="button" id="btn-coupon-submit" class="btn-cp-apply" onclick="submitCoupon()">Apply</button>
+            {% endif %}
+          </div>
+
+          <div id="coupon-msg" class="cp-msg-box {% if applied_coupon_code %}cp-msg-success{% endif %}" {% if applied_coupon_code %}style="display:block;"{% endif %}>
+            {% if applied_coupon_code %}🎉 Coupon "{{ applied_coupon_code }}" applied! You saved ₹{{ coupon_discount|floatformat:2 }}{% endif %}
+          </div>
+        </div>
+
+        <!-- ── Order Summary ── -->
+        <div class="summary-card">
+          <div class="summary-title">
+            <i class="fa-solid fa-receipt" style="color:#226b2e;"></i> Order Summary
+          </div>
+
+          <div class="summary-row">
+            <span class="label">Item Total (MRP)</span>
+            <span id="summary-mrp">₹{{ cart.total_mrp|floatformat:2 }}</span>
+          </div>
+          {% if cart.savings > 0 %}
+          <div class="summary-row discount">
+            <span class="label">Product Discount</span>
+            <span id="summary-savings">- ₹{{ cart.savings|floatformat:2 }}</span>
+          </div>
+          {% endif %}
+          <div class="summary-row">
+            <span class="label">Subtotal</span>
+            <span id="summary-subtotal">₹{{ cart.subtotal|floatformat:2 }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Delivery Charge</span>
+            <span id="summary-delivery">
+              {% if cart.delivery_charge == 0 %}
+                <span style="color:#2e7d32;font-weight:700;">🎉 FREE</span>
+              {% else %}
+                ₹{{ cart.delivery_charge|floatformat:2 }}
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="summary-row discount" id="summary-coupon-row" style="{% if not coupon_discount %}display:none;{% endif %}">
+            <span class="label">🎟️ Coupon (<span id="summary-coupon-code">{{ applied_coupon_code|default:'' }}</span>)</span>
+            <span id="summary-coupon-discount">- ₹{{ coupon_discount|floatformat:2 }}</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row total">
+            <span>Grand Total</span>
+            <span class="value" id="summary-total">₹{{ grand_total|floatformat:2 }}</span>
+          </div>
+
+          {% if cart.savings > 0 %}
+          <div class="savings-alert">
+            <i class="fa-solid fa-tag"></i>
+            You're saving <strong>₹{{ cart.savings|floatformat:2 }}</strong> on MRP!
+          </div>
+          {% endif %}
+
+          {% if cart.delivery_charge == 0 %}
+          <div class="free-del-banner">
+            <i class="fa-solid fa-truck-fast"></i> Free delivery on this order!
+          </div>
+          {% endif %}
+
+          <a href="{% url 'checkout:checkout' %}" class="btn-checkout">
+            Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <div class="secure-note">
+            <i class="fa-solid fa-lock"></i> 100% Secure Checkout
+          </div>
+          <div class="trust-badges">
+            <span class="trust-badge"><i class="fa-solid fa-shield-halved"></i> Secure Payment</span>
+            <span class="trust-badge"><i class="fa-solid fa-rotate-left"></i> Easy Returns</span>
+            <span class="trust-badge"><i class="fa-solid fa-headset"></i> 24/7 Support</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+      <div class="ec-icon">🛒</div>
+      <h2>Your cart is empty!</h2>
+      <p>Looks like you haven't added any items to your cart yet.</p>
+      <a href="/shop/" class="btn-shop">
+        <i class="fa-solid fa-store"></i> Start Shopping
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function applyCouponCode(code) {
+  const input = document.getElementById('coupon-input');
+  if (input) input.value = code;
+  submitCoupon();
+}
+
+function submitCoupon() {
+  const codeInput = document.getElementById('coupon-input');
+  const code = codeInput ? codeInput.value.trim() : '';
+  const msgBox = document.getElementById('coupon-msg');
+
+  if (!code) {
+    if (msgBox) {
+      msgBox.className = 'cp-msg-box cp-msg-error';
+      msgBox.innerText = 'Please enter or select a coupon code';
+      msgBox.style.display = 'block';
+    }
+    return;
+  }
+
+  if (msgBox) {
+    msgBox.className = 'cp-msg-box';
+    msgBox.innerText = 'Applying coupon...';
+    msgBox.style.display = 'block';
+  }
+
+  fetch('/cart/apply-coupon/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+    body: JSON.stringify({ code: code })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      if (msgBox) {
+        msgBox.className = 'cp-msg-box cp-msg-success';
+        msgBox.innerText = data.message;
+      }
+      updateCouponSummary(data);
+    } else {
+      if (msgBox) {
+        msgBox.className = 'cp-msg-box cp-msg-error';
+        msgBox.innerText = data.message;
+      }
+    }
+  })
+  .catch(() => {
+    if (msgBox) {
+      msgBox.className = 'cp-msg-box cp-msg-error';
+      msgBox.innerText = 'Error applying coupon';
+    }
+  });
+}
+
+function removeCoupon() {
+  const msgBox = document.getElementById('coupon-msg');
+  fetch('/cart/remove-coupon/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const codeInput = document.getElementById('coupon-input');
+      if (codeInput) codeInput.value = '';
+      if (msgBox) {
+        msgBox.className = 'cp-msg-box cp-msg-success';
+        msgBox.innerText = 'Coupon removed';
+      }
+      updateCouponSummary(data);
+    }
+  });
+}
+
+function updateCouponSummary(data) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  set('summary-subtotal', `₹${parseFloat(data.subtotal).toFixed(2)}`);
+  set('summary-total', `₹${parseFloat(data.grand_total || data.total).toFixed(2)}`);
+  
+  const couponRow = document.getElementById('summary-coupon-row');
+  const couponCodeEl = document.getElementById('summary-coupon-code');
+  const couponDiscEl = document.getElementById('summary-coupon-discount');
+  const applyBtn = document.getElementById('btn-coupon-submit');
+
+  if (data.coupon_discount > 0) {
+    if (couponRow) couponRow.style.display = 'flex';
+    if (couponCodeEl) couponCodeEl.innerText = data.coupon_code || '';
+    if (couponDiscEl) couponDiscEl.innerText = `- ₹${parseFloat(data.coupon_discount).toFixed(2)}`;
+    if (applyBtn) {
+      applyBtn.innerText = 'Remove';
+      applyBtn.className = 'btn-cp-apply btn-cp-remove';
+      applyBtn.onclick = removeCoupon;
+    }
+  } else {
+    if (couponRow) couponRow.style.display = 'none';
+    if (applyBtn) {
+      applyBtn.innerText = 'Apply';
+      applyBtn.className = 'btn-cp-apply';
+      applyBtn.onclick = submitCoupon;
+    }
+  }
+}
+
+function updateCartItem(itemId, qty, btn) {
+  if (qty < 1) return;
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  btn.disabled = true;
+
+  fetch(`/cart/update/${itemId}/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+    body: JSON.stringify({ quantity: qty })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.innerHTML = origHTML;
+    btn.disabled = false;
+    if (data.success) {
+      document.getElementById(`qty-${itemId}`).value = qty;
+      document.getElementById(`subtotal-${itemId}`).innerText = `₹${parseFloat(data.item_subtotal).toFixed(2)}`;
+      updateSummary(data);
+    } else {
+      alert(data.message || 'Error updating cart');
+    }
+  })
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; });
+}
+
+function removeCartItem(itemId) {
+  const row = document.querySelector(`.cart-item[data-item-id="${itemId}"]`);
+  if (row) { row.style.opacity = '0.4'; row.style.pointerEvents = 'none'; }
+
+  fetch(`/cart/remove/${itemId}/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      if (data.cart_count === 0) {
+        window.location.reload();
+      } else {
+        if (row) row.remove();
+        updateSummary(data);
+        const badge = document.querySelector('.cart-count-badge');
+        if (badge) badge.innerText = `${data.cart_count} item${data.cart_count !== 1 ? 's' : ''}`;
+      }
+    }
+  });
+}
+
+function updateSummary(data) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+  set('summary-mrp',      `₹${parseFloat(data.total_mrp).toFixed(2)}`);
+  set('summary-savings',  `- ₹${parseFloat(data.savings).toFixed(2)}`);
+  set('summary-subtotal', `₹${parseFloat(data.subtotal).toFixed(2)}`);
+  
+  // Re-apply coupon check on cart update if active
+  const couponDiscEl = document.getElementById('summary-coupon-discount');
+  let disc = 0;
+  if (couponDiscEl && couponDiscEl.innerText) {
+    const text = couponDiscEl.innerText.replace('- ₹', '').trim();
+    disc = parseFloat(text) || 0;
+  }
+  
+  const delVal = data.delivery_charge || 0;
+  const grandTotal = Math.max(0, (data.subtotal || 0) + delVal - disc);
+  set('summary-total', `₹${parseFloat(grandTotal).toFixed(2)}`);
+
+  const delEl = document.getElementById('summary-delivery');
+  if (delEl) {
+    if (delVal === 0) {
+      delEl.innerHTML = '<span style="color:#2e7d32;font-weight:700;">🎉 FREE</span>';
+    } else {
+      delEl.innerText = `₹${parseFloat(delVal).toFixed(2)}`;
+    }
+  }
+  const badge = document.querySelector('.cart-badge');
+  if (badge) badge.innerText = data.cart_count;
+}
+
+function getCookie(name) {
+  let v = null;
+  if (document.cookie) {
+    document.cookie.split(';').forEach(c => {
+      c = c.trim();
+      if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+    });
+  }
+  return v;
+}
+</script>
+{% endblock %}

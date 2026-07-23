@@ -1,0 +1,229 @@
+{% extends 'base/base.html' %}
+{% block title %}Customers — Admin{% endblock %}
+{% block content %}
+<style>
+.cu-page { padding: 36px 0; }
+
+/* Header */
+.cu-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+.cu-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* KPI bar */
+.cu-kpi { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+.cu-kpi-card { background:#fff; border-radius:14px; padding:16px 22px; display:flex; align-items:center; gap:14px; border:1px solid #e4ece4; box-shadow:0 3px 12px rgba(0,0,0,0.04); }
+.cu-ki { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.cu-knum { font-size:1.7rem; font-weight:900; line-height:1; color:#226b2e; }
+.cu-klbl { font-size:.78rem; font-weight:600; color:#888; margin-top:3px; }
+
+/* Search */
+.cu-search-bar { background:#fff; border-radius:16px; padding:16px 22px; margin-bottom:22px; border:1px solid #e4ece4; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.cu-search-form { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.cu-input { flex:1; min-width:220px; padding:11px 16px; border:2px solid #dce8dc; border-radius:12px; font-size:.92rem; color:#333; background:#f8faf8; outline:none; transition:all .2s; }
+.cu-input:focus { border-color:#226b2e; background:#fff; box-shadow:0 0 0 3px rgba(34,107,46,0.08); }
+.btn-cu-search { background:#226b2e; color:#fff; padding:11px 22px; border-radius:12px; border:none; cursor:pointer; font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:6px; transition:all .2s; white-space:nowrap; }
+.btn-cu-search:hover { background:#1a5d1a; }
+.btn-cu-clear { background:#f1f5f1; color:#555; padding:11px 18px; border-radius:12px; font-weight:600; font-size:.9rem; text-decoration:none; transition:all .2s; white-space:nowrap; }
+.btn-cu-clear:hover { background:#e5ece5; }
+
+/* Table card */
+.cu-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.cu-table { width:100%; border-collapse:collapse; }
+.cu-table th { background:#f5f8f5; padding:12px 18px; font-size:.73rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; white-space:nowrap; }
+.cu-table td { padding:14px 18px; border-top:1px solid #f0f5f0; vertical-align:middle; }
+.cu-table tr:hover td { background:#fafcfa; }
+
+/* Avatar */
+.cu-avatar { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#226b2e,#4caf50); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#fff; flex-shrink:0; box-shadow:0 2px 8px rgba(34,107,46,0.25); }
+.cu-user-cell { display:flex; align-items:center; gap:12px; }
+.cu-name { font-weight:700; color:#1a3a1a; font-size:.95rem; }
+.cu-id { font-size:.73rem; color:#aaa; margin-top:2px; }
+
+/* Phone */
+.cu-phone { font-family:monospace; font-weight:600; color:#333; font-size:.9rem; }
+
+/* Email */
+.cu-email { font-size:.83rem; color:#888; max-width:180px; word-break:break-all; }
+
+/* Orders chip */
+.orders-chip { display:inline-flex; align-items:center; gap:5px; background:#e8f5e9; color:#226b2e; padding:5px 12px; border-radius:20px; font-size:.78rem; font-weight:700; }
+.orders-chip-zero { display:inline-flex; align-items:center; gap:5px; background:#f5f5f5; color:#aaa; padding:5px 12px; border-radius:20px; font-size:.78rem; font-weight:600; }
+
+/* Spent */
+.cu-spent { font-weight:900; color:#1a7a1a; font-size:1rem; }
+.cu-spent-zero { color:#ccc; }
+
+/* Joined date */
+.cu-joined { font-size:.82rem; color:#aaa; white-space:nowrap; }
+
+/* Status */
+.badge-cu-active  { display:inline-flex; align-items:center; gap:4px; background:#e8f5e9; color:#2e7d32; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+.badge-cu-blocked { display:inline-flex; align-items:center; gap:4px; background:#ffebee; color:#c62828; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+
+/* Empty */
+.cu-empty { text-align:center; padding:64px 20px; color:#aaa; }
+.cu-empty .ei { font-size:3rem; margin-bottom:12px; }
+
+/* Pagination */
+.cu-pagination { display:flex; gap:8px; justify-content:center; padding:20px; flex-wrap:wrap; }
+.pg-btn { padding:8px 18px; border-radius:10px; background:#f5f8f5; border:1px solid #e0eae0; color:#333; font-weight:600; font-size:.88rem; text-decoration:none; transition:all .2s; }
+.pg-btn:hover { background:#e8f5e9; border-color:#c8e6c9; }
+.pg-cur { background:#e8f5e9; border-color:#a5d6a7; color:#226b2e; font-weight:800; pointer-events:none; }
+
+@media(max-width:700px){ .cu-search-form { flex-direction:column; } .cu-input { width:100%; } }
+</style>
+
+<div class="cu-page container">
+  <div class="cu-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">👥</span>
+      Customers
+    </h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- KPI -->
+  <div class="cu-kpi">
+    <div class="cu-kpi-card">
+      <div class="cu-ki" style="background:#e8f5e9;">👥</div>
+      <div>
+        <div class="cu-knum">{{ total_customers }}</div>
+        <div class="cu-klbl">Total Customers</div>
+      </div>
+    </div>
+    {% if search_query %}
+    <div class="cu-kpi-card">
+      <div class="cu-ki" style="background:#e3f2fd;">🔍</div>
+      <div>
+        <div class="cu-knum" style="color:#1565c0;">{{ page_obj.paginator.count }}</div>
+        <div class="cu-klbl">Results for "{{ search_query }}"</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <div class="cu-search-bar">
+    <form class="cu-search-form" method="get">
+      <input type="text" name="q" value="{{ search_query }}" class="cu-input"
+             placeholder="🔍 Search by name, phone, or email...">
+      <button type="submit" class="btn-cu-search">
+        <i class="fa-solid fa-magnifying-glass"></i> Search
+      </button>
+      {% if search_query %}
+        <a href="{% url 'admin_panel:customers_manage' %}" class="btn-cu-clear">✕ Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="cu-card">
+    {% if page_obj.object_list %}
+    <div style="overflow-x:auto;">
+      <table class="cu-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Orders</th>
+            <th>Total Spent</th>
+            <th>Joined</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for customer in page_obj %}
+          <tr>
+            <!-- Customer -->
+            <td>
+              <div class="cu-user-cell">
+                <div class="cu-avatar">{{ customer.full_name|slice:":1"|upper }}</div>
+                <div>
+                  <div class="cu-name">{{ customer.full_name }}</div>
+                  <div class="cu-id">ID #{{ customer.id }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Phone -->
+            <td>
+              <span class="cu-phone">{{ customer.phone }}</span>
+            </td>
+
+            <!-- Email -->
+            <td>
+              <span class="cu-email">{{ customer.email|default:"—" }}</span>
+            </td>
+
+            <!-- Orders -->
+            <td>
+              {% if customer.order_count %}
+                <span class="orders-chip">
+                  <i class="fa-solid fa-box" style="font-size:.65rem;"></i>
+                  {{ customer.order_count }} order{{ customer.order_count|pluralize }}
+                </span>
+              {% else %}
+                <span class="orders-chip-zero">0 orders</span>
+              {% endif %}
+            </td>
+
+            <!-- Total Spent -->
+            <td>
+              {% if customer.total_spent %}
+                <span class="cu-spent">₹{{ customer.total_spent|floatformat:0 }}</span>
+              {% else %}
+                <span class="cu-spent-zero">—</span>
+              {% endif %}
+            </td>
+
+            <!-- Joined -->
+            <td>
+              <span class="cu-joined">{{ customer.date_joined|date:"d M Y" }}</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              {% if customer.is_active %}
+                <span class="badge-cu-active">🟢 Active</span>
+              {% else %}
+                <span class="badge-cu-blocked">🔴 Blocked</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="cu-pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}" class="pg-btn">← Prev</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="pg-btn pg-cur">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}&q={{ search_query }}" class="pg-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}" class="pg-btn">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="cu-empty">
+      <div class="ei">👥</div>
+      <p style="font-weight:600;">No customers found{% if search_query %} for "{{ search_query }}"{% endif %}.</p>
+      {% if search_query %}
+        <a href="{% url 'admin_panel:customers_manage' %}" style="color:#226b2e;font-weight:600;">Clear search →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

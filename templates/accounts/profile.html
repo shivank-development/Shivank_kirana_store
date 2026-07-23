@@ -1,0 +1,327 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}My Profile — Shivank Kirana Store{% endblock %}
+
+{% block content %}
+<style>
+.prof-page { padding: 36px 0 60px; background: #f5f8f5; min-height: 75vh; }
+
+/* ── Hero Banner ── */
+.prof-hero {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32, #388e3c);
+  border-radius: 24px; padding: 32px; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px; box-shadow: 0 8px 30px rgba(27,94,32,0.25);
+  margin-bottom: 30px;
+}
+.prof-user-meta { display: flex; align-items: center; gap: 20px; }
+.prof-avatar {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: #fff; color: #1a5d1a; font-size: 2.2rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid rgba(255,255,255,0.4); box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  overflow: hidden; flex-shrink: 0;
+}
+.prof-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.prof-name { font-size: 1.8rem; font-weight: 900; margin: 0 0 4px; color: #fff; }
+.prof-sub { font-size: .9rem; opacity: .88; display: flex; gap: 14px; flex-wrap: wrap; }
+.prof-hero-actions { display: flex; gap: 10px; }
+.btn-prof-act {
+  background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+  padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: .88rem;
+  text-decoration: none; backdrop-filter: blur(4px); transition: all .2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-prof-act:hover { background: #fff; color: #1a5d1a; }
+
+/* ── Grid Layout ── */
+.prof-grid { display: grid; grid-template-columns: 1fr 360px; gap: 28px; }
+
+/* ── Cards ── */
+.prof-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 28px;
+}
+.prof-card-head {
+  padding: 18px 24px; background: #f9fcf9; border-bottom: 1px solid #eef3ee;
+  font-weight: 800; font-size: 1.05rem; color: #1a5d1a;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.prof-card-body { padding: 24px; }
+
+/* ── Address List ── */
+.addr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.addr-card {
+  background: #f8faf8; border: 2px solid #e0eae0; border-radius: 16px; padding: 18px;
+  position: relative; transition: all .2s;
+}
+.addr-card.is-default { border-color: #226b2e; background: #f0f7f0; }
+.addr-badge {
+  font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+  padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+}
+.badge-home { background: #e3f2fd; color: #1565c0; }
+.badge-work { background: #fff3e0; color: #e65100; }
+.badge-def  { background: #e8f5e9; color: #2e7d32; }
+.addr-text { font-size: .9rem; color: #333; line-height: 1.4; margin-bottom: 12px; }
+.addr-actions { display: flex; gap: 10px; align-items: center; font-size: .8rem; }
+.btn-addr-del { color: #d32f2f; text-decoration: none; font-weight: 700; background: none; border: none; cursor: pointer; }
+.btn-addr-del:hover { text-decoration: underline; }
+.btn-addr-def { color: #226b2e; text-decoration: none; font-weight: 700; }
+.btn-addr-def:hover { text-decoration: underline; }
+
+/* Form modal/box */
+.add-addr-box {
+  background: #f5f8f5; border: 1px dashed #a5d6a7; border-radius: 16px; padding: 20px; margin-top: 14px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.form-group label { font-size: .8rem; font-weight: 700; color: #555; }
+.form-input {
+  padding: 10px 14px; border: 1.5px solid #dce8dc; border-radius: 10px;
+  font-size: .9rem; background: #fff; color: #333; outline: none; transition: border .2s;
+}
+.form-input:focus { border-color: #226b2e; }
+.btn-save-addr {
+  background: linear-gradient(135deg, #226b2e, #1a5d1a); color: #fff;
+  border: none; padding: 11px 24px; border-radius: 12px; font-weight: 800;
+  font-size: .9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(34,107,46,0.25);
+  transition: all .2s;
+}
+.btn-save-addr:hover { transform: translateY(-1px); color: #fff; }
+
+/* ── Recent Orders ── */
+.order-mini-card {
+  border: 1px solid #eef3ee; border-radius: 14px; padding: 16px;
+  margin-bottom: 14px; background: #fff; display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.omc-num { font-weight: 800; color: #226b2e; font-size: .95rem; }
+.omc-date { font-size: .78rem; color: #aaa; }
+.omc-total { font-weight: 900; color: #1a7a1a; font-size: 1rem; }
+.omc-status { font-size: .73rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; }
+.st-placed { background: #e3f2fd; color: #1565c0; }
+.st-confirmed { background: #ede7f6; color: #4527a0; }
+.st-packed { background: #fff3e0; color: #e65100; }
+.st-out { background: #fff8e1; color: #bf6a00; }
+.st-delivered { background: #e8f5e9; color: #1b5e20; }
+.st-cancelled { background: #ffebee; color: #b71c1c; }
+
+/* ── Sidebar Quick Links ── */
+.quick-link-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-radius: 12px; color: #333; font-weight: 700;
+  text-decoration: none; background: #f8faf8; border: 1px solid #e4ece4;
+  margin-bottom: 10px; transition: all .2s;
+}
+.quick-link-item:hover { background: #e8f5e9; border-color: #c8e6c9; color: #226b2e; }
+
+@media(max-width: 900px) { .prof-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="prof-page">
+  <div class="container">
+
+    <!-- ── Hero Banner ── -->
+    <div class="prof-hero">
+      <div class="prof-user-meta">
+        <div class="prof-avatar">
+          {% if profile_user.avatar %}
+            <img src="{{ profile_user.avatar.url }}" alt="Avatar">
+          {% else %}
+            <span>{{ profile_user.full_name|first|upper }}</span>
+          {% endif %}
+        </div>
+        <div>
+          <h1 class="prof-name">{{ profile_user.full_name }}</h1>
+          <div class="prof-sub">
+            <span><i class="fa-solid fa-envelope"></i> {{ profile_user.email }}</span>
+            <span><i class="fa-solid fa-phone"></i> {{ profile_user.phone }}</span>
+            <span><i class="fa-solid fa-calendar"></i> Joined {{ profile_user.date_joined|date:"M Y" }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="prof-hero-actions">
+        <a href="{% url 'accounts:edit_profile' %}" class="btn-prof-act">
+          <i class="fa-solid fa-user-pen"></i> Edit Profile
+        </a>
+        <a href="{% url 'orders:list' %}" class="btn-prof-act">
+          <i class="fa-solid fa-box-archive"></i> My Orders ({{ orders_count }})
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Content Grid ── -->
+    <div class="prof-grid">
+
+      <!-- Main Column -->
+      <div>
+
+        <!-- Delivery Addresses -->
+        <div class="prof-card">
+          <div class="prof-card-head">
+            <span><i class="fa-solid fa-location-dot"></i> Delivery Addresses</span>
+            <button type="button" class="btn-prof-act" style="background:#226b2e;padding:6px 14px;font-size:.8rem;" onclick="toggleAddAddr()">
+              <i class="fa-solid fa-plus"></i> Add New
+            </button>
+          </div>
+          <div class="prof-card-body">
+            {% if addresses %}
+            <div class="addr-grid">
+              {% for addr in addresses %}
+              <div class="addr-card {% if addr.is_default %}is-default{% endif %}">
+                <span class="addr-badge {% if addr.label == 'Home' %}badge-home{% else %}badge-work{% endif %}">
+                  {{ addr.label }}
+                </span>
+                {% if addr.is_default %}
+                  <span class="addr-badge badge-def">Default</span>
+                {% endif %}
+
+                <div class="addr-text">
+                  <strong>{{ addr.full_address }}</strong><br>
+                  {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
+                </div>
+
+                <div class="addr-actions">
+                  {% if not addr.is_default %}
+                    <a href="{% url 'accounts:address_set_default' addr.pk %}" class="btn-addr-def">Set Default</a>
+                    <span>•</span>
+                  {% endif %}
+                  <a href="{% url 'accounts:address_delete' addr.pk %}" class="btn-addr-del" onclick="return confirm('Delete this address?')">Delete</a>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p style="color:#888;font-size:.9rem;margin-bottom:16px;">No saved addresses yet. Add an address for faster checkout!</p>
+            {% endif %}
+
+            <!-- Add Address Form -->
+            <div class="add-addr-box" id="add-addr-form" style="display:{% if not addresses %}block{% else %}none{% endif %};">
+              <h4 style="margin:0 0 14px;color:#1a5d1a;font-weight:800;">➕ Add New Delivery Address</h4>
+              <form method="post" action="{% url 'accounts:address_add' %}">
+                {% csrf_token %}
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Address Label</label>
+                    <select name="label" class="form-input">
+                      <option value="Home">Home</option>
+                      <option value="Work">Work</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Pincode</label>
+                    <input type="text" name="pincode" class="form-input" placeholder="250404" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Full Address (House No, Street, Landmark)</label>
+                  <textarea name="full_address" class="form-input" rows="2" placeholder="e.g. House #12, Gali No. 3, Main Market" required></textarea>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>City</label>
+                    <input type="text" name="city" class="form-input" value="Meerut">
+                  </div>
+                  <div class="form-group">
+                    <label>State</label>
+                    <input type="text" name="state" class="form-input" value="Uttar Pradesh">
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                  <input type="checkbox" name="is_default" id="chk-def" {% if not addresses %}checked{% endif %}>
+                  <label for="chk-def" style="font-size:.85rem;font-weight:600;color:#555;">Set as Default Address</label>
+                </div>
+
+                <button type="submit" class="btn-save-addr">Save Address</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="prof-card">
+          <div class="prof-card-head">
+            <span><i class="fa-solid fa-clock-rotate-left"></i> Recent Orders</span>
+            <a href="{% url 'orders:list' %}" style="color:#226b2e;font-size:.85rem;font-weight:700;text-decoration:none;">View All →</a>
+          </div>
+          <div class="prof-card-body">
+            {% if recent_orders %}
+              {% for order in recent_orders %}
+              <div class="order-mini-card">
+                <div>
+                  <div class="omc-num">{{ order.order_number }}</div>
+                  <div class="omc-date">{{ order.placed_at|date:"d M Y, h:i A" }} • {{ order.items.count }} item{{ order.items.count|pluralize }}</div>
+                </div>
+                <div>
+                  <span class="omc-status st-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="omc-total">₹{{ order.total_amount }}</div>
+                <div style="display:flex;gap:6px;">
+                  <a href="{% url 'orders:detail' order.id %}" class="btn-prof-act" style="background:#226b2e;padding:5px 12px;font-size:.78rem;">View</a>
+                  <a href="{% url 'orders:pdf' order.id %}" class="btn-prof-act" style="background:#1565c0;padding:5px 12px;font-size:.78rem;">PDF</a>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p style="color:#888;font-size:.9rem;">You haven't placed any orders yet. <a href="/shop/" style="color:#226b2e;font-weight:700;">Start Shopping!</a></p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Sidebar -->
+      <div>
+        <div class="prof-card">
+          <div class="prof-card-head">
+            <span><i class="fa-solid fa-bars"></i> Quick Menu</span>
+          </div>
+          <div class="prof-card-body">
+            <a href="{% url 'orders:list' %}" class="quick-link-item">
+              <span>📦 My Orders</span>
+              <span>→</span>
+            </a>
+            <a href="{% url 'accounts:edit_profile' %}" class="quick-link-item">
+              <span>✏️ Edit Profile</span>
+              <span>→</span>
+            </a>
+            <a href="{% url 'wishlist:list' %}" class="quick-link-item">
+              <span>❤️ My Wishlist</span>
+              <span>→</span>
+            </a>
+            <a href="{% url 'cart:cart' %}" class="quick-link-item">
+              <span>🛒 Shopping Cart</span>
+              <span>→</span>
+            </a>
+            {% if request.user.is_admin %}
+            <a href="/admin-panel/" class="quick-link-item" style="color:#1565c0;border-color:#bbdefb;background:#e3f2fd;">
+              <span>⚡ Admin Panel</span>
+              <span>→</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'accounts:logout' %}" class="quick-link-item" style="color:#d32f2f;border-color:#ffcdd2;background:#ffebee;">
+              <span>🚪 Logout</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggleAddAddr() {
+  const box = document.getElementById('add-addr-form');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

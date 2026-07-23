@@ -1,0 +1,359 @@
+{% load static %}
+<!-- ★ CATEGORY SIDEBAR ────────────────────────────────── -->
+<div class="category-sidebar" id="category-sidebar">
+  <div class="sidebar-header">
+    <h3 class="sidebar-title">
+      <i class="fa-solid fa-grip-vertical"></i>
+      Shop by Category
+    </h3>
+    <button class="sidebar-close" onclick="closeSidebar()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  
+  <div class="sidebar-body">
+    <!-- 12 Categories with inline SVG icons -->
+    
+    <a href="/category/grains-pulses/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <!-- Grains & Pulses SVG -->
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="32" cy="20" rx="8" ry="12"/>
+          <ellipse cx="16" cy="32" rx="8" ry="12"/>
+          <ellipse cx="48" cy="32" rx="8" ry="12"/>
+          <path d="M22 44 Q32 52 42 44"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Grains & Pulses</span>
+        <span class="cat-count">Atta, Dal, Rice</span>
+      </div>
+    </a>
+    
+    <a href="/category/atta-rice-flour/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="12" y="28" width="40" height="24" rx="4"/>
+          <path d="M12 36 Q32 30 52 36"/>
+          <path d="M20 20 Q32 12 44 20"/>
+          <path d="M32 20 L32 28"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Atta, Rice & Flour</span>
+        <span class="cat-count">Chakki, Basmati</span>
+      </div>
+    </a>
+    
+    <a href="/category/snacks-branded-foods/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20 Q32 12 52 20 L52 44 Q32 52 12 44 Z"/>
+          <path d="M20 30 Q32 35 44 30"/>
+          <path d="M22 38 Q32 43 42 38"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Snacks & Branded</span>
+        <span class="cat-count">Lay's, Haldiram's</span>
+      </div>
+    </a>
+    
+    <a href="/category/dairy-bakery/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 12 L44 12 L48 28 L16 28 Z"/>
+          <rect x="14" y="28" width="36" height="22" rx="3"/>
+          <path d="M24 40 Q32 36 40 40"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Dairy & Bakery</span>
+        <span class="cat-count">Amul, Britannia</span>
+      </div>
+    </a>
+    
+    <a href="/category/spices-masala/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M28 10 Q32 6 36 10 L44 50 Q32 54 20 50 Z"/>
+          <path d="M28 22 L36 22"/>
+          <path d="M26 34 L38 34"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Spices & Masala</span>
+        <span class="cat-count">MDH, Everest, Tata</span>
+      </div>
+    </a>
+    
+    <a href="/category/tea-coffee-beverages/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 24 L16 48 Q16 52 32 52 Q48 52 48 48 L48 24 Z"/>
+          <path d="M48 30 Q56 30 56 38 Q56 44 48 44"/>
+          <path d="M24 16 Q24 10 28 10"/>
+          <path d="M32 16 Q32 8 36 8"/>
+          <path d="M40 16 Q40 10 44 10"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Tea, Coffee & Drinks</span>
+        <span class="cat-count">Tata, Nescafé</span>
+      </div>
+    </a>
+    
+    <a href="/category/edible-oil-ghee/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M26 10 L38 10 L42 52 L22 52 Z"/>
+          <path d="M22 28 L42 28"/>
+          <ellipse cx="32" cy="10" rx="6" ry="3"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Edible Oil & Ghee</span>
+        <span class="cat-count">Fortune, Dhara</span>
+      </div>
+    </a>
+    
+    <a href="/category/personal-care/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M26 8 L38 8 L40 20 L24 20 Z"/>
+          <rect x="20" y="20" width="24" height="32" rx="4"/>
+          <path d="M28 34 Q32 38 36 34"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Personal Care</span>
+        <span class="cat-count">Colgate, Dove, Dettol</span>
+      </div>
+    </a>
+    
+    <a href="/category/home-care/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 28 L32 10 L54 28"/>
+          <rect x="18" y="28" width="28" height="24" rx="2"/>
+          <rect x="26" y="38" width="12" height="14" rx="1"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Home Care</span>
+        <span class="cat-count">Surf Excel, Lizol</span>
+      </div>
+    </a>
+    
+    <a href="/category/baby-care/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="32" cy="22" r="10"/>
+          <path d="M16 44 Q16 38 32 38 Q48 38 48 44"/>
+          <path d="M22 20 Q22 16 26 16"/>
+          <path d="M42 20 Q42 16 38 16"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Baby Care</span>
+        <span class="cat-count">Johnson's, Pampers</span>
+      </div>
+    </a>
+    
+    <a href="/category/frozen-foods/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="12" y="14" width="40" height="36" rx="4"/>
+          <path d="M12 28 L52 28"/>
+          <path d="M24 14 L24 50"/>
+          <path d="M40 14 L40 50"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Frozen Foods</span>
+        <span class="cat-count">McCain, Haldiram's</span>
+      </div>
+    </a>
+    
+    <a href="/category/pooja-essentials/" class="sidebar-cat-item">
+      <span class="cat-icon">
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="#226b2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M32 8 L32 56"/>
+          <path d="M20 20 L44 20"/>
+          <path d="M32 8 Q44 14 44 20"/>
+          <path d="M32 8 Q20 14 20 20"/>
+          <path d="M24 50 Q32 44 40 50"/>
+        </svg>
+      </span>
+      <div class="cat-info">
+        <span class="cat-name">Pooja Essentials</span>
+        <span class="cat-count">Agarbatti, Diyas</span>
+      </div>
+    </a>
+    
+    <!-- View All button -->
+    <a href="/shop/" class="sidebar-view-all">
+      View All Products
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+</div>
+
+<style>
+/* ─── SIDEBAR ─── */
+.category-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: white;
+  z-index: var(--z-sidebar);
+  transform: translateX(-100%);
+  transition: transform var(--transition-base);
+  overflow-y: auto;
+  box-shadow: var(--shadow-float);
+}
+
+.category-sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: calc(var(--z-sidebar) - 1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.sidebar-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--gradient-primary);
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-title {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-close {
+  color: white;
+  font-size: var(--fs-md);
+  background: rgba(255,255,255,0.15);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sidebar-close:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.sidebar-body { padding: var(--space-sm) 0; }
+
+/* ─── CATEGORY ITEM ─── */
+.sidebar-cat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px var(--space-lg);
+  border-bottom: 1px solid var(--clr-border);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  color: var(--clr-text-dark);
+}
+
+.sidebar-cat-item:hover {
+  background: var(--clr-primary-mint);
+  padding-left: calc(var(--space-lg) + 6px);
+}
+
+.sidebar-cat-item:hover .cat-icon svg {
+  transform: scale(1.1);
+}
+
+.cat-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--clr-primary-mint);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-cat-item:hover .cat-icon {
+  background: white;
+  box-shadow: var(--shadow-card);
+}
+
+.cat-icon svg {
+  transition: transform var(--transition-bounce);
+}
+
+.cat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cat-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--clr-text-dark);
+}
+
+.cat-count {
+  font-size: var(--fs-xs);
+  color: var(--clr-text-light);
+}
+
+/* View All */
+.sidebar-view-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--space-md);
+  margin: var(--space-md);
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  transition: all var(--transition-bounce);
+  text-decoration: none;
+}
+
+.sidebar-view-all:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-btn);
+  color: white;
+}
+</style>

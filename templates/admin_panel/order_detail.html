@@ -1,0 +1,316 @@
+{% extends 'base/base.html' %}
+{% block title %}Order {{ order.order_number }} — Admin{% endblock %}
+
+{% block content %}
+<style>
+.od-page { padding: 36px 0; }
+
+/* Header */
+.od-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+.od-header h1 { font-size:1.7rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.od-number { font-family:monospace; font-size:1.1rem; background:#e8f5e9; color:#2e7d32; padding:4px 14px; border-radius:10px; }
+
+/* Status pill */
+.order-status-pill { padding:5px 14px; border-radius:20px; font-size:.78rem; font-weight:700; letter-spacing:.03em; }
+.sp-placed    { background:#e3f2fd; color:#1565c0; }
+.sp-confirmed { background:#ede7f6; color:#4527a0; }
+.sp-packed    { background:#fff3e0; color:#e65100; }
+.sp-out_for_delivery { background:#fff8e1; color:#bf6a00; }
+.sp-delivered { background:#e8f5e9; color:#1b5e20; }
+.sp-cancelled { background:#ffebee; color:#b71c1c; }
+
+/* Layout */
+.od-grid { display:grid; grid-template-columns:2fr 1fr; gap:24px; align-items:start; }
+
+/* Cards */
+.od-card {
+  background:#fff; border-radius:18px; border:1px solid #e8ede9;
+  box-shadow:0 4px 20px rgba(0,0,0,0.05); overflow:hidden; margin-bottom:20px;
+}
+.od-card-head {
+  display:flex; align-items:center; gap:10px;
+  padding:16px 22px; border-bottom:1px solid #f0f4f1;
+  background:#f9fcfa; font-weight:700; font-size:.98rem; color:#1a5d1a;
+}
+.od-card-head .ch-icon { font-size:1.1rem; background:#e8f5e9; padding:7px; border-radius:10px; }
+.od-card-body { padding:22px; }
+
+/* Info grid */
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.info-item label { display:block; font-size:.75rem; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px; }
+.info-item p { font-size:.97rem; font-weight:600; color:#333; margin:0; }
+.info-full { grid-column:span 2; }
+
+/* Notes box */
+.notes-box { background:#f5f8f5; border-radius:10px; padding:14px 16px; font-size:.9rem; color:#444; line-height:1.6; white-space:pre-line; border:1px solid #e0e8e0; }
+
+/* Items table */
+.items-table { width:100%; border-collapse:collapse; }
+.items-table th { background:#f5f8f5; padding:11px 18px; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:#888; font-weight:700; text-align:left; }
+.items-table td { padding:13px 18px; border-top:1px solid #f0f5f1; font-size:.92rem; vertical-align:middle; }
+.items-table tr:hover td { background:#fafcfa; }
+.product-link { color:#226b2e; font-weight:600; text-decoration:none; }
+.product-link:hover { text-decoration:underline; }
+.deleted-badge { font-size:.75rem; background:#ffebee; color:#c62828; padding:2px 8px; border-radius:6px; margin-left:4px; }
+
+/* Summary totals */
+.totals-section { background:#f5f8f5; padding:16px 20px; border-top:1px solid #e8eee8; }
+.total-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:.92rem; color:#555; }
+.total-row.final { font-size:1.15rem; font-weight:800; color:#1a5d1a; border-top:2px solid #c8e6c9; margin-top:8px; padding-top:12px; }
+
+/* Payment card info items */
+.pay-item { margin-bottom:18px; }
+.pay-item:last-child { margin-bottom:0; }
+.pay-label { font-size:.75rem; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.pay-val { font-size:.95rem; font-weight:600; color:#333; }
+.utr-box { background:#f0f4f0; border-radius:10px; padding:10px 14px; font-family:monospace; font-size:1rem; color:#1a5d1a; border:1px dashed #a5d6a7; word-break:break-all; }
+.pay-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:10px; font-size:.88rem; font-weight:700; }
+.pay-upi { background:#e3f2fd; color:#1565c0; }
+.pay-cod { background:#f3e5f5; color:#6a1b9a; }
+
+/* Update form */
+.od-update-card { background:#fff; border-radius:18px; border:2px solid #c8e6c9; box-shadow:0 4px 20px rgba(34,107,46,0.08); overflow:hidden; }
+.od-update-head { padding:16px 22px; border-bottom:1px solid #e8f5e9; background:linear-gradient(135deg,#f1f8f1,#e8f5e9); font-weight:700; font-size:1rem; color:#1a5d1a; display:flex; align-items:center; gap:10px; }
+.od-update-body { padding:22px; }
+
+.up-group { margin-bottom:18px; }
+.up-group label { display:block; font-size:.78rem; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:.04em; margin-bottom:7px; }
+.up-group select,
+.up-group textarea {
+  width:100%; padding:11px 14px; border:2px solid #dce8dc;
+  border-radius:11px; font-size:.92rem; color:#333;
+  background:#f8faf8; outline:none;
+  transition:all .2s;
+}
+.up-group select:focus,
+.up-group textarea:focus { border-color:#226b2e; background:#fff; box-shadow:0 0 0 3px rgba(34,107,46,0.09); }
+.up-group textarea { resize:vertical; min-height:80px; }
+
+.update-btn { width:100%; padding:13px; background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 14px rgba(34,107,46,0.2); display:flex; align-items:center; justify-content:center; gap:8px; margin-top:4px; }
+.update-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(34,107,46,0.3); }
+
+@media(max-width:900px){ .od-grid { grid-template-columns:1fr; } .info-grid { grid-template-columns:1fr; } .info-full { grid-column:span 1; } }
+</style>
+
+<div class="od-page container">
+  <div class="od-header">
+    <h1>
+      📦 Order Detail
+      <span class="od-number">{{ order.order_number }}</span>
+      <span class="order-status-pill sp-{{ order.status }}">{{ order.get_status_display }}</span>
+    </h1>
+    <a href="{% url 'admin_panel:order_list' %}" class="btn btn-outline" style="font-size:.9rem;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Orders
+    </a>
+  </div>
+
+  <div class="od-grid">
+
+    <!-- ═══ LEFT COLUMN ═══ -->
+    <div>
+
+      <!-- Customer Info -->
+      <div class="od-card">
+        <div class="od-card-head">
+          <span class="ch-icon">👤</span> Customer Details
+        </div>
+        <div class="od-card-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Full Name</label>
+              <p>{{ order.user.full_name }}</p>
+            </div>
+            <div class="info-item">
+              <label>Phone</label>
+              <p><a href="tel:{{ order.user.phone }}" style="color:#226b2e;text-decoration:none;">{{ order.user.phone }}</a></p>
+            </div>
+            <div class="info-item">
+              <label>Email</label>
+              <p style="font-size:.88rem;">{{ order.user.email }}</p>
+            </div>
+            <div class="info-item">
+              <label>Order Placed</label>
+              <p style="font-size:.88rem;">{{ order.placed_at|date:"d M Y, g:i A" }}</p>
+            </div>
+            {% if order.notes %}
+            <div class="info-item info-full">
+              <label>Delivery Notes / Address</label>
+              <div class="notes-box">{{ order.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="od-card">
+        <div class="od-card-head">
+          <span class="ch-icon">🛒</span> Order Items ({{ items|length }} items)
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Unit Price</th>
+                <th>Qty</th>
+                <th style="text-align:right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td>
+                  {% if item.product %}
+                    <a href="{% url 'products:detail' item.product.slug %}" target="_blank" class="product-link">{{ item.product_name }}</a>
+                  {% else %}
+                    <span style="color:#555;">{{ item.product_name }}</span>
+                    <span class="deleted-badge">Deleted</span>
+                  {% endif %}
+                </td>
+                <td style="color:#555;">₹{{ item.unit_price }}</td>
+                <td>
+                  <span style="background:#e8f5e9;color:#1b5e20;padding:3px 10px;border-radius:8px;font-weight:700;">× {{ item.quantity }}</span>
+                </td>
+                <td style="text-align:right;font-weight:800;color:#226b2e;font-size:1rem;">₹{{ item.total_price }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <!-- Totals -->
+        <div class="totals-section">
+          <div class="total-row">
+            <span>Subtotal</span><span>₹{{ order.subtotal }}</span>
+          </div>
+          <div class="total-row">
+            <span>Delivery Charge</span><span>₹{{ order.delivery_charge }}</span>
+          </div>
+          {% if order.distance_charge > 0 %}
+          <div class="total-row">
+            <span>Distance Charge</span><span>₹{{ order.distance_charge }}</span>
+          </div>
+          {% endif %}
+          {% if order.coupon_discount > 0 %}
+          <div class="total-row" style="color:#2e7d32;">
+            <span>🎟 Coupon Discount</span><span>- ₹{{ order.coupon_discount }}</span>
+          </div>
+          {% endif %}
+          <div class="total-row final">
+            <span>Grand Total</span><span>₹{{ order.total_amount }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ RIGHT COLUMN ═══ -->
+    <div>
+
+      <!-- Payment Info -->
+      <div class="od-card">
+        <div class="od-card-head">
+          <span class="ch-icon">💳</span> Payment Info
+        </div>
+        <div class="od-card-body">
+          <div class="pay-item">
+            <div class="pay-label">Payment Method</div>
+            {% if order.payment_method == 'UPI' %}
+              <span class="pay-badge pay-upi"><i class="fa-solid fa-mobile-screen-button"></i> UPI Payment</span>
+            {% else %}
+              <span class="pay-badge pay-cod"><i class="fa-solid fa-money-bill-wave"></i> Cash on Delivery</span>
+            {% endif %}
+          </div>
+
+          <div class="pay-item">
+            <div class="pay-label">Payment Status</div>
+            <div class="pay-val">
+              {% if order.payment_status == 'received' %}
+                <span style="color:#2e7d32;"><i class="fa-solid fa-check-circle"></i> Received ✅</span>
+              {% elif order.payment_status == 'pending' %}
+                <span style="color:#bf6a00;"><i class="fa-solid fa-clock"></i> Pending</span>
+              {% elif order.payment_status == 'refunded' %}
+                <span style="color:#6a1b9a;"><i class="fa-solid fa-rotate-left"></i> Refunded</span>
+              {% else %}
+                {{ order.payment_status|title }}
+              {% endif %}
+            </div>
+          </div>
+
+          {% if order.upi_transaction_id %}
+          <div class="pay-item">
+            <div class="pay-label">UTR / Transaction ID</div>
+            <div class="utr-box">{{ order.upi_transaction_id }}</div>
+          </div>
+          {% endif %}
+
+          {% if order.payment_method == 'COD' %}
+          <div class="pay-item">
+            <div class="pay-label">COD Call Confirmed?</div>
+            <div class="pay-val">
+              {% if order.cod_call_confirmed %}
+                <span style="color:#2e7d32;font-weight:700;"><i class="fa-solid fa-check-circle"></i> Yes, Confirmed</span>
+              {% else %}
+                <span style="color:#bf6a00;font-weight:700;"><i class="fa-solid fa-clock"></i> Pending Confirmation</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Update Order Form -->
+      <div class="od-update-card">
+        <div class="od-update-head">
+          <i class="fa-solid fa-pen-to-square"></i> Update Order
+        </div>
+        <div class="od-update-body">
+          <form method="post" action="{% url 'admin_panel:order_update' order.id %}">
+            {% csrf_token %}
+
+            <div class="up-group">
+              <label>Order Status</label>
+              <select name="status">
+                {% for val, label in status_choices %}
+                  <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="up-group">
+              <label>Payment Status</label>
+              <select name="payment_status">
+                {% for val, label in payment_status_choices %}
+                  <option value="{{ val }}" {% if order.payment_status == val %}selected{% endif %}>{{ val|title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="up-group">
+              <label>Assign Delivery Boy</label>
+              <select name="delivery_boy">
+                <option value="">— Unassigned —</option>
+                {% for boy in delivery_boys %}
+                  <option value="{{ boy.id }}" {% if order.delivery_boy_id == boy.id %}selected{% endif %}>
+                    {{ boy.full_name }} ({{ boy.phone }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="up-group">
+              <label>Admin Note (Optional)</label>
+              <textarea name="admin_notes" placeholder="Add a private note about this update..."></textarea>
+            </div>
+
+            <button type="submit" class="update-btn">
+              <i class="fa-solid fa-floppy-disk"></i> Save Changes
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

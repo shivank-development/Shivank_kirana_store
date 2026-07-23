@@ -1,0 +1,254 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Order {{ order.order_number }} — Shivank Kirana Store{% endblock %}
+
+{% block content %}
+<style>
+.od-page { padding: 36px 0 60px; background: #f5f8f5; min-height: 75vh; }
+
+.od-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+.od-title { font-size: 1.8rem; font-weight: 900; color: #1a3a1a; margin: 0; display: flex; align-items: center; gap: 12px; }
+
+/* ── Stepper Tracker ── */
+.stepper-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 28px;
+}
+.stepper-wrap { display: flex; justify-content: space-between; align-items: center; position: relative; margin-top: 10px; }
+.stepper-line { position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background: #e0eae0; z-index: 1; }
+.stepper-progress { position: absolute; top: 18px; left: 40px; height: 4px; background: #226b2e; z-index: 2; transition: width .3s; }
+.step-item { position: relative; z-index: 3; text-align: center; flex: 1; }
+.step-circle {
+  width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 3px solid #ccc;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;
+  font-weight: 800; font-size: .9rem; color: #888; transition: all .3s;
+}
+.step-item.active .step-circle { border-color: #226b2e; background: #226b2e; color: #fff; }
+.step-item.completed .step-circle { border-color: #226b2e; background: #e8f5e9; color: #226b2e; }
+.step-lbl { font-size: .8rem; font-weight: 800; color: #555; }
+.step-item.active .step-lbl { color: #226b2e; }
+.step-time { font-size: .7rem; color: #aaa; margin-top: 2px; }
+
+/* ── Content Grid ── */
+.od-grid { display: grid; grid-template-columns: 1fr 360px; gap: 28px; }
+
+.od-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px;
+}
+.od-card-head {
+  padding: 18px 24px; background: #f9fcf9; border-bottom: 1px solid #eef3ee;
+  font-weight: 800; font-size: 1rem; color: #1a5d1a; display: flex; align-items: center; gap: 8px;
+}
+.od-card-body { padding: 24px; }
+
+/* Items list table */
+.od-table { width: 100%; border-collapse: collapse; }
+.od-table th { background: #f5f8f5; padding: 10px 16px; font-size: .75rem; text-transform: uppercase; color: #888; text-align: left; }
+.od-table td { padding: 14px 16px; border-top: 1px solid #f0f5f0; vertical-align: middle; }
+
+.od-prod-cell { display: flex; align-items: center; gap: 12px; }
+.od-prod-img {
+  width: 52px; height: 52px; border-radius: 12px; background: #f5f8f5; border: 1px solid #e8ede8;
+  display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px; flex-shrink: 0;
+}
+.od-prod-img img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Summary List */
+.od-sum-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: .88rem; color: #555; }
+.od-sum-total { font-size: 1.15rem; font-weight: 900; color: #226b2e; margin-top: 12px; padding-top: 12px; border-top: 1px solid #eef3ee; }
+
+/* Action buttons */
+.btn-od-act {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px; border-radius: 12px; font-weight: 800; font-size: .9rem;
+  text-decoration: none; transition: all .2s; border: none; cursor: pointer; width: 100%;
+}
+.btn-od-pdf { background: #1565c0; color: #fff; box-shadow: 0 4px 14px rgba(21,101,192,0.25); }
+.btn-od-pdf:hover { background: #0d47a1; color: #fff; }
+
+.btn-od-track { background: linear-gradient(135deg,#226b2e,#1a5d1a); color: #fff; box-shadow: 0 4px 14px rgba(34,107,46,0.25); margin-bottom: 10px; }
+.btn-od-track:hover { transform: translateY(-1px); color: #fff; }
+
+.btn-od-cancel { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; margin-top: 14px; }
+.btn-od-cancel:hover { background: #ffcdd2; }
+
+@media(max-width: 900px) { .od-grid { grid-template-columns: 1fr; } .stepper-wrap { flex-direction: column; gap: 14px; } .stepper-line, .stepper-progress { display: none; } }
+</style>
+
+<div class="od-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="od-header">
+      <h1 class="od-title">
+        📦 Order #{{ order.order_number }}
+      </h1>
+      <a href="{% url 'orders:list' %}" class="btn-od-act" style="background:#fff;border:1px solid #c8e6c9;color:#226b2e;width:auto;padding:8px 18px;">
+        ← Back to Orders
+      </a>
+    </div>
+
+    <!-- Stepper Tracker -->
+    {% if order.status != 'cancelled' %}
+    <div class="stepper-card">
+      <div style="font-weight:800;font-size:1rem;color:#1a5d1a;margin-bottom:16px;">Order Progress</div>
+      <div class="stepper-wrap">
+        <!-- Progress bar width calculation -->
+        {% with s=order.status %}
+        <div class="stepper-line"></div>
+        <div class="stepper-progress" style="width:
+          {% if s == 'placed' %}0%{% elif s == 'confirmed' %}33%{% elif s == 'packed' %}66%{% elif s == 'out_for_delivery' %}85%{% elif s == 'delivered' %}100%{% endif %};">
+        </div>
+
+        <div class="step-item {% if s == 'placed' or s == 'confirmed' or s == 'packed' or s == 'out_for_delivery' or s == 'delivered' %}completed{% endif %}">
+          <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+          <div class="step-lbl">Placed</div>
+          <div class="step-time">{{ order.placed_at|date:"d M, h:i A" }}</div>
+        </div>
+
+        <div class="step-item {% if s == 'confirmed' or s == 'packed' or s == 'out_for_delivery' or s == 'delivered' %}completed{% elif s == 'placed' %}active{% endif %}">
+          <div class="step-circle">{% if s == 'confirmed' or s == 'packed' or s == 'out_for_delivery' or s == 'delivered' %}<i class="fa-solid fa-check"></i>{% else %}2{% endif %}</div>
+          <div class="step-lbl">Confirmed</div>
+          <div class="step-time">{% if order.confirmed_at %}{{ order.confirmed_at|date:"d M, h:i A" }}{% endif %}</div>
+        </div>
+
+        <div class="step-item {% if s == 'packed' or s == 'out_for_delivery' or s == 'delivered' %}completed{% elif s == 'confirmed' %}active{% endif %}">
+          <div class="step-circle">{% if s == 'packed' or s == 'out_for_delivery' or s == 'delivered' %}<i class="fa-solid fa-check"></i>{% else %}3{% endif %}</div>
+          <div class="step-lbl">Packed</div>
+          <div class="step-time">{% if order.packed_at %}{{ order.packed_at|date:"d M, h:i A" }}{% endif %}</div>
+        </div>
+
+        <div class="step-item {% if s == 'out_for_delivery' or s == 'delivered' %}completed{% elif s == 'packed' %}active{% endif %}">
+          <div class="step-circle">{% if s == 'out_for_delivery' or s == 'delivered' %}<i class="fa-solid fa-truck-fast"></i>{% else %}4{% endif %}</div>
+          <div class="step-lbl">Out for Delivery</div>
+          <div class="step-time">{% if order.out_for_delivery_at %}{{ order.out_for_delivery_at|date:"d M, h:i A" }}{% endif %}</div>
+        </div>
+
+        <div class="step-item {% if s == 'delivered' %}completed{% elif s == 'out_for_delivery' %}active{% endif %}">
+          <div class="step-circle">{% if s == 'delivered' %}<i class="fa-solid fa-house-circle-check"></i>{% else %}5{% endif %}</div>
+          <div class="step-lbl">Delivered</div>
+          <div class="step-time">{% if order.delivered_at %}{{ order.delivered_at|date:"d M, h:i A" }}{% endif %}</div>
+        </div>
+        {% endwith %}
+      </div>
+    </div>
+    {% else %}
+    <div class="stepper-card" style="background:#ffebee;border-color:#ffcdd2;">
+      <h3 style="color:#c62828;margin:0 0 6px;">🔴 Order Cancelled</h3>
+      <p style="color:#555;margin:0;">Reason: {{ order.cancel_reason|default:"Cancelled by user" }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Content Grid -->
+    <div class="od-grid">
+      <!-- Items Column -->
+      <div>
+        <div class="od-card">
+          <div class="od-card-head">
+            <i class="fa-solid fa-basket-shopping"></i> Items Ordered ({{ order.items.count }})
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="od-table">
+              <thead>
+                <tr><th>Item Details</th><th>Price</th><th>Qty</th><th style="text-align:right;">Subtotal</th></tr>
+              </thead>
+              <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                  <td>
+                    <div class="od-prod-cell">
+                      <div class="od-prod-img">
+                        {% if item.product and item.product.image_main %}
+                          <img src="{{ item.product.image_main.url }}" alt="{{ item.product_name }}">
+                        {% else %}
+                          <span>📦</span>
+                        {% endif %}
+                      </div>
+                      <div style="font-weight:700;color:#333;">{{ item.product_name }}</div>
+                    </div>
+                  </td>
+                  <td style="font-weight:600;color:#555;">₹{{ item.unit_price }}</td>
+                  <td style="font-weight:800;color:#226b2e;">x {{ item.quantity }}</td>
+                  <td style="font-weight:900;color:#1a7a1a;text-align:right;">₹{{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Address Card -->
+        <div class="od-card">
+          <div class="od-card-head">
+            <i class="fa-solid fa-location-dot"></i> Delivery Address
+          </div>
+          <div class="od-card-body">
+            {% if order.address %}
+              <div style="font-weight:800;color:#1a3a1a;margin-bottom:4px;">{{ order.address.label }} Address</div>
+              <div style="color:#555;font-size:.92rem;line-height:1.5;">
+                {{ order.address.full_address }}<br>
+                {{ order.address.city }}, {{ order.address.state }} - <strong>{{ order.address.pincode }}</strong>
+              </div>
+            {% else %}
+              <div style="color:#888;">Address info not available.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Sidebar Column -->
+      <div>
+        <div class="od-card">
+          <div class="od-card-head">
+            <i class="fa-solid fa-receipt"></i> Payment & Summary
+          </div>
+          <div class="od-card-body">
+            <div class="od-sum-row"><span>Item Subtotal</span><span>₹{{ order.subtotal }}</span></div>
+            <div class="od-sum-row"><span>Delivery Charge</span><span>₹{{ order.delivery_charge }}</span></div>
+            {% if order.coupon_discount > 0 %}
+              <div class="od-sum-row" style="color:#2e7d32;font-weight:700;"><span>Coupon Discount</span><span>- ₹{{ order.coupon_discount }}</span></div>
+            {% endif %}
+            <div class="od-sum-row od-sum-total"><span>Grand Total</span><span>₹{{ order.total_amount }}</span></div>
+
+            <div style="margin-top:16px;padding-top:14px;border-top:1px solid #eef3ee;font-size:.85rem;">
+              <div style="margin-bottom:6px;"><strong>Payment Method:</strong> {{ order.payment_method }}</div>
+              <div><strong>Payment Status:</strong> <span style="font-weight:800;color:#226b2e;">{{ order.get_payment_status_display }}</span></div>
+              {% if order.upi_transaction_id %}
+                <div style="margin-top:6px;font-family:monospace;font-size:.8rem;color:#888;">UPI Txn: {{ order.upi_transaction_id }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Links -->
+        <div>
+          {% if order.status != 'delivered' and order.status != 'cancelled' %}
+            <a href="{% url 'orders:tracking' order.id %}" class="btn-od-act btn-od-track">
+              <i class="fa-solid fa-location-arrow"></i> Track Delivery Live
+            </a>
+          {% endif %}
+
+          <a href="{% url 'orders:pdf' order.id %}" class="btn-od-act btn-od-pdf">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF Invoice
+          </a>
+
+          {% if order.status == 'placed' or order.status == 'confirmed' %}
+          <form method="post" action="{% url 'orders:cancel' order.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-od-act btn-od-cancel">
+              <i class="fa-solid fa-xmark"></i> Cancel Order
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

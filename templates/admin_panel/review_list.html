@@ -1,0 +1,81 @@
+{% extends 'base/base.html' %}
+{% block title %}Manage Reviews{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-lg">
+  <h2>Product Reviews</h2>
+  <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<div class="card p-0" style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+        <th style="padding: 15px;">Product</th>
+        <th style="padding: 15px;">User</th>
+        <th style="padding: 15px;">Rating</th>
+        <th style="padding: 15px;">Comment</th>
+        <th style="padding: 15px;">Verified?</th>
+        <th style="padding: 15px; text-align: right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for review in page_obj %}
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 15px;">
+          <strong>{{ review.product.name }}</strong>
+        </td>
+        <td style="padding: 15px;">
+          {{ review.user.full_name }}<br>
+          <small style="color:#888;">{{ review.created_at|date:"M d, Y" }}</small>
+        </td>
+        <td style="padding: 15px;">
+          <span style="color: #FFC107;">
+            {% for i in "12345"|make_list %}
+              {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+            {% endfor %}
+          </span>
+        </td>
+        <td style="padding: 15px;">
+          {% if review.comment %}
+            <span style="font-size:0.9rem;">"{{ review.comment|truncatechars:50 }}"</span>
+          {% else %}
+            <span style="color:#666;">No comment</span>
+          {% endif %}
+        </td>
+        <td style="padding: 15px;">
+          <form method="post" action="{% url 'admin_panel:review_toggle_verify' review.id %}" style="display:inline;">
+            {% csrf_token %}
+            {% if review.is_verified %}
+              <button type="submit" class="badge" style="background: rgba(76, 175, 80, 0.2); color: #4caf50; border:none; cursor:pointer;" title="Click to unverify">Verified</button>
+            {% else %}
+              <button type="submit" class="badge" style="background: rgba(255, 152, 0, 0.2); color: #ff9800; border:none; cursor:pointer;" title="Click to verify">Unverified</button>
+            {% endif %}
+          </form>
+        </td>
+        <td style="padding: 15px; text-align: right;">
+          <a href="{% url 'admin_panel:review_delete' review.id %}" class="btn" style="background: rgba(244, 67, 54, 0.1); color: #f44336; padding: 5px 10px; font-size: 0.85rem;"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="padding: 30px; text-align: center; color: #888;">No reviews found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="pagination mt-lg" style="display: flex; gap: 10px; justify-content: center;">
+  {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline">Prev</a>
+  {% endif %}
+  <span class="btn" style="pointer-events: none; background: rgba(255,255,255,0.1);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline">Next</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends 'base/base.html' %}
+{% block title %}Bulk Import — Admin{% endblock %}
+{% block content %}
+<style>
+.admin-page { padding:30px 0; }
+.admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+.admin-header h1 { font-size:1.8rem; font-weight:800; color:var(--clr-primary); }
+.import-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.import-card { background:var(--clr-surface); border-radius:16px; padding:28px; border:1px solid rgba(255,255,255,0.07); }
+.import-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:14px; }
+.drop-zone { border:2px dashed rgba(26,93,26,0.5); border-radius:14px; padding:40px 20px; text-align:center; cursor:pointer; transition:all .3s; margin-bottom:18px; }
+.drop-zone:hover { border-color:var(--clr-primary); background:rgba(26,93,26,0.05); }
+.drop-zone .icon { font-size:3rem; margin-bottom:10px; }
+.drop-zone p { color:var(--clr-text-muted); font-size:.9rem; }
+.drop-zone strong { color:var(--clr-primary); }
+input[type=file] { display:none; }
+.csv-format { background:var(--clr-bg); border-radius:12px; padding:18px; margin-top:16px; }
+.csv-format pre { font-family:monospace; font-size:.82rem; color:var(--clr-text-muted); overflow-x:auto; white-space:pre; margin:0; }
+.result-card { border-radius:14px; padding:20px 24px; margin-bottom:20px; }
+.result-success { background:rgba(46,213,115,0.1); border:1px solid rgba(46,213,115,0.3); }
+.result-error   { background:rgba(255,71,87,0.1);  border:1px solid rgba(255,71,87,0.3);  }
+.result-title { font-weight:700; font-size:1rem; margin-bottom:8px; }
+.error-list { margin-top:12px; max-height:200px; overflow-y:auto; }
+.error-item { font-size:.82rem; color:#ff4757; padding:4px 0; border-bottom:1px solid rgba(255,71,87,0.1); }
+.stat-chip { display:inline-flex; align-items:center; gap:8px; background:var(--clr-surface); border-radius:10px; padding:12px 18px; border:1px solid rgba(255,255,255,0.07); font-weight:600; }
+.instructions li { font-size:.9rem; color:var(--clr-text-muted); margin-bottom:8px; line-height:1.5; }
+.instructions li::marker { color:var(--clr-primary); }
+@media(max-width:768px) { .import-grid { grid-template-columns:1fr; } }
+</style>
+
+<div class="admin-page container">
+  <div class="admin-header">
+    <h1>📥 Bulk Import</h1>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div class="stat-chip">📦 Total Products: <span style="color:var(--clr-primary);">{{ total_products }}</span></div>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Import Result -->
+  {% if result %}
+  <div class="result-card {% if result.success %}result-success{% else %}result-error{% endif %}">
+    <div class="result-title">
+      {% if result.success %}✅ Import Complete — {{ result.count }} products imported!
+      {% else %}❌ Import Failed{% endif %}
+    </div>
+    {% if result.errors %}
+    <div class="error-list">
+      {% for err in result.errors %}
+      <div class="error-item">⚠ {{ err }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if messages %}
+  {% for msg in messages %}
+  <div style="background:rgba(46,213,115,0.1);border:1px solid rgba(46,213,115,0.3);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-weight:600;">
+    ✓ {{ msg }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <div class="import-grid">
+    <!-- Upload Form -->
+    <div class="import-card">
+      <h3>📤 Upload CSV File</h3>
+      <form method="post" enctype="multipart/form-data" id="importForm">
+        {% csrf_token %}
+        <label for="fileInput">
+          <div class="drop-zone" id="dropZone">
+            <div class="icon">📄</div>
+            <p><strong>Click to browse</strong> or drag & drop your CSV file here</p>
+            <p style="margin-top:6px;font-size:.8rem;">Supported: .csv files only</p>
+          </div>
+        </label>
+        <input type="file" name="import_file" id="fileInput" accept=".csv" onchange="showFile(this)">
+        <div id="fileInfo" style="display:none;background:rgba(26,93,26,0.1);border-radius:10px;padding:12px;margin-bottom:14px;font-size:.9rem;color:var(--clr-primary);font-weight:600;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;font-size:1rem;padding:14px;" id="submitBtn" disabled>
+          📥 Import Products
+        </button>
+      </form>
+    </div>
+
+    <!-- Instructions & Format -->
+    <div class="import-card">
+      <h3>📋 CSV Format Guide</h3>
+      <ul class="instructions">
+        <li>First row must be the header row (column names)</li>
+        <li><strong>name</strong> is required — used as unique product identifier</li>
+        <li><strong>price</strong> and <strong>discount_price</strong> must be numbers</li>
+        <li><strong>stock</strong> must be a whole number (integer)</li>
+        <li><strong>category</strong> and <strong>brand</strong> must match existing names (case-insensitive)</li>
+        <li>Duplicate products (by slug) will be skipped</li>
+        <li>Maximum recommended: 500 products per file</li>
+      </ul>
+
+      <div class="csv-format">
+        <div style="font-size:.8rem;font-weight:600;color:var(--clr-text-muted);margin-bottom:10px;">Sample CSV:</div>
+        <pre>name,price,discount_price,stock,category,brand
+Aashirvaad Atta 5kg,280,250,50,Flour & Atta,ITC
+Britannia Good Day,30,28,100,Biscuits,Britannia
+Amul Butter 500g,275,265,30,Dairy,Amul</pre>
+      </div>
+
+      <a href="#" id="downloadSample" class="btn btn-outline" style="margin-top:14px;width:100%;display:block;text-align:center;font-size:.9rem;" onclick="downloadSample()">
+        ⬇ Download Sample CSV
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function showFile(input) {
+  const info = document.getElementById('fileInfo');
+  const btn  = document.getElementById('submitBtn');
+  if (input.files && input.files[0]) {
+    const f = input.files[0];
+    info.style.display = 'block';
+    info.textContent = '📄 ' + f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)';
+    btn.disabled = false;
+    btn.textContent = '📥 Import: ' + f.name;
+  }
+}
+
+// Drag & drop
+const zone = document.getElementById('dropZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--clr-primary)'; zone.style.background = 'rgba(26,93,26,0.1)'; });
+zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; zone.style.background = ''; });
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.style.borderColor = ''; zone.style.background = '';
+  const inp = document.getElementById('fileInput');
+  inp.files = e.dataTransfer.files;
+  showFile(inp);
+});
+
+function downloadSample() {
+  const csv = `name,price,discount_price,stock,category,brand
+Aashirvaad Atta 5kg,280,250,50,Flour & Atta,ITC
+Britannia Good Day Butter 100g,30,25,100,Biscuits,Britannia
+Amul Butter 500g,275,260,35,Dairy,Amul
+Fortune Mustard Oil 1L,180,165,40,Edible Oil,Fortune
+Tata Salt 1kg,28,24,150,Spices & Masala,Tata
+Cadbury Dairy Milk Silk 150g,175,160,60,Chocolates,Cadbury
+Surf Excel Easy Wash 1kg,145,130,45,Household,Unilever
+Nestle Maggi 2-Min Noodles 280g,48,42,200,Instant Food,Nestle
+Dettol Antiseptic Liquid 250ml,125,115,50,Personal Care,Dettol
+Coca-Cola Soft Drink 1.25L,65,55,80,Beverages,Coca-Cola
+`;
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'sample_products_import.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

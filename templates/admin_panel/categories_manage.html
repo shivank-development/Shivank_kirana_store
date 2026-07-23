@@ -1,0 +1,468 @@
+{% extends 'base/base.html' %}
+{% block title %}Categories Management — Admin{% endblock %}
+{% block content %}
+<style>
+.cm-page { padding: 36px 0; }
+
+/* Header */
+.cm-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; gap:12px; flex-wrap:wrap; }
+.cm-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* Messages */
+.alert-success { background:#e8f5e9; color:#2e7d32; padding:14px 20px; border-radius:12px; border:1px solid #c8e6c9; margin-bottom:20px; font-weight:600; display:flex; align-items:center; gap:10px; }
+.alert-error   { background:#ffebee; color:#c62828; padding:14px 20px; border-radius:12px; border:1px solid #ffcdd2; margin-bottom:20px; font-weight:600; display:flex; align-items:center; gap:10px; }
+
+/* Add Form Card */
+.add-card { background:#fff; border-radius:18px; padding:28px; margin-bottom:24px; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.add-card-title { font-size:1rem; font-weight:800; color:#1a5d1a; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+.add-card-title .t-icon { background:#e8f5e9; padding:7px 9px; border-radius:10px; }
+.add-row { display:flex; gap:12px; align-items:stretch; flex-wrap:wrap; }
+.add-input {
+  flex:1; min-width:220px; padding:13px 18px;
+  border:2px solid #dce8dc; border-radius:12px;
+  font-size:.95rem; color:#333; background:#f8faf8;
+  outline:none; transition:all .2s;
+}
+.add-input:focus { border-color:#226b2e; background:#fff; box-shadow:0 0 0 4px rgba(34,107,46,0.08); }
+.btn-create {
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff;
+  padding:13px 28px; border-radius:12px; font-weight:700; font-size:.95rem;
+  border:none; cursor:pointer; box-shadow:0 4px 14px rgba(34,107,46,0.25);
+  transition:all .2s; white-space:nowrap; display:flex; align-items:center; gap:8px;
+}
+.btn-create:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(34,107,46,0.3); }
+
+/* Stats summary */
+.cm-stats { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+.cm-stat { background:#fff; border-radius:12px; padding:12px 20px; border:1px solid #e4ece4; display:flex; align-items:center; gap:10px; font-size:.88rem; font-weight:600; color:#555; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+.cm-stat .cs-num { font-size:1.4rem; font-weight:900; }
+
+/* Table card */
+.cm-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.cm-table { width:100%; border-collapse:collapse; }
+.cm-table th { background:#f5f8f5; padding:12px 18px; font-size:.73rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; white-space:nowrap; }
+.cm-table td { padding:14px 18px; border-top:1px solid #f0f5f0; vertical-align:middle; }
+.cm-table tr:hover td { background:#fafcfa; }
+
+/* Category icon */
+.cat-img { width:46px; height:46px; border-radius:12px; object-fit:cover; border:1px solid #eee; }
+.cat-icon-ph { width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
+
+/* Name */
+.cat-name { font-weight:700; color:#1a3a1a; font-size:.97rem; }
+
+/* Slug */
+.slug-box { font-family:monospace; background:#f5f8f5; border:1px dashed #c8d8c8; padding:4px 10px; border-radius:8px; font-size:.8rem; color:#666; display:inline-block; max-width:200px; word-break:break-all; }
+
+/* Product count */
+.prod-count { font-weight:800; font-size:1.05rem; color:#226b2e; }
+.prod-count-zero { font-weight:600; font-size:.95rem; color:#bbb; }
+
+/* Status badges */
+.badge-active   { display:inline-flex; align-items:center; gap:5px; background:#e8f5e9; color:#2e7d32; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+.badge-inactive { display:inline-flex; align-items:center; gap:5px; background:#ffebee; color:#c62828; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; }
+
+/* Action buttons */
+.act-row { display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+.btn-activate {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 13px; border-radius:9px; font-size:.78rem; font-weight:700;
+  background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9;
+  cursor:pointer; transition:all .2s;
+}
+.btn-activate:hover { background:#c8e6c9; }
+.btn-deactivate {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 13px; border-radius:9px; font-size:.78rem; font-weight:700;
+  background:#fff8e1; color:#e65100; border:1px solid #ffe082;
+  cursor:pointer; transition:all .2s;
+}
+.btn-deactivate:hover { background:#ffe0b2; }
+.btn-delete {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 12px; border-radius:9px; font-size:.78rem; font-weight:700;
+  background:#ffebee; color:#c62828; border:1px solid #ffcdd2;
+  cursor:pointer; transition:all .2s;
+}
+.btn-delete:hover { background:#ffcdd2; }
+
+/* Empty */
+.cm-empty { text-align:center; padding:64px 20px; color:#aaa; }
+.cm-empty .ei { font-size:3rem; margin-bottom:12px; }
+
+@media(max-width:700px){ .add-row { flex-direction:column; } }
+
+/* ── Custom Center Delete Modal ── */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-modal-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 24px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-overlay.active .custom-modal-box {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.modal-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 4px solid #ffe4e4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.15);
+  animation: modalPulse 2s infinite;
+}
+
+@keyframes modalPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 18px 0;
+  line-height: 1.5;
+}
+
+.cat-highlight {
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-weight: 700;
+}
+
+.modal-warning-box {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: #d46b08;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-modal-confirm {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-modal-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.4);
+}
+</style>
+
+<div class="cm-page container">
+  <div class="cm-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">📂</span>
+      Categories
+    </h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for msg in messages %}
+      {% if 'error' in msg.tags %}
+        <div class="alert-error">⚠️ {{ msg }}</div>
+      {% else %}
+        <div class="alert-success">✅ {{ msg }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  <!-- Add New Category -->
+  <div class="add-card">
+    <div class="add-card-title">
+      <span class="t-icon">➕</span> Add New Category
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+      <div class="add-row">
+        <input type="text" name="name" class="add-input"
+               placeholder="Category name (e.g. Snacks & Chips, Dairy & Eggs)" required>
+        <button type="submit" class="btn-create">
+          <i class="fa-solid fa-plus"></i> Create Category
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Stats -->
+  {% if categories %}
+  <div class="cm-stats">
+    <div class="cm-stat">
+      <span class="cs-num" style="color:#226b2e;">{{ categories|length }}</span>
+      <span>Total Categories</span>
+    </div>
+    <div class="cm-stat">
+      <span class="cs-num" style="color:#2e7d32;">
+        {% with active_count=0 %}
+          {% for c in categories %}{% if c.is_active %}{{ forloop.counter }}{% endif %}{% endfor %}
+        {% endwith %}
+      </span>
+      <span>Active</span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Table -->
+  <div class="cm-card">
+    {% if categories %}
+    <div style="overflow-x:auto;">
+      <table class="cm-table">
+        <thead>
+          <tr>
+            <th>Icon</th>
+            <th>Category Name</th>
+            <th>Slug</th>
+            <th>Products</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cat in categories %}
+          <tr>
+            <!-- Icon -->
+            <td>
+              {% if cat.icon %}
+                <img src="{{ cat.icon.url }}" alt="{{ cat.name }}" class="cat-img">
+              {% else %}
+                <div class="cat-icon-ph">🛒</div>
+              {% endif %}
+            </td>
+
+            <!-- Name -->
+            <td><div class="cat-name">{{ cat.name }}</div></td>
+
+            <!-- Slug -->
+            <td><span class="slug-box">{{ cat.slug }}</span></td>
+
+            <!-- Product Count -->
+            <td>
+              {% if cat.product_count > 0 %}
+                <span class="prod-count">{{ cat.product_count }}</span>
+              {% else %}
+                <span class="prod-count-zero">0</span>
+              {% endif %}
+            </td>
+
+            <!-- Status -->
+            <td>
+              {% if cat.is_active %}
+                <span class="badge-active">🟢 Active</span>
+              {% else %}
+                <span class="badge-inactive">🔴 Inactive</span>
+              {% endif %}
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="act-row">
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="toggle">
+                  <input type="hidden" name="cat_id" value="{{ cat.pk }}">
+                  {% if cat.is_active %}
+                    <button type="submit" class="btn-deactivate">
+                      <i class="fa-solid fa-pause"></i> Deactivate
+                    </button>
+                  {% else %}
+                    <button type="submit" class="btn-activate">
+                      <i class="fa-solid fa-play"></i> Activate
+                    </button>
+                  {% endif %}
+                </form>
+                <form method="post" id="cat-delete-form-{{ cat.pk }}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="cat_id" value="{{ cat.pk }}">
+                  <button type="button" class="btn-delete"
+                          onclick="promptDeleteCategory('{{ cat.name|escapejs }}', '{{ cat.product_count }}', 'cat-delete-form-{{ cat.pk }}')">
+                    <i class="fa-solid fa-trash"></i> Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="cm-empty">
+      <div class="ei">📂</div>
+      <p style="font-weight:600;">No categories yet.</p>
+      <p style="font-size:.88rem;">Add your first category using the form above.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Professional Center Delete Modal -->
+<div id="deleteModal" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="modal-header-icon">
+      <div class="modal-icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <h3 class="modal-title">Delete Category?</h3>
+    <p class="modal-desc">
+      Are you sure you want to delete <span id="modalCatName" class="cat-highlight"></span>?
+    </p>
+    <div id="modalWarningBox" class="modal-warning-box">
+      <i class="fa-solid fa-circle-info" style="font-size:1.1rem;color:#e67e22;"></i>
+      <span>This category contains <strong id="modalProductCount" style="color:#d35400;">0</strong> linked product(s).</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn-modal-confirm" id="confirmDeleteBtn">
+        <i class="fa-solid fa-trash"></i> Delete Category
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let activeDeleteFormId = null;
+
+function promptDeleteCategory(catName, productCount, formId) {
+  activeDeleteFormId = formId;
+  document.getElementById('modalCatName').textContent = catName;
+  document.getElementById('modalProductCount').textContent = productCount;
+  
+  const modal = document.getElementById('deleteModal');
+  modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  modal.classList.remove('active');
+  activeDeleteFormId = null;
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  if (activeDeleteFormId) {
+    const targetForm = document.getElementById(activeDeleteFormId);
+    if (targetForm) {
+      targetForm.submit();
+    }
+  }
+});
+
+// Close modal when clicking backdrop
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+</script>
+{% endblock %}

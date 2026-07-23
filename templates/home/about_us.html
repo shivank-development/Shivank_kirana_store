@@ -1,0 +1,132 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}About Us — Shivank Kirana Store{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/policy.css' %}">{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <div class="policy-layout">
+
+      <!-- ── SIDEBAR ── -->
+      <aside class="policy-sidebar">
+        <h3>Customer Care</h3>
+        <nav class="policy-nav">
+          <a href="{% url 'about-us' %}" class="active"><i class="fa-solid fa-store"></i> About Us</a>
+          <a href="{% url 'privacy-policy' %}"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="{% url 'return-policy' %}"><i class="fa-solid fa-rotate-left"></i> Return Policy</a>
+          <a href="{% url 'shipping-policy' %}"><i class="fa-solid fa-truck"></i> Shipping Policy</a>
+          <a href="{% url 'faqs' %}"><i class="fa-solid fa-circle-question"></i> FAQs</a>
+          <a href="{% url 'contact-us' %}"><i class="fa-solid fa-headset"></i> Contact Us</a>
+        </nav>
+        <div class="divider" style="height:1px;background:#eee;margin:14px 0;"></div>
+        <div class="policy-nav">
+          <a href="#our-story"><i class="fa-solid fa-book-open"></i> Our Story</a>
+          <a href="#our-mission"><i class="fa-solid fa-bullseye"></i> Our Mission</a>
+          <a href="#why-us"><i class="fa-solid fa-star"></i> Why Choose Us</a>
+          <a href="#our-team"><i class="fa-solid fa-users"></i> Our Team</a>
+          <a href="#store-info"><i class="fa-solid fa-location-dot"></i> Store Info</a>
+        </div>
+      </aside>
+
+      <!-- ── MAIN CONTENT ── -->
+      <div class="policy-content">
+        <div class="policy-hero">
+          <div class="policy-hero-icon">🛒</div>
+          <div>
+            <h1>About Shivank Kirana Store</h1>
+            <p>Meerut ka bharosemand grocery & FMCG store — last updated July 2026</p>
+          </div>
+        </div>
+
+        <!-- Our Story -->
+        <section class="policy-section" id="our-story">
+          <h2><span class="sec-icon">📖</span> Our Story</h2>
+          <p>Shivank Kirana Store ki shuruaat ek chote se sapne se hui thi — Meerut ke logon ko fresh, quality grocery products unke ghar ki pragal par pahunchana. Humari journey 2024 mein shuru hui, jab Shivank So Om Pal ne dekha ki logon ko rozana ki shopping ke liye ghar se bahar jaana padta tha.</p>
+          <p>Aaj, hum Meerut ke premium grocery delivery platform ke roop mein jaane jaate hain, jahan aapko Amul, Haldiram's, Britannia, Cadbury, Lay's jaise 20+ top brands ke 500+ products milte hain — seedha aapke darwaze tak.</p>
+          <div class="highlight-box">🎯 Hamara Goal: "Har ghar tak quality grocery — ek tap mein!"</div>
+        </section>
+
+        <!-- Our Mission -->
+        <section class="policy-section" id="our-mission">
+          <h2><span class="sec-icon">🎯</span> Our Mission & Vision</h2>
+          <p><strong>Mission:</strong> Meerut ke har ghar mein affordable, fresh aur genuine grocery products pahunchana, bina kisi jhanjhat ke.</p>
+          <p><strong>Vision:</strong> Uttar Pradesh ka sabse trusted online kirana platform banana, jahan customers quality, speed aur convenience — teeno ek saath paayein.</p>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon">⚡</div>
+              <h4>Same-Day Delivery</h4>
+              <p>Meerut ke selected areas mein</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">✅</div>
+              <h4>100% Genuine</h4>
+              <p>Sirf original branded products</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">💸</div>
+              <h4>Best Prices</h4>
+              <p>MRP se hamesha kam ya barabar</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">🔒</div>
+              <h4>Secure Payments</h4>
+              <p>UPI & COD dono available</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Why Us -->
+        <section class="policy-section" id="why-us">
+          <h2><span class="sec-icon">⭐</span> Why Choose Us?</h2>
+          <ul>
+            <li><strong>20+ Trusted Brands:</strong> Amul, Aashirvaad, Britannia, Cadbury, Haldiram's, Lay's, Maggi, Nestlé aur bahut kuch.</li>
+            <li><strong>500+ Products:</strong> Grains se lekar snacks, personal care se lekar beverages — sab kuch ek jagah.</li>
+            <li><strong>Free Delivery on ₹799+:</strong> Zyada order karein, delivery free paayein.</li>
+            <li><strong>Live Order Tracking:</strong> Janiye kahan hai aapka order — real-time GPS tracking ke saath.</li>
+            <li><strong>Easy Returns:</strong> Agar koi product sahi nahi laga, 7 din ke andar return karein.</li>
+            <li><strong>24/7 Customer Support:</strong> WhatsApp ya call karein — hum hamesha ready hain.</li>
+          </ul>
+        </section>
+
+        <!-- Our Team -->
+        <section class="policy-section" id="our-team">
+          <h2><span class="sec-icon">👥</span> Our Team</h2>
+          <p>Shivank Kirana Store ek passionate team chalati hai jo aapki shopping ko simple, fast aur enjoyable banana chahti hai.</p>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon">👨‍💼</div>
+              <h4>Shivank So Om Pal</h4>
+              <p>Founder & CEO</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">🚴</div>
+              <h4>Delivery Team</h4>
+              <p>Quick & Friendly Delivery Boys</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">💬</div>
+              <h4>Support Team</h4>
+              <p>24/7 Customer Assistance</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Store Info -->
+        <section class="policy-section" id="store-info">
+          <h2><span class="sec-icon">📍</span> Store Information</h2>
+          <ul>
+            <li><strong>Address:</strong> 288, Main Market, Meerut — 250404, Uttar Pradesh, India</li>
+            <li><strong>Phone:</strong> +91 7599342112</li>
+            <li><strong>Email:</strong> support@shivankkirana.com</li>
+            <li><strong>WhatsApp:</strong> +91 7599342112</li>
+            <li><strong>Business Hours:</strong> Monday – Sunday, 7:00 AM – 10:00 PM</li>
+            <li><strong>Delivery Areas:</strong> Meerut city & surrounding pincodes (250001, 250002, 250003, 250404)</li>
+          </ul>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

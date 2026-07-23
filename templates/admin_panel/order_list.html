@@ -1,0 +1,269 @@
+{% extends 'base/base.html' %}
+{% block title %}Manage Orders — Admin{% endblock %}
+
+{% block content %}
+<style>
+.ol-page { padding: 36px 0; }
+
+/* Header */
+.ol-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+.ol-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* Filter Card */
+.filter-card {
+  background:#fff; border-radius:16px; padding:18px 22px;
+  border:1px solid #e4ece4; box-shadow:0 2px 12px rgba(0,0,0,0.04);
+  margin-bottom:22px;
+}
+.filter-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.filter-input {
+  flex:2; min-width:200px; padding:11px 16px;
+  border:2px solid #dce8dc; border-radius:12px;
+  font-size:.92rem; color:#333; background:#f8faf8; outline:none; transition:all .2s;
+}
+.filter-input:focus { border-color:#226b2e; background:#fff; box-shadow:0 0 0 3px rgba(34,107,46,0.08); }
+.filter-select {
+  flex:1; min-width:180px; padding:11px 16px;
+  border:2px solid #dce8dc; border-radius:12px;
+  font-size:.92rem; color:#333; background:#f8faf8; outline:none; transition:all .2s;
+}
+.filter-select:focus { border-color:#226b2e; background:#fff; }
+.btn-filter { background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; padding:11px 24px; border-radius:12px; font-weight:700; font-size:.9rem; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(34,107,46,0.2); transition:all .2s; display:flex; align-items:center; gap:6px; }
+.btn-filter:hover { transform:translateY(-1px); }
+.btn-clear { background:#f1f5f1; color:#555; padding:11px 20px; border-radius:12px; font-weight:600; font-size:.9rem; text-decoration:none; transition:all .2s; }
+.btn-clear:hover { background:#e5ece5; }
+
+/* Table card */
+.ol-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.ol-table { width:100%; border-collapse:collapse; }
+.ol-table th { background:#f5f8f5; padding:12px 18px; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; white-space:nowrap; }
+.ol-table td { padding:14px 18px; border-top:1px solid #f0f5f0; vertical-align:middle; }
+.ol-table tr:hover td { background:#fafcfa; }
+
+/* Order number */
+.ord-num { font-weight:800; color:#226b2e; font-size:.95rem; text-decoration:none; display:block; }
+.ord-num:hover { text-decoration:underline; }
+.ord-time { font-size:.75rem; color:#aaa; margin-top:2px; }
+
+/* Customer */
+.cust-name { font-weight:600; color:#333; font-size:.92rem; }
+.cust-phone { font-size:.77rem; color:#aaa; margin-top:2px; }
+
+/* Amount */
+.ord-amount { font-weight:800; color:#1a7a1a; font-size:1.02rem; }
+.ord-items { font-size:.77rem; color:#aaa; margin-top:2px; }
+
+/* Payment badges */
+.pay-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:8px; font-size:.75rem; font-weight:700; }
+.pay-upi { background:#e3f2fd; color:#1565c0; }
+.pay-cod { background:#f3e5f5; color:#6a1b9a; }
+.pay-status { font-size:.75rem; font-weight:600; margin-top:4px; }
+.ps-received { color:#2e7d32; }
+.ps-pending  { color:#e65100; }
+.ps-refunded { color:#6a1b9a; }
+.ps-rejected { color:#c62828; }
+
+/* Status badges */
+.status-badge { display:inline-flex; align-items:center; padding:5px 11px; border-radius:20px; font-size:.73rem; font-weight:700; letter-spacing:.02em; white-space:nowrap; }
+.s-placed    { background:#e3f2fd; color:#1565c0; }
+.s-confirmed { background:#ede7f6; color:#4527a0; }
+.s-packed    { background:#fff3e0; color:#e65100; }
+.s-out_for_delivery { background:#fff8e1; color:#bf6a00; }
+.s-delivered { background:#e8f5e9; color:#1b5e20; }
+.s-cancelled { background:#ffebee; color:#b71c1c; }
+
+/* COD toggle */
+.cod-btn { border:none; cursor:pointer; padding:5px 12px; border-radius:20px; font-size:.73rem; font-weight:700; transition:all .2s; }
+.cod-confirmed { background:#e8f5e9; color:#2e7d32; }
+.cod-confirmed:hover { background:#c8e6c9; }
+.cod-pending   { background:#fff8e1; color:#e65100; }
+.cod-pending:hover   { background:#ffe0b2; }
+.cod-na { font-size:.78rem; color:#ccc; }
+
+/* View button */
+.btn-view {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 16px; border-radius:10px;
+  background:linear-gradient(135deg,#226b2e,#1a5d1a);
+  color:#fff; font-size:.82rem; font-weight:700;
+  text-decoration:none; box-shadow:0 3px 10px rgba(34,107,46,0.2);
+  transition:all .2s; white-space:nowrap;
+}
+.btn-view:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(34,107,46,0.3); color:#fff; }
+
+/* Empty */
+.empty-row td { text-align:center; padding:60px; color:#aaa; }
+.empty-row .ei { font-size:2.5rem; margin-bottom:10px; }
+
+/* Pagination */
+.ol-pagination { display:flex; gap:8px; justify-content:center; margin-top:22px; flex-wrap:wrap; align-items:center; }
+.pg-btn { padding:8px 18px; border-radius:10px; background:#fff; border:1px solid #dce8dc; color:#333; font-weight:600; font-size:.88rem; text-decoration:none; transition:all .2s; }
+.pg-btn:hover { background:#e8f5e9; border-color:#c8e6c9; }
+.pg-current { background:#e8f5e9; border-color:#c8e6c9; color:#226b2e; font-weight:700; pointer-events:none; }
+
+@media(max-width:900px){ .ol-table th:nth-child(6), .ol-table td:nth-child(6) { display:none; } }
+@media(max-width:700px){ .filter-row { flex-direction:column; } .filter-input,.filter-select { width:100%; } }
+</style>
+
+<div class="ol-page container">
+  <div class="ol-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">📦</span>
+      Manage Orders
+    </h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-card">
+    <form method="get" action="{% url 'admin_panel:order_list' %}">
+      <div class="filter-row">
+        <input type="text" name="q" value="{{ search_query }}" class="filter-input"
+               placeholder="🔍 Search by order #, customer name, phone...">
+        <select name="status" class="filter-select">
+          <option value="">All Statuses</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select name="method" class="filter-select">
+          <option value="">All Payment Methods</option>
+          {% for val, label in payment_methods %}
+            <option value="{{ val }}" {% if method_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-filter">
+          <i class="fa-solid fa-magnifying-glass"></i> Filter
+        </button>
+        <a href="{% url 'admin_panel:order_list' %}" class="btn-clear">✕ Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="ol-card">
+    <div style="overflow-x:auto;">
+      <table class="ol-table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>COD Call</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in page_obj %}
+          <tr>
+            <!-- Order Number + Date -->
+            <td>
+              <a href="{% url 'admin_panel:order_detail' order.id %}" class="ord-num">{{ order.order_number }}</a>
+              <div class="ord-time">{{ order.placed_at|date:"d M, H:i" }}</div>
+            </td>
+
+            <!-- Customer -->
+            <td>
+              <div class="cust-name">{{ order.user.full_name }}</div>
+              <div class="cust-phone">{{ order.user.phone_number }}</div>
+            </td>
+
+            <!-- Amount -->
+            <td>
+              <div class="ord-amount">₹{{ order.total_amount }}</div>
+              <div class="ord-items">{{ order.items.count }} items</div>
+            </td>
+
+            <!-- Payment Method + Status -->
+            <td>
+              {% if order.payment_method == 'UPI' %}
+                <span class="pay-badge pay-upi"><i class="fa-solid fa-mobile-screen-button" style="font-size:.7rem;"></i> UPI</span>
+              {% else %}
+                <span class="pay-badge pay-cod"><i class="fa-solid fa-money-bill-wave" style="font-size:.7rem;"></i> COD</span>
+              {% endif %}
+              <div class="pay-status ps-{{ order.payment_status }}">
+                {% if order.payment_status == 'received' %}✅ Received
+                {% elif order.payment_status == 'pending' %}⏳ Pending
+                {% elif order.payment_status == 'refunded' %}💸 Refunded
+                {% elif order.payment_status == 'rejected' %}❌ Rejected
+                {% else %}{{ order.payment_status|title }}{% endif %}
+              </div>
+            </td>
+
+            <!-- Order Status -->
+            <td>
+              <span class="status-badge s-{{ order.status }}">{{ order.get_status_display }}</span>
+            </td>
+
+            <!-- COD Call Toggle -->
+            <td>
+              {% if order.payment_method == 'COD' %}
+                <form method="post" action="{% url 'admin_panel:order_toggle_cod' order.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  {% if order.cod_call_confirmed %}
+                    <button type="submit" class="cod-btn cod-confirmed" title="Click to toggle">
+                      ✅ Confirmed
+                    </button>
+                  {% else %}
+                    <button type="submit" class="cod-btn cod-pending" title="Click to confirm">
+                      ⏳ Pending
+                    </button>
+                  {% endif %}
+                </form>
+              {% else %}
+                <span class="cod-na">N/A</span>
+              {% endif %}
+            </td>
+
+            <!-- View Button -->
+            <td>
+              <a href="{% url 'admin_panel:order_detail' order.id %}" class="btn-view">
+                <i class="fa-solid fa-eye"></i> View
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr class="empty-row">
+            <td colspan="7">
+              <div class="ei">📦</div>
+              <p>No orders found.</p>
+              {% if search_query or status_filter %}
+                <a href="{% url 'admin_panel:order_list' %}" style="color:#226b2e;font-weight:600;">Clear filters →</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div class="ol-pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" class="pg-btn">
+        ← Prev
+      </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <span class="pg-btn pg-current">{{ num }}</span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" class="pg-btn">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}" class="pg-btn">
+        Next →
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

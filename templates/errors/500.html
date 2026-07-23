@@ -1,0 +1,36 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}500 - Server Error — Shivank Kirana Store{% endblock %}
+
+{% block content %}
+<style>
+  .err-page { padding: 60px 20px; text-align: center; background: #f8fafc; min-height: 75vh; display: flex; align-items: center; justify-content: center; }
+  .err-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 48px 32px; max-width: 600px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+  .err-code { font-size: 5rem; font-weight: 900; background: linear-gradient(135deg, #dc2626, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin-bottom: 12px; }
+  .err-icon { font-size: 3.5rem; margin-bottom: 16px; display: inline-block; }
+  .err-title { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 10px; }
+  .err-msg { font-size: .95rem; color: #64748b; margin-bottom: 28px; line-height: 1.6; }
+
+  .err-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-err-home { background: #166534; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background .2s; }
+  .btn-err-home:hover { background: #14532d; color: white; }
+</style>
+
+<div class="err-page">
+  <div class="err-card">
+    <div class="err-icon">⚠️</div>
+    <div class="err-code">500</div>
+    <h1 class="err-title">Something Went Wrong</h1>
+    <p class="err-msg">
+      We encountered an unexpected server error. Our team has been notified. Please try refreshing or return to homepage.
+    </p>
+
+    <div class="err-actions">
+      <a href="/" class="btn-err-home">
+        <i class="fa-solid fa-house"></i> Return to Homepage
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

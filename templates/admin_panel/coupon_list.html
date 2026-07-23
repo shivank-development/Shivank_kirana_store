@@ -1,0 +1,489 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Coupon Center — Admin Panel{% endblock %}
+
+{% block content %}
+<style>
+.admin-page { padding: 36px 0 60px; background: #f5f8f5; min-height: 85vh; }
+.admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 14px; flex-wrap: wrap; }
+.admin-header h1 { font-size: 1.8rem; font-weight: 900; color: #1a3a1a; margin: 0; display: flex; align-items: center; gap: 10px; }
+.btn-back {
+  background: #fff; border: 1.5px solid #dce8dc; color: #226b2e; font-weight: 700;
+  padding: 8px 18px; border-radius: 999px; text-decoration: none; font-size: .88rem;
+  display: inline-flex; align-items: center; gap: 6px; transition: all .2s;
+}
+.btn-back:hover { background: #e8f5e9; border-color: #226b2e; color: #1a5d1a; transform: translateY(-1px); }
+
+/* Quick Stats Bar */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: #fff; border-radius: 16px; border: 1px solid #e4ece4; padding: 18px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 14px;
+}
+.stat-ico { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+.stat-num { font-size: 1.5rem; font-weight: 900; color: #1a3a1a; line-height: 1.1; }
+.stat-lbl { font-size: .78rem; color: #777; font-weight: 600; }
+
+/* Main Grid Layout */
+.cp-grid { display: grid; grid-template-columns: 360px 1fr; gap: 28px; align-items: start; }
+
+/* Form Card */
+.cp-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 24px;
+}
+.cp-card-head {
+  font-size: 1.15rem; font-weight: 900; color: #1a5d1a; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eef3ee; padding-bottom: 12px;
+}
+
+.cp-form-grp { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+.cp-form-grp label { font-size: .85rem; font-weight: 700; color: #333; }
+.cp-input {
+  padding: 11px 14px; border: 1.5px solid #dce8dc; border-radius: 12px;
+  background: #fcfdfe; font-size: .92rem; color: #222; outline: none; transition: all .2s; width: 100%;
+}
+.cp-input:focus { border-color: #226b2e; background: #fff; box-shadow: 0 0 0 3px rgba(34,107,46,0.1); }
+.cp-code-input { font-family: monospace; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #1a5d1a; }
+
+.btn-create-cp {
+  background: linear-gradient(135deg, #226b2e, #1a5d1a); color: #fff;
+  border: none; padding: 13px 20px; border-radius: 14px; font-weight: 800; font-size: .95rem;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(34,107,46,0.25); transition: all .2s;
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;
+}
+.btn-create-cp:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,107,46,0.35); color: #fff; }
+
+/* Coupons Table Card */
+.cp-table-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;
+}
+.cp-table-head {
+  padding: 18px 24px; background: #f9fcf9; border-bottom: 1px solid #eef3ee;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cp-table-title { font-size: 1.1rem; font-weight: 900; color: #1a5d1a; display: flex; align-items: center; gap: 8px; }
+
+.cp-table { width: 100%; border-collapse: collapse; text-align: left; }
+.cp-table th { background: #fafdfa; padding: 12px 18px; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: #777; font-weight: 700; border-bottom: 1px solid #eef3ee; }
+.cp-table td { padding: 16px 18px; border-bottom: 1px solid #f0f5f0; vertical-align: middle; font-size: .9rem; }
+.cp-table tr:last-child td { border-bottom: none; }
+.cp-table tr:hover td { background: #fafcfa; }
+
+.code-badge {
+  display: inline-block; background: #e8f5e9; color: #1a5d1a; border: 1px solid #a5d6a7;
+  padding: 4px 10px; border-radius: 8px; font-weight: 800; font-family: monospace; font-size: .95rem; letter-spacing: 1px;
+}
+.disc-pill {
+  display: inline-block; background: #fff3e0; color: #e65100; font-weight: 800;
+  padding: 3px 10px; border-radius: 20px; font-size: .8rem;
+}
+.disc-flat { background: #e3f2fd; color: #1565c0; }
+
+.status-chip { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: .78rem; padding: 3px 10px; border-radius: 20px; }
+.status-active { background: #e8f5e9; color: #2e7d32; }
+.status-inactive { background: #ffebee; color: #c62828; }
+
+.btn-del-cp {
+  background: #fff; border: 1px solid #ffcdd2; color: #c62828; font-weight: 700; font-size: .8rem;
+  padding: 5px 12px; border-radius: 8px; cursor: pointer; transition: all .15s;
+}
+.btn-del-cp:hover { background: #ffebee; border-color: #e53935; color: #b71c1c; transform: scale(1.03); }
+
+/* Responsive */
+@media(max-width: 992px) {
+  .cp-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Custom Center Delete Modal ── */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.custom-modal-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 24px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-overlay.active .custom-modal-box {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.modal-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 4px solid #ffe4e4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.15);
+  animation: modalPulse 2s infinite;
+}
+
+@keyframes modalPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.modal-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 18px 0;
+  line-height: 1.5;
+}
+
+.coupon-highlight {
+  color: #1a5d1a;
+  background: #e8f5e9;
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 1px solid #a5d6a7;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+.modal-warning-box {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: #d46b08;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-modal-confirm {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-modal-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.4);
+}
+</style>
+
+<div class="admin-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <h1>🎟️ Coupon &amp; Promo Center</h1>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn-back">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      {% for msg in messages %}
+        <div style="padding:12px 18px;border-radius:12px;margin-bottom:20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;{% if msg.tags == 'error' %}background:#ffebee;color:#c62828;border:1px solid #ffcdd2;{% else %}background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;{% endif %}">
+          <i class="fa-solid {% if msg.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-ico" style="background:#e8f5e9;color:#2e7d32;">🎟️</div>
+        <div>
+          <div class="stat-num">{{ coupons|length }}</div>
+          <div class="stat-lbl">Total Coupons Created</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:#fff3e0;color:#e65100;">⚡</div>
+        <div>
+          <div class="stat-num">{{ active_count|default:0 }}</div>
+          <div class="stat-lbl">Active Promo Offers</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:#e3f2fd;color:#1565c0;">👥</div>
+        <div>
+          <div class="stat-num">All Users</div>
+          <div class="stat-lbl">Eligible Audience</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="cp-grid">
+
+      <!-- Left Column: Create Form -->
+      <div class="cp-card">
+        <div class="cp-card-head">
+          <i class="fa-solid fa-circle-plus" style="color:#226b2e;"></i> Create New Coupon
+        </div>
+        <form method="post" action="{% url 'admin_panel:coupon_list' %}">
+          {% csrf_token %}
+          
+          <div class="cp-form-grp">
+            <label for="id_code">Coupon Code *</label>
+            <input type="text" id="id_code" name="code" class="cp-input cp-code-input" placeholder="e.g. SAVE20, FESTIVE100" required>
+          </div>
+
+          <div class="cp-form-grp">
+            <label for="id_discount_type">Discount Type *</label>
+            <select id="id_discount_type" name="discount_type" class="cp-input" required>
+              <option value="percent">Percentage Discount (%)</option>
+              <option value="flat">Flat Amount Discount (₹)</option>
+            </select>
+          </div>
+
+          <div class="cp-form-grp">
+            <label for="id_discount_value">Discount Value *</label>
+            <input type="number" step="0.01" id="id_discount_value" name="discount_value" class="cp-input" placeholder="e.g. 20 for 20% or 100 for ₹100" required>
+          </div>
+
+          <div class="cp-form-grp">
+            <label for="id_min_order_amount">Minimum Order Amount (₹)</label>
+            <input type="number" step="0.01" id="id_min_order_amount" name="min_order_amount" class="cp-input" placeholder="Optional. e.g. 499">
+          </div>
+
+          <button type="submit" class="btn-create-cp">
+            <i class="fa-solid fa-ticket"></i> Create &amp; Activate Coupon
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Coupons Table -->
+      <div class="cp-table-card">
+        <div class="cp-table-head">
+          <div class="cp-table-title">
+            <i class="fa-solid fa-list-check"></i> Active Coupons &amp; Offers
+          </div>
+          <span style="font-size:.8rem;font-weight:700;color:#666;background:#eef3ee;padding:3px 10px;border-radius:20px;">
+            {{ coupons|length }} total
+          </span>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="cp-table">
+            <thead>
+              <tr>
+                <th>Coupon Code</th>
+                <th>Discount</th>
+                <th>Min Order</th>
+                <th>Status</th>
+                <th style="text-align:right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for coupon in coupons %}
+              <tr>
+                <td>
+                  <span class="code-badge">{{ coupon.code }}</span>
+                  <div style="font-size:.75rem;color:#888;margin-top:4px;">
+                    Used {{ coupon.used_count }} times
+                  </div>
+                </td>
+                <td>
+                  {% if coupon.discount_type == 'percent' %}
+                    <span class="disc-pill">{{ coupon.discount_value }}% OFF</span>
+                  {% else %}
+                    <span class="disc-pill disc-flat">₹{{ coupon.discount_value }} OFF</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if coupon.min_order_amount > 0 %}
+                    <strong style="color:#333;">₹{{ coupon.min_order_amount }}</strong>
+                  {% else %}
+                    <span style="color:#aaa;">No Limit</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if coupon.is_active %}
+                    <span class="status-chip status-active">🟢 Active</span>
+                  {% else %}
+                    <span class="status-chip status-inactive">🔴 Inactive</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:right;">
+                  <form method="post" id="coupon-delete-form-{{ coupon.id }}" action="{% url 'admin_panel:coupon_delete' coupon.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="button" class="btn-del-cp" onclick="promptDeleteCoupon('{{ coupon.code|escapejs }}', 'coupon-delete-form-{{ coupon.id }}')">
+                      <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" style="padding:48px 24px;text-align:center;">
+                  <div style="font-size:2.8rem;margin-bottom:12px;">🎟️</div>
+                  <h3 style="margin:0 0 6px;color:#1a3a1a;font-weight:800;">No Coupons Created Yet</h3>
+                  <p style="margin:0;color:#777;font-size:.88rem;">Use the form on the left to create your first promo code!</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Professional Center Delete Modal -->
+<div id="deleteModal" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="modal-header-icon">
+      <div class="modal-icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <h3 class="modal-title">Delete Coupon?</h3>
+    <p class="modal-desc">
+      Are you sure you want to delete promo coupon <span id="modalCouponCode" class="coupon-highlight"></span>?
+    </p>
+    <div class="modal-warning-box">
+      <i class="fa-solid fa-circle-info" style="font-size:1.1rem;color:#e67e22;"></i>
+      <span>This coupon will immediately be deactivated and cannot be redeemed by customers.</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn-modal-confirm" id="confirmDeleteBtn">
+        <i class="fa-solid fa-trash-can"></i> Yes, Delete Coupon
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let activeDeleteFormId = null;
+
+function promptDeleteCoupon(couponCode, formId) {
+  activeDeleteFormId = formId;
+  document.getElementById('modalCouponCode').textContent = couponCode;
+  
+  const modal = document.getElementById('deleteModal');
+  modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  modal.classList.remove('active');
+  activeDeleteFormId = null;
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  if (activeDeleteFormId) {
+    const targetForm = document.getElementById(activeDeleteFormId);
+    if (targetForm) {
+      targetForm.submit();
+    }
+  }
+});
+
+// Close modal when clicking backdrop
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+</script>
+{% endblock %}

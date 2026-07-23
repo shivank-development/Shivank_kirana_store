@@ -1,0 +1,183 @@
+{% load static %}
+<!-- ★ STICKY NAVBAR ─────────────────────────────────── -->
+<nav class="navbar-main" id="main-navbar">
+  <div class="navbar-container">
+
+    <!-- ─── LOGO ─── -->
+    <div class="navbar-logo">
+      <a href="/" class="logo-link">
+        <!-- Store SVG Icon (cart + leaves) -->
+        <span class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="48" fill="url(#logoGrad)"/>
+            <path d="M25 35 L30 65 L70 65 L75 35 Z" fill="white" opacity="0.9"/>
+            <path d="M20 35 L80 35" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="38" cy="72" r="5" fill="white"/>
+            <circle cx="62" cy="72" r="5" fill="white"/>
+            <!-- Leaf -->
+            <path d="M55 20 Q65 10 75 15 Q70 25 55 20 Z" fill="#90EE90"/>
+            <path d="M45 18 Q40 8 30 13 Q35 23 45 18 Z" fill="#98FB98"/>
+            <path d="M50 25 L55 20" stroke="#2d8a3e" stroke-width="2"/>
+            <path d="M50 25 L45 18" stroke="#2d8a3e" stroke-width="2"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="100" y2="100">
+                <stop offset="0%" stop-color="#1a5d1a"/>
+                <stop offset="100%" stop-color="#4CAF50"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <div class="logo-text">
+          <span class="logo-name">Shivank</span>
+          <span class="logo-sub">Kirana Store</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- ─── SEARCH BAR ─── -->
+    <div class="navbar-search" id="search-wrapper">
+      <form action="/search/" method="GET" class="search-form">
+        <div class="search-input-wrap">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="search"
+            name="q"
+            id="navbar-search"
+            class="search-input"
+            placeholder="Search for chips, chocolates, grocery..."
+            value="{{ request.GET.q }}"
+            autocomplete="off"
+          >
+          <button type="submit" class="search-btn">Search</button>
+        </div>
+        <!-- Autocomplete dropdown -->
+        <div id="search-autocomplete" class="search-autocomplete hidden"></div>
+      </form>
+    </div>
+
+    <!-- ─── RIGHT ICONS ─── -->
+    <div class="navbar-actions">
+      <!-- WhatsApp Order -->
+      <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi!%20I%20want%20to%20place%20an%20order" 
+         class="nav-action-btn whatsapp-btn" target="_blank" data-tooltip="Order on WhatsApp">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        <span class="action-label">WhatsApp</span>
+      </a>
+
+      <!-- Wishlist -->
+      <a href="{% url 'wishlist:list' %}" class="nav-action-btn" id="wishlist-btn" data-tooltip="Wishlist">
+        <i class="fa-{% if request.user.is_authenticated %}solid{% else %}regular{% endif %} fa-heart wishlist-icon"></i>
+        <span class="action-label">❤️ Wishlist</span>
+      </a>
+
+      <!-- Cart -->
+      <a href="/cart/" class="nav-action-btn cart-btn" id="cart-nav-btn" data-tooltip="My Cart">
+        <div class="cart-icon-wrap">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" id="cart-count">{{ cart_count }}</span>
+        </div>
+        <span class="action-label">🛒 Cart</span>
+      </a>
+
+
+
+      <!-- User Account -->
+      {% if request.user.is_authenticated %}
+        <div class="nav-dropdown-wrap user-dropdown-wrap">
+          <button class="nav-action-btn user-btn" data-tooltip="{{ request.user.full_name }}">
+            <div class="user-avatar-mini">
+              {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="avatar">
+              {% else %}
+                <span>{{ request.user.full_name|first|upper }}</span>
+              {% endif %}
+            </div>
+            <span class="action-label">👤 Account</span>
+          </button>
+          <div class="nav-dropdown">
+            <a href="/auth/profile/"><i class="fa-solid fa-user"></i> My Profile</a>
+            <a href="/orders/"><i class="fa-solid fa-box"></i> My Orders</a>
+            {% if request.user.is_admin %}
+              <a href="/admin-panel/"><i class="fa-solid fa-gauge-high"></i> Admin Panel</a>
+            {% endif %}
+            <div class="dropdown-divider"></div>
+            <a href="/auth/logout/" class="text-danger"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+          </div>
+        </div>
+      {% else %}
+        <a href="/auth/login/" class="nav-action-btn login-btn">
+          <i class="fa-solid fa-user"></i>
+          <span class="action-label">👤 Login</span>
+        </a>
+      {% endif %}
+
+      <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── NAV LINKS ROW (desktop) ─── -->
+  <div class="navbar-links" id="navbar-links">
+    <div class="navbar-links-container">
+      <!-- All Categories button -->
+      <button class="nav-link-item nav-categories-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-grip-vertical"></i>
+        <span>All Categories</span>
+        <i class="fa-solid fa-chevron-down chev"></i>
+      </button>
+
+      <!-- Main nav links -->
+      <a href="/" class="nav-link-item {% if request.path == '/' %}active{% endif %}">🏠 Home</a>
+      <a href="/shop/" class="nav-link-item">🛍️ Products</a>
+      
+      <!-- Direct Category Links -->
+      <a href="/category/snacks/" class="nav-link-item {% if '/category/snacks' in request.path %}active{% endif %}">🍟 Snacks</a>
+      <a href="/category/chocolates/" class="nav-link-item {% if '/category/chocolates' in request.path %}active{% endif %}">🍫 Chocolates</a>
+      
+      <a href="/category/dairy-bakery/" class="nav-link-item">🥛 Dairy</a>
+      <a href="/category/grains-pulses/" class="nav-link-item">🌾 Grocery</a>
+      <a href="/category/personal-care/" class="nav-link-item">🧴 Personal Care</a>
+
+      <!-- Free delivery badge -->
+      <div class="nav-free-delivery">
+        <i class="fa-solid fa-truck-fast"></i>
+        <span>FREE Delivery ₹799+</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── MOBILE MENU ─── -->
+  <div class="mobile-menu" id="mobile-menu">
+    <div class="mobile-menu-header">
+      <span>Menu</span>
+      <button onclick="toggleMobileMenu()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mobile-menu-body">
+      <a href="/" class="mobile-nav-link">🏠 Home</a>
+      <a href="/shop/" class="mobile-nav-link">🛍️ All Products</a>
+      <a href="/category/snacks-branded-foods/" class="mobile-nav-link">🍟 Snacks</a>
+      <a href="/category/dairy-bakery/" class="mobile-nav-link">🥛 Dairy & Bakery</a>
+      <a href="/category/grains-pulses/" class="mobile-nav-link">🌾 Grocery</a>
+      <a href="/cart/" class="mobile-nav-link">🛒 My Cart ({{ cart_count }})</a>
+      <a href="/wishlist/" class="mobile-nav-link">❤️ Wishlist</a>
+      {% if request.user.is_authenticated %}
+        <a href="/auth/profile/" class="mobile-nav-link">👤 My Account</a>
+        <a href="/orders/" class="mobile-nav-link">📦 My Orders</a>
+        {% if request.user.is_admin %}
+          <a href="/admin-panel/" class="mobile-nav-link admin-link">⚡ Admin Panel</a>
+        {% endif %}
+        <a href="/auth/logout/" class="mobile-nav-link logout-link">🚪 Logout</a>
+      {% else %}
+        <a href="/auth/login/" class="mobile-nav-link">👤 Login / Register</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileMenu()"></div>
+</nav>
+
+<!-- Navbar spacing placeholder -->
+<div class="navbar-spacer"></div>

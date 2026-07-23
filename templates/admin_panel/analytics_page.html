@@ -1,0 +1,209 @@
+{% extends 'base/base.html' %}
+{% block title %}Analytics — Admin{% endblock %}
+
+{% block content %}
+<style>
+.an-page { padding: 36px 0; }
+.an-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+.an-header h1 { font-size:1.9rem; font-weight:800; color:var(--clr-primary-dark); margin:0; }
+
+/* ── KPI cards ── */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:32px; }
+.kpi-card { background:#fff; border-radius:16px; padding:22px 24px; border:1px solid #e8f0eb; box-shadow:0 4px 18px rgba(0,0,0,0.05); }
+.kpi-icon { font-size:1.6rem; margin-bottom:8px; }
+.kpi-val { font-size:2rem; font-weight:800; line-height:1; margin-bottom:4px; }
+.kpi-label { font-size:.82rem; color:#888; font-weight:500; }
+
+/* ── Chart cards ── */
+.charts-row { display:grid; grid-template-columns:3fr 2fr; gap:20px; margin-bottom:24px; }
+.chart-card { background:#fff; border-radius:16px; padding:24px 28px; border:1px solid #e8f0eb; box-shadow:0 4px 18px rgba(0,0,0,0.05); }
+.chart-card h3 { font-size:1rem; font-weight:700; color:var(--clr-primary-dark); margin:0 0 20px; }
+.chart-wrap { position:relative; height:280px; }
+.chart-wrap canvas { position:absolute; inset:0; width:100% !important; height:100% !important; }
+
+/* ── Top products ── */
+.top-card { background:#fff; border-radius:16px; padding:24px 28px; border:1px solid #e8f0eb; box-shadow:0 4px 18px rgba(0,0,0,0.05); margin-bottom:24px; }
+.top-card h3 { font-size:1rem; font-weight:700; color:var(--clr-primary-dark); margin:0 0 18px; }
+.prod-row { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid #f0f0f0; }
+.prod-row:last-child { border-bottom:none; }
+.prod-rank { width:30px; height:30px; border-radius:50%; background:#f0f7f0; color:var(--clr-primary-dark); font-size:.82rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.prod-rank.gold { background:var(--clr-primary); color:#fff; }
+.prod-name { flex:1; font-size:.92rem; font-weight:600; color:#333; }
+.prod-cat { font-size:.78rem; color:#aaa; }
+.prod-sold { font-size:.85rem; font-weight:700; color:var(--clr-primary); min-width:70px; text-align:right; }
+.prod-price { font-size:.85rem; font-weight:700; color:#555; min-width:70px; text-align:right; }
+
+.empty-state { text-align:center; padding:48px; color:#aaa; }
+.empty-state .icon { font-size:2.5rem; margin-bottom:10px; }
+@media(max-width:900px){
+  .kpi-row { grid-template-columns:repeat(2,1fr); }
+  .charts-row { grid-template-columns:1fr; }
+}
+@media(max-width:480px){ .kpi-row { grid-template-columns:1fr 1fr; } }
+</style>
+
+<div class="an-page container">
+  <div class="an-header">
+    <h1>📊 Analytics</h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-val" style="color:#1a7a1a;">₹{{ total_revenue|floatformat:0 }}</div>
+      <div class="kpi-label">Total Revenue (Delivered)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📅</div>
+      <div class="kpi-val" style="color:#2196f3;">₹{{ this_month_revenue|floatformat:0 }}</div>
+      <div class="kpi-label">This Month Revenue</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-val" style="color:#ff8c00;">{{ total_orders }}</div>
+      <div class="kpi-label">Total Orders</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-val" style="color:#4caf50;">{{ delivered_orders }}</div>
+      <div class="kpi-label">Delivered Orders</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <!-- Revenue Line Chart -->
+    <div class="chart-card">
+      <h3>📈 Revenue — Last 30 Days</h3>
+      {% if revenue_labels != '[]' %}
+      <div class="chart-wrap">
+        <canvas id="revenueChart"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="icon">📈</div>
+        <p>No revenue data yet.<br>Revenue appears after orders are delivered.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Orders Bar Chart -->
+    <div class="chart-card">
+      <h3>📦 Orders — Last 30 Days</h3>
+      {% if orders_data != '[]' %}
+      <div class="chart-wrap">
+        <canvas id="ordersChart"></canvas>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <p>No order data yet.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Top Selling Products -->
+  <div class="top-card">
+    <h3>🏆 Top Selling Products</h3>
+    {% if top_products %}
+    {% for product in top_products %}
+    <div class="prod-row">
+      <div class="prod-rank {% if forloop.counter <= 3 %}gold{% endif %}">{{ forloop.counter }}</div>
+      <div>
+        <div class="prod-name">{{ product.name }}</div>
+        <div class="prod-cat">{{ product.category.name|default:"—" }}</div>
+      </div>
+      <div class="prod-sold">{{ product.bought_count }} sold</div>
+      <div class="prod-price">₹{{ product.discount_price }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">🏆</div>
+      <p>No product sales data yet.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const revenueLabels = {{ revenue_labels|safe }};
+const revenueData   = {{ revenue_data|safe }};
+const ordersData    = {{ orders_data|safe }};
+
+const lightGrid = 'rgba(0,0,0,0.05)';
+const tickColor = '#999';
+
+// Revenue Chart
+const rEl = document.getElementById('revenueChart');
+if (rEl && revenueLabels.length > 0) {
+  new Chart(rEl, {
+    type: 'line',
+    data: {
+      labels: revenueLabels,
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: revenueData,
+        borderColor: '#226b2e',
+        backgroundColor: 'rgba(34,107,46,0.10)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#226b2e',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => '₹' + ctx.parsed.y.toLocaleString('en-IN') }
+        }
+      },
+      scales: {
+        x: { grid: { color: lightGrid }, ticks: { color: tickColor, font: { size: 11 } } },
+        y: { grid: { color: lightGrid }, ticks: { color: tickColor, font: { size: 11 }, callback: v => '₹' + v } }
+      }
+    }
+  });
+}
+
+// Orders Chart
+const oEl = document.getElementById('ordersChart');
+if (oEl && revenueLabels.length > 0) {
+  new Chart(oEl, {
+    type: 'bar',
+    data: {
+      labels: revenueLabels,
+      datasets: [{
+        label: 'Orders',
+        data: ordersData,
+        backgroundColor: 'rgba(33,150,243,0.25)',
+        borderColor: '#2196f3',
+        borderWidth: 1.5,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: lightGrid }, ticks: { color: tickColor, font: { size: 10 } } },
+        y: { grid: { color: lightGrid }, ticks: { color: tickColor, font: { size: 10 }, stepSize: 1 } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

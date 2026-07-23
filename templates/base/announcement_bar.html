@@ -1,0 +1,155 @@
+{% load static %}
+<!-- ★ ANNOUNCEMENT BAR -->
+<div class="announcement-bar" id="announcement-bar">
+  <div class="announcement-container">
+    <!-- Desktop text -->
+    <div class="announcement-items desktop-announcement">
+      <span class="announcement-item">✨ Welcome to {{ STORE_NAME }}</span>
+      <span class="announcement-sep">•</span>
+      <span class="announcement-item">🚀 <strong>FREE Delivery</strong> on orders above ₹799</span>
+      <span class="announcement-sep">•</span>
+      <span class="announcement-item">📱 Order on WhatsApp: <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi!%20I%20want%20to%20order" class="announcement-link">+91 {{ STORE_PHONE }}</a></span>
+      <span class="announcement-sep">•</span>
+      <span class="announcement-item">📍 288, Main Market, Meerut</span>
+    </div>
+    
+    <!-- Mobile scrolling marquee -->
+    <div class="announcement-marquee mobile-announcement">
+      <div class="marquee-track">
+        <span>✨ Welcome to {{ STORE_NAME }} &nbsp;•&nbsp; 🚀 FREE Delivery on orders above ₹799 &nbsp;•&nbsp; 📱 Order on WhatsApp: +91 {{ STORE_PHONE }} &nbsp;•&nbsp; 📍 288, Main Market, Meerut &nbsp;•&nbsp;</span>
+        <span>✨ Welcome to {{ STORE_NAME }} &nbsp;•&nbsp; 🚀 FREE Delivery on orders above ₹799 &nbsp;•&nbsp; 📱 Order on WhatsApp: +91 {{ STORE_PHONE }} &nbsp;•&nbsp; 📍 288, Main Market, Meerut &nbsp;•&nbsp;</span>
+      </div>
+    </div>
+    
+    <!-- Quick links (desktop only) -->
+    <div class="announcement-links">
+      <a href="{% url 'orders:list' %}" class="announcement-link">📦 Track Order</a>
+      <span class="announcement-sep">|</span>
+      <a href="https://wa.me/{{ WHATSAPP_NUMBER }}" class="announcement-link" target="_blank">💬 Help</a>
+      {% if request.user.is_authenticated %}
+      <span class="announcement-sep">|</span>
+      <div class="ann-notif-wrap" style="position:relative;display:inline-block;">
+        <button id="notification-bell-btn" onclick="toggleNavNotif(event)" style="background:none;border:none;cursor:pointer;color:white;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px;padding:0;line-height:1;">
+          <span style="position:relative;display:inline-flex;">
+            <i class="fa-solid fa-bell" style="font-size:13px;"></i>
+            <span id="notif-badge" style="display:none;position:absolute;top:-6px;right:-8px;min-width:14px;height:14px;background:#ff4757;color:white;border-radius:50%;font-size:8px;font-weight:800;align-items:center;justify-content:center;border:1.5px solid var(--clr-announcement,#1a5d1a);">0</span>
+          </span>
+          Notification
+        </button>
+        <!-- Dropdown panel -->
+        <div id="nav-notif-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;width:320px;background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:99999;overflow:hidden;">
+          <div style="background:var(--clr-primary,#2e7d32);color:white;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;">
+            <span>🔔 Notifications</span>
+            <button onclick="markAllNotifRead()" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:5px;padding:3px 7px;font-size:10px;cursor:pointer;">Mark all read</button>
+          </div>
+          <div id="notification-list" style="max-height:260px;overflow-y:auto;">
+            <div style="text-align:center;padding:28px 16px;color:#aaa;">
+              <div style="font-size:2rem;">🔔</div><p style="margin:6px 0 0;">No notifications yet</p>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-top:1px solid #f0f0f0;text-align:center;">
+            <a href="/notifications/" style="font-size:.82rem;color:var(--clr-primary,#2e7d32);font-weight:700;">View all →</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+/* Notification Hover Dropdown */
+.ann-notif-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.ann-notif-wrap:hover #nav-notif-dropdown,
+.ann-notif-wrap:focus-within #nav-notif-dropdown {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.ann-notif-wrap::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: transparent;
+}
+
+.announcement-bar {
+  background: var(--clr-announcement);
+  color: white;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  padding: 8px 0;
+  z-index: var(--z-announcement);
+  position: relative;
+}
+
+.announcement-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.announcement-items {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+  justify-content: center;
+}
+
+.announcement-sep { opacity: 0.4; }
+
+.announcement-link {
+  color: var(--clr-cta-yellow);
+  font-weight: 600;
+  transition: opacity var(--transition-fast);
+}
+
+.announcement-link:hover { opacity: 0.8; color: var(--clr-cta-yellow); }
+
+.announcement-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Marquee */
+.announcement-marquee {
+  flex: 1;
+  overflow: hidden;
+  display: none;
+}
+
+.marquee-track {
+  display: flex;
+  animation: marquee 25s linear infinite;
+  white-space: nowrap;
+}
+
+.marquee-track:hover { animation-play-state: paused; }
+
+/* Responsive */
+@media (max-width: 767px) {
+  .desktop-announcement, .announcement-links { display: none; }
+  .mobile-announcement { display: flex; }
+  .announcement-container { justify-content: center; }
+}
+
+@media (min-width: 768px) {
+  .mobile-announcement { display: none; }
+}
+</style>

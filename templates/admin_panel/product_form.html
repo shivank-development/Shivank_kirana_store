@@ -1,0 +1,292 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ title }} — Admin{% endblock %}
+
+{% block content %}
+<style>
+.pe-page { padding: 36px 0; }
+.pe-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+.pe-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* ── Section Card ── */
+.pe-card {
+  background:#fff; border-radius:18px; border:1px solid #e4ece4;
+  box-shadow:0 4px 20px rgba(0,0,0,0.05); margin-bottom:22px; overflow:hidden;
+}
+.pe-card-head {
+  display:flex; align-items:center; gap:10px;
+  padding:16px 24px; border-bottom:1px solid #eef3ee;
+  background:#f9fcf9; font-weight:700; font-size:.98rem; color:#1a5d1a;
+}
+.pe-card-head .ph-icon { font-size:1.05rem; background:#e8f5e9; padding:7px 9px; border-radius:10px; }
+.pe-card-body { padding:24px; }
+
+/* ── Form Grid ── */
+.pe-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.pe-full { grid-column:span 2; }
+
+/* ── Fields ── */
+.pe-group { display:flex; flex-direction:column; gap:7px; }
+.pe-group label {
+  font-size:.75rem; font-weight:700; color:#666;
+  text-transform:uppercase; letter-spacing:.05em;
+}
+.pe-group input[type=text],
+.pe-group input[type=number],
+.pe-group textarea,
+.pe-group select {
+  padding:11px 15px; border:2px solid #dce8dc;
+  border-radius:12px; font-size:.93rem; color:#333;
+  background:#f8faf8; outline:none; transition:all .2s; width:100%;
+}
+.pe-group input:focus,
+.pe-group textarea:focus,
+.pe-group select:focus {
+  border-color:#226b2e; background:#fff;
+  box-shadow:0 0 0 4px rgba(34,107,46,0.08);
+}
+.pe-group textarea { resize:vertical; min-height:100px; }
+.pe-group input[type=file] {
+  padding:9px 12px; border:2px dashed #c8e0c8;
+  border-radius:12px; background:#f5faf5; color:#555;
+}
+.pe-group input[type=file]::file-selector-button {
+  background:#e8f5e9; color:#226b2e; border:none;
+  padding:6px 14px; border-radius:8px; font-weight:600; margin-right:12px; cursor:pointer;
+}
+.field-err { color:#c62828; font-size:.78rem; margin-top:2px; }
+.help-text { font-size:.78rem; color:#999; margin-top:3px; }
+
+/* ── Toggle Flags ── */
+.flags-row { display:flex; flex-wrap:wrap; gap:12px; }
+.flag-toggle { display:flex; align-items:center; gap:8px; background:#f5f8f5; border-radius:12px; padding:10px 16px; border:1px solid #dce8dc; cursor:pointer; font-weight:600; font-size:.88rem; color:#444; transition:all .2s; }
+.flag-toggle:hover { background:#e8f5e9; border-color:#c8e6c9; }
+.flag-toggle input[type=checkbox] { width:18px; height:18px; accent-color:#226b2e; cursor:pointer; }
+
+/* ── Gallery Table ── */
+.gallery-table { width:100%; border-collapse:collapse; }
+.gallery-table th { background:#f5f8f5; padding:10px 14px; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:#888; font-weight:700; text-align:left; }
+.gallery-table td { padding:12px 14px; border-top:1px solid #f0f5f0; vertical-align:middle; }
+.gallery-table tr:hover td { background:#fafcfa; }
+.gallery-table input[type=number] { width:80px; padding:7px 10px; border:2px solid #dce8dc; border-radius:8px; font-size:.88rem; background:#f8faf8; outline:none; }
+.gallery-table input[type=number]:focus { border-color:#226b2e; }
+.gallery-table input[type=checkbox] { width:18px; height:18px; accent-color:#d32f2f; }
+
+/* ── Actions ── */
+.pe-actions { display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:24px; border-top:1px solid #eef3ee; }
+.pe-btn-cancel { background:#f1f5f1; color:#555; padding:13px 26px; border-radius:12px; font-weight:600; text-decoration:none; border:none; font-size:.95rem; cursor:pointer; transition:all .2s; }
+.pe-btn-cancel:hover { background:#e5ece5; }
+.pe-btn-save { background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; padding:13px 36px; border-radius:12px; font-weight:700; font-size:1rem; border:none; cursor:pointer; box-shadow:0 4px 16px rgba(34,107,46,0.25); transition:all .2s; display:flex; align-items:center; gap:8px; }
+.pe-btn-save:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(34,107,46,0.3); }
+
+.error-alert { background:#ffebee; color:#c62828; padding:14px 18px; border-radius:12px; border:1px solid #ffcdd2; margin-bottom:22px; font-weight:600; }
+
+@media(max-width:768px) { .pe-grid { grid-template-columns:1fr; } .pe-full { grid-column:span 1; } .pe-card-body { padding:16px; } }
+</style>
+
+<div class="pe-page container">
+  <div class="pe-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">📦</span>
+      {{ title }}
+    </h1>
+    <a href="{% url 'admin_panel:product_list' %}" class="btn btn-outline" style="font-size:.9rem;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Products
+    </a>
+  </div>
+
+  {% if form.non_field_errors %}
+    <div class="error-alert">⚠️ {{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- ── Basic Details ── -->
+    <div class="pe-card">
+      <div class="pe-card-head">
+        <span class="ph-icon">📝</span> Basic Details
+      </div>
+      <div class="pe-card-body">
+        <div class="pe-grid">
+          <div class="pe-group">
+            <label>Product Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}<span class="field-err">{{ form.name.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Slug (URL friendly)</label>
+            {{ form.slug }}
+            <span class="help-text">e.g. lays-classic-salted. Must be unique.</span>
+            {% if form.slug.errors %}<span class="field-err">{{ form.slug.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Brand</label>
+            {{ form.brand }}
+            {% if form.brand.errors %}<span class="field-err">{{ form.brand.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Category</label>
+            {{ form.category }}
+            {% if form.category.errors %}<span class="field-err">{{ form.category.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group pe-full">
+            <label>Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}<span class="field-err">{{ form.description.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Pricing & Stock ── -->
+    <div class="pe-card">
+      <div class="pe-card-head">
+        <span class="ph-icon">💰</span> Pricing & Stock
+      </div>
+      <div class="pe-card-body">
+        <div class="pe-grid">
+          <div class="pe-group">
+            <label>MRP Price (₹)</label>
+            {{ form.price }}
+            <span class="help-text">Original market price (crossed out)</span>
+            {% if form.price.errors %}<span class="field-err">{{ form.price.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Selling Price (₹)</label>
+            {{ form.discount_price }}
+            <span class="help-text">Actual price customer pays</span>
+            {% if form.discount_price.errors %}<span class="field-err">{{ form.discount_price.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Stock Available (Units)</label>
+            {{ form.stock }}
+            {% if form.stock.errors %}<span class="field-err">{{ form.stock.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Min Stock Alert Level</label>
+            {{ form.min_stock_alert }}
+            <span class="help-text">Alert triggers below this quantity</span>
+            {% if form.min_stock_alert.errors %}<span class="field-err">{{ form.min_stock_alert.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Attributes & Media ── -->
+    <div class="pe-card">
+      <div class="pe-card-head">
+        <span class="ph-icon">🏷️</span> Attributes & Media
+      </div>
+      <div class="pe-card-body">
+        <div class="pe-grid">
+          <div class="pe-group">
+            <label>Weight / Volume</label>
+            {{ form.weight }}
+            <span class="help-text">e.g. 250g, 1L, 6pcs</span>
+            {% if form.weight.errors %}<span class="field-err">{{ form.weight.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group">
+            <label>Delivery ETA</label>
+            {{ form.delivery_eta }}
+            <span class="help-text">e.g. Delivered in 30 mins</span>
+            {% if form.delivery_eta.errors %}<span class="field-err">{{ form.delivery_eta.errors.0 }}</span>{% endif %}
+          </div>
+          <div class="pe-group pe-full">
+            <label>Main Product Image</label>
+            {{ form.image_main }}
+            {% if form.image_main.errors %}<span class="field-err">{{ form.image_main.errors.0 }}</span>{% endif %}
+          </div>
+        </div>
+
+        <!-- Flags -->
+        <div style="margin-top:22px;">
+          <div style="font-size:.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Product Flags</div>
+          <div class="flags-row">
+            <label class="flag-toggle">{{ form.is_active }} <span>✅ Active</span></label>
+            <label class="flag-toggle">{{ form.is_featured }} <span>⭐ Featured</span></label>
+            <label class="flag-toggle">{{ form.is_new_launch }} <span>🆕 New Launch</span></label>
+            <label class="flag-toggle">{{ form.is_combo_deal }} <span>🎁 Combo Deal</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Product Gallery ── -->
+    <div class="pe-card">
+      <div class="pe-card-head">
+        <span class="ph-icon">🖼️</span> Product Gallery (Extra Images)
+      </div>
+      <div class="pe-card-body">
+        {{ image_formset.management_form }}
+        {% if image_formset.total_form_count > 0 %}
+        <div style="overflow-x:auto;">
+          <table class="gallery-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Image File</th>
+                <th>Sort Order</th>
+                <th>Delete?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for image_form in image_formset %}
+              <tr>
+                <td style="color:#aaa;font-size:.82rem;">{{ forloop.counter }}</td>
+                <td>{{ image_form.id }} {{ image_form.image }}</td>
+                <td>{{ image_form.sort_order }}</td>
+                <td>{% if image_form.instance.pk %}<label style="display:flex;align-items:center;gap:6px;color:#c62828;font-size:.82rem;font-weight:600;">{{ image_form.DELETE }} Delete</label>{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p style="color:#aaa;text-align:center;padding:20px;">No gallery images. Save first to add gallery images.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── Bulk Pricing ── -->
+    <div class="pe-card">
+      <div class="pe-card-head">
+        <span class="ph-icon">📊</span> Bulk Pricing — Buy More, Save More
+      </div>
+      <div class="pe-card-body">
+        {{ pricing_formset.management_form }}
+        <div style="overflow-x:auto;">
+          <table class="gallery-table">
+            <thead>
+              <tr>
+                <th>Min Quantity</th>
+                <th>Price / Unit (₹)</th>
+                <th>Discount Label</th>
+                <th>Delete?</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pricing_form in pricing_formset %}
+              <tr>
+                <td>{{ pricing_form.id }} {{ pricing_form.min_quantity }}</td>
+                <td>{{ pricing_form.price_per_unit }}</td>
+                <td>{{ pricing_form.discount_label }}</td>
+                <td>{% if pricing_form.instance.pk %}<label style="display:flex;align-items:center;gap:6px;color:#c62828;font-size:.82rem;font-weight:600;">{{ pricing_form.DELETE }} Delete</label>{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p style="color:#aaa;font-size:.8rem;margin-top:12px;">💡 Example: Min qty 3 → ₹45/unit with label "Buy 3, Save 10%"</p>
+      </div>
+    </div>
+
+    <!-- ── Save Actions ── -->
+    <div class="pe-actions">
+      <a href="{% url 'admin_panel:product_list' %}" class="pe-btn-cancel">Cancel</a>
+      <button type="submit" class="pe-btn-save">
+        <i class="fa-solid fa-floppy-disk"></i> Save Product & All Data
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

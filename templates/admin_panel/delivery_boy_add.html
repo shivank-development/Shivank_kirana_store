@@ -1,0 +1,114 @@
+{% extends 'base/base.html' %}
+{% block title %}Add Delivery Boy — Admin{% endblock %}
+{% block content %}
+<style>
+.db-page { padding: 40px 0; }
+.db-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:12px; }
+.db-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+.db-card { background:#fff; border-radius:20px; padding:36px; box-shadow:0 4px 24px rgba(0,0,0,0.06); border:1px solid #e4ece4; max-width:680px; margin:0 auto; }
+
+.db-section-title { font-size:.78rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.06em; margin:24px 0 14px; border-top:1px solid #eef3ee; padding-top:18px; }
+.db-section-title:first-of-type { border-top:none; margin-top:0; padding-top:0; }
+
+.db-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.db-full { grid-column:span 2; }
+
+.db-group { display:flex; flex-direction:column; gap:7px; }
+.db-group label { font-size:.78rem; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:.04em; }
+.db-group input, .db-group select {
+  padding:12px 15px; border:2px solid #dce8dc; border-radius:12px;
+  font-size:.93rem; color:#333; background:#f8faf8; outline:none; transition:all .2s;
+}
+.db-group input:focus, .db-group select:focus {
+  border-color:#226b2e; background:#fff;
+  box-shadow:0 0 0 4px rgba(34,107,46,0.08);
+}
+.db-group .hint { font-size:.76rem; color:#aaa; }
+
+.required-mark { color:#d32f2f; }
+
+.db-actions { display:flex; justify-content:space-between; align-items:center; margin-top:28px; padding-top:22px; border-top:1px solid #eef3ee; }
+.btn-cancel-db { background:#f1f5f1; color:#555; padding:12px 24px; border-radius:12px; font-weight:600; text-decoration:none; font-size:.95rem; }
+.btn-cancel-db:hover { background:#e5ece5; }
+.btn-add-db { background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; padding:12px 32px; border-radius:12px; font-weight:700; font-size:.95rem; border:none; cursor:pointer; box-shadow:0 4px 16px rgba(34,107,46,0.25); transition:all .2s; display:flex; align-items:center; gap:8px; }
+.btn-add-db:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(34,107,46,0.3); }
+
+.error-alert { background:#ffebee; color:#c62828; padding:14px 18px; border-radius:12px; border:1px solid #ffcdd2; margin-bottom:22px; font-weight:600; }
+
+@media(max-width:600px){ .db-grid { grid-template-columns:1fr; } .db-full { grid-column:span 1; } }
+</style>
+
+<div class="db-page container">
+  <div class="db-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">🛵</span>
+      Add Delivery Boy
+    </h1>
+    <a href="{% url 'admin_panel:delivery_manage' %}" class="btn btn-outline" style="font-size:.9rem;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Delivery
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="error-alert">⚠️ {{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="db-card">
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Personal Info -->
+      <div class="db-section-title">👤 Personal Information</div>
+      <div class="db-grid">
+        <div class="db-group db-full">
+          <label>Full Name <span class="required-mark">*</span></label>
+          <input type="text" name="full_name" required placeholder="e.g. Ramesh Kumar" autocomplete="name">
+        </div>
+        <div class="db-group">
+          <label>Phone Number <span class="required-mark">*</span></label>
+          <input type="tel" name="phone" required placeholder="9876543210">
+          <span class="hint">This will be the login phone number</span>
+        </div>
+        <div class="db-group">
+          <label>Email (Optional)</label>
+          <input type="email" name="email" placeholder="ramesh@example.com">
+        </div>
+        <div class="db-group db-full">
+          <label>Login Password <span class="required-mark">*</span></label>
+          <input type="password" name="password" required placeholder="Set a strong password">
+        </div>
+      </div>
+
+      <!-- Vehicle Info -->
+      <div class="db-section-title">🛵 Vehicle Information</div>
+      <div class="db-grid">
+        <div class="db-group">
+          <label>Vehicle Type</label>
+          <select name="vehicle_type">
+            <option value="">— Select —</option>
+            <option value="Bike">🏍️ Bike</option>
+            <option value="Scooter">🛵 Scooter</option>
+            <option value="Cycle">🚲 Cycle</option>
+            <option value="E-Bike">⚡ E-Bike</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="db-group">
+          <label>Vehicle Number</label>
+          <input type="text" name="vehicle_number" placeholder="UP14AB1234">
+        </div>
+      </div>
+
+      <div class="db-actions">
+        <a href="{% url 'admin_panel:delivery_manage' %}" class="btn-cancel-db">Cancel</a>
+        <button type="submit" class="btn-add-db">
+          <i class="fa-solid fa-user-plus"></i> Add Delivery Boy
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

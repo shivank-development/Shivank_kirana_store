@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% block meta_description %}Shivank Kirana Store — Premium grocery & FMCG delivery in Meerut. Order Lay's, KitKat, Haldiram's, Amul & more. Free delivery on orders above ₹799.{% endblock %}">
+  <meta name="keywords" content="kirana store, online grocery, Meerut delivery, Lay's, KitKat, Haldiram's, Amul, Maggi, daily essentials">
+  <meta name="author" content="Shivank So Om Pal (Paagle Badshah)">
+  <meta property="og:title" content="{% block og_title %}Shivank Kirana Store{% endblock %}">
+  <meta property="og:type" content="website">
+  
+  <title>{% block title %}Shivank Kirana Store — Daily Essentials, Delivered{% endblock %}</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="{% static 'css/base/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base/reset.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base/utilities.css' %}">
+  <link rel="stylesheet" href="{% static 'css/animations/animations.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/navbar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/product-card.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/footer.css' %}">
+  
+  <!-- Page-specific CSS -->
+  {% block extra_css %}{% endblock %}
+  
+  <!-- CSRF for AJAX -->
+  <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+  <!-- ★ ANNOUNCEMENT BAR -->
+  {% include 'base/announcement_bar.html' %}
+
+  <!-- ★ NAVBAR -->
+  {% include 'base/navbar.html' %}
+
+  <!-- ★ CATEGORY SIDEBAR (desktop) -->
+  <div id="category-sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+  {% include 'base/sidebar.html' %}
+
+  <!-- ★ MAIN CONTENT -->
+  <main id="main-content" class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ★ FOOTER -->
+  {% include 'base/footer.html' %}
+
+  <!-- ★ FLOATING CART (desktop) -->
+  {% include 'base/floating_cart.html' %}
+
+  <!-- ★ BOTTOM NAVIGATION (mobile) -->
+  {% include 'base/bottom_nav.html' %}
+
+  <!-- ★ TOAST NOTIFICATIONS -->
+  <div id="toast-container" class="toast-container"></div>
+  <!-- Notification Bell JS -->
+  <script>
+    function toggleNavNotif(e) {
+      e.stopPropagation();
+      const dd = document.getElementById('nav-notif-dropdown');
+      if (!dd) return;
+      const isOpen = dd.style.display === 'block';
+      dd.style.display = isOpen ? 'none' : 'block';
+    }
+    function markAllNotifRead() {
+      document.querySelectorAll('.notif-item.unread').forEach(el => {
+        el.classList.remove('unread');
+        el.querySelector('.notif-dot')?.remove();
+      });
+      const badge = document.getElementById('notif-badge');
+      if (badge) badge.style.display = 'none';
+    }
+    document.addEventListener('click', function(e) {
+      const wrap = document.querySelector('.nav-notif-wrap');
+      const dd   = document.getElementById('nav-notif-dropdown');
+      if (dd && wrap && !wrap.contains(e.target)) dd.style.display = 'none';
+    });
+
+    // Auto-refresh page on browser Back button press so stale action states are never displayed
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+        window.location.reload();
+      }
+    });
+  </script>
+
+
+  <!-- ★ SCRIPTS ─── -->
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Core JS -->
+  <script>
+    // ─── Global config for JS modules ───
+    window.KIRANA_CONFIG = {
+      csrfToken: '{{ csrf_token }}',
+      isAuthenticated: {{ request.user.is_authenticated|lower }},
+      userId: {% if request.user.is_authenticated %}{{ request.user.id }}{% else %}null{% endif %},
+      storeName: '{{ STORE_NAME|escapejs }}',
+      whatsappNumber: '{{ WHATSAPP_NUMBER }}',
+      googleMapsKey: '{{ GOOGLE_MAPS_API_KEY }}',
+      freDeliveryThreshold: 799,
+    };
+  </script>
+  <script src="{% static 'js/core/utils.js' %}"></script>
+  <script src="{% static 'js/core/app.js' %}"></script>
+  <script src="{% static 'js/cart/cart_ui.js' %}"></script>
+  <script src="{% static 'js/cart/cart_manager.js' %}"></script>
+  <script src="{% static 'js/search/search_handler.js' %}"></script>
+  <script src="{% static 'js/wishlist/wishlist_manager.js' %}"></script>
+  <script src="{% static 'js/websocket/notification_ws.js' %}"></script>
+  <script src="{% static 'js/animations/gsap_init.js' %}"></script>
+
+  <!-- Page-specific JS -->
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>

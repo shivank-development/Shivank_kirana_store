@@ -1,0 +1,202 @@
+{% extends 'base/base.html' %}
+{% block title %}Reports — Admin{% endblock %}
+{% block content %}
+<style>
+.rp-page { padding: 36px 0; }
+
+/* Header */
+.rp-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; gap:12px; flex-wrap:wrap; }
+.rp-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* ── KPI Grid ── */
+.rp-kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+.rp-kpi-card { background:#fff; border-radius:18px; padding:22px 24px; border:1px solid #e4ece4; box-shadow:0 4px 16px rgba(0,0,0,0.05); position:relative; overflow:hidden; }
+.rp-kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; border-radius:18px 18px 0 0; }
+.kpi-orders::before    { background:linear-gradient(90deg,#226b2e,#4caf50); }
+.kpi-revenue::before   { background:linear-gradient(90deg,#1565c0,#42a5f5); }
+.kpi-today-o::before   { background:linear-gradient(90deg,#e65100,#ff9800); }
+.kpi-today-r::before   { background:linear-gradient(90deg,#6a1b9a,#ab47bc); }
+.rp-knum { font-size:2.2rem; font-weight:900; line-height:1; margin-bottom:6px; }
+.rp-klbl { font-size:.8rem; font-weight:600; color:#888; }
+.rp-ktag { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; margin-top:6px; }
+
+/* ── Section Title ── */
+.rp-section-title { font-size:1.1rem; font-weight:800; color:#1a3a1a; margin:0 0 18px; display:flex; align-items:center; gap:10px; }
+.rp-section-title .st-icon { background:#e8f5e9; padding:7px 9px; border-radius:10px; font-size:1rem; }
+
+/* ── Report Cards Grid ── */
+.rp-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:20px; }
+
+.rp-card { background:#fff; border-radius:18px; padding:28px; border:1px solid #e4ece4; box-shadow:0 4px 18px rgba(0,0,0,0.05); display:flex; flex-direction:column; transition:all .2s; }
+.rp-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,0.09); }
+
+.rp-card-icon { width:58px; height:58px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:16px; flex-shrink:0; }
+.rci-orders   { background:linear-gradient(135deg,#e8f5e9,#c8e6c9); }
+.rci-payments { background:linear-gradient(135deg,#e3f2fd,#bbdefb); }
+.rci-stock    { background:linear-gradient(135deg,#fff8e1,#ffe082); }
+.rci-analytics { background:linear-gradient(135deg,#f3e5f5,#ce93d8); }
+.rci-customers { background:linear-gradient(135deg,#e0f2f1,#80cbc4); }
+.rci-export   { background:linear-gradient(135deg,#fce4ec,#f48fb1); }
+
+.rp-card-title { font-size:1.05rem; font-weight:800; color:#1a3a1a; margin-bottom:8px; }
+.rp-card-desc { font-size:.85rem; color:#888; line-height:1.6; margin-bottom:20px; flex:1; }
+
+/* Date filter inside card */
+.date-filter { margin-bottom:16px; }
+.date-filter-label { font-size:.73rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; }
+.date-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.date-group label { font-size:.73rem; font-weight:600; color:#aaa; display:block; margin-bottom:4px; }
+.date-group input[type=date] { width:100%; padding:9px 12px; border:2px solid #dce8dc; border-radius:10px; font-size:.83rem; color:#333; background:#f8faf8; outline:none; transition:all .2s; }
+.date-group input[type=date]:focus { border-color:#226b2e; background:#fff; }
+
+/* Action buttons */
+.btn-download {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 20px; border-radius:12px; width:100%;
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff;
+  font-weight:700; font-size:.9rem; border:none; cursor:pointer;
+  box-shadow:0 4px 14px rgba(34,107,46,0.25); transition:all .2s; text-decoration:none;
+}
+.btn-download:hover { transform:translateY(-1px); box-shadow:0 8px 22px rgba(34,107,46,0.3); color:#fff; }
+
+.btn-view-link {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 20px; border-radius:12px; width:100%;
+  border:2px solid #dce8dc; color:#226b2e; background:#f8faf8;
+  font-weight:700; font-size:.9rem; text-decoration:none; transition:all .2s;
+}
+.btn-view-link:hover { background:#e8f5e9; border-color:#c8e6c9; color:#1a5d1a; }
+
+.btn-analytics-link {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 20px; border-radius:12px; width:100%;
+  background:linear-gradient(135deg,#6a1b9a,#9c27b0); color:#fff;
+  font-weight:700; font-size:.9rem; text-decoration:none;
+  box-shadow:0 4px 14px rgba(106,27,154,0.2); transition:all .2s;
+}
+.btn-analytics-link:hover { transform:translateY(-1px); box-shadow:0 8px 22px rgba(106,27,154,0.3); color:#fff; }
+
+@media(max-width:900px){ .rp-kpi { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px){ .rp-kpi { grid-template-columns:1fr 1fr; } .date-row { grid-template-columns:1fr; } }
+</style>
+
+<div class="rp-page container">
+  <div class="rp-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">📋</span>
+      Reports & Insights
+    </h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="rp-kpi">
+    <div class="rp-kpi-card kpi-orders">
+      <div class="rp-knum" style="color:#226b2e;">{{ stats.total_orders }}</div>
+      <div class="rp-klbl">Total Orders</div>
+      <span class="rp-ktag" style="background:#e8f5e9;color:#226b2e;">All Time</span>
+    </div>
+    <div class="rp-kpi-card kpi-revenue">
+      <div class="rp-knum" style="color:#1565c0;">₹{{ stats.total_revenue|floatformat:0 }}</div>
+      <div class="rp-klbl">Total Revenue</div>
+      <span class="rp-ktag" style="background:#e3f2fd;color:#1565c0;">Gross</span>
+    </div>
+    <div class="rp-kpi-card kpi-today-o">
+      <div class="rp-knum" style="color:#e65100;">{{ stats.today_orders }}</div>
+      <div class="rp-klbl">Today's Orders</div>
+      <span class="rp-ktag" style="background:#fff3e0;color:#e65100;">Today</span>
+    </div>
+    <div class="rp-kpi-card kpi-today-r">
+      <div class="rp-knum" style="color:#6a1b9a;">₹{{ stats.today_revenue|floatformat:0 }}</div>
+      <div class="rp-klbl">Today's Revenue</div>
+      <span class="rp-ktag" style="background:#f3e5f5;color:#6a1b9a;">Today</span>
+    </div>
+  </div>
+
+  <!-- Section Title -->
+  <div class="rp-section-title">
+    <span class="st-icon">⬇️</span> Download & View Reports
+  </div>
+
+  <!-- Report Cards -->
+  <div class="rp-cards">
+
+    <!-- Orders CSV Download -->
+    <div class="rp-card">
+      <div class="rp-card-icon rci-orders">📦</div>
+      <div class="rp-card-title">Orders Report (CSV)</div>
+      <div class="rp-card-desc">Download all orders with customer details, amounts, payment method and delivery status. Filter by date range.</div>
+      <form method="get">
+        <div class="date-filter">
+          <div class="date-filter-label">📅 Filter by date range</div>
+          <div class="date-row">
+            <div class="date-group">
+              <label>From Date</label>
+              <input type="date" name="from">
+            </div>
+            <div class="date-group">
+              <label>To Date</label>
+              <input type="date" name="to">
+            </div>
+          </div>
+        </div>
+        <input type="hidden" name="type" value="orders_csv">
+        <button type="submit" class="btn-download">
+          <i class="fa-solid fa-download"></i> Download CSV
+        </button>
+      </form>
+    </div>
+
+    <!-- Payments Summary -->
+    <div class="rp-card">
+      <div class="rp-card-icon rci-payments">💳</div>
+      <div class="rp-card-title">Payments Summary</div>
+      <div class="rp-card-desc">View all payment records — approval status, UPI transaction IDs, COD confirmations, and refund history.</div>
+      <a href="{% url 'admin_panel:payments_manage' %}" class="btn-view-link">
+        <i class="fa-solid fa-arrow-right"></i> View Payments
+      </a>
+    </div>
+
+    <!-- Stock Report -->
+    <div class="rp-card">
+      <div class="rp-card-icon rci-stock">⚠️</div>
+      <div class="rp-card-title">Stock Alert Report</div>
+      <div class="rp-card-desc">See which products are running low, in critical range, or completely out of stock. Act fast to restock.</div>
+      <a href="{% url 'admin_panel:stock_alerts' %}" class="btn-view-link">
+        <i class="fa-solid fa-arrow-right"></i> View Stock Report
+      </a>
+    </div>
+
+    <!-- Revenue Analytics -->
+    <div class="rp-card">
+      <div class="rp-card-icon rci-analytics">📊</div>
+      <div class="rp-card-title">Revenue Analytics</div>
+      <div class="rp-card-desc">Visual charts showing revenue trends, daily order volume, top-selling products, and customer activity over time.</div>
+      <a href="{% url 'admin_panel:analytics_page' %}" class="btn-analytics-link">
+        <i class="fa-solid fa-chart-line"></i> View Analytics
+      </a>
+    </div>
+
+    <!-- Customers Report -->
+    <div class="rp-card">
+      <div class="rp-card-icon rci-customers">👥</div>
+      <div class="rp-card-title">Customer Directory</div>
+      <div class="rp-card-desc">Browse all registered customers, their order history, total spending, and account status (active / blocked).</div>
+      <a href="{% url 'admin_panel:customers_manage' %}" class="btn-view-link">
+        <i class="fa-solid fa-arrow-right"></i> View Customers
+      </a>
+    </div>
+
+    <!-- Delivery Report -->
+    <div class="rp-card">
+      <div class="rp-card-icon rci-export">🛵</div>
+      <div class="rp-card-title">Delivery Overview</div>
+      <div class="rp-card-desc">Check active deliveries, assign delivery boys to pending orders, and track all on-ground delivery agents.</div>
+      <a href="{% url 'admin_panel:delivery_manage' %}" class="btn-view-link">
+        <i class="fa-solid fa-arrow-right"></i> View Deliveries
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

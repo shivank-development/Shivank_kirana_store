@@ -1,0 +1,283 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Manage Delivery Pincodes — Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+  .admin-page { padding: 30px 0 60px; background: #f8fafc; min-height: 80vh; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .admin-header h1 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px; }
+  .btn-back { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: #475569; text-decoration: none; background: white; padding: 8px 16px; border-radius: 10px; border: 1px solid #e2e8f0; }
+
+  /* Stats Grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: white; padding: 18px; border-radius: 14px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.02); }
+  .stat-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+  .stat-num { font-size: 1.4rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+  .stat-lbl { font-size: .8rem; font-weight: 600; color: #64748b; margin-top: 2px; }
+
+  /* Two Column Layout */
+  .grid-layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+  @media(max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
+
+  /* Form Card */
+  .cp-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,.03); }
+  .cp-card-head { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
+  .cp-form-grp { margin-bottom: 16px; }
+  .cp-form-grp label { display: block; font-size: .82rem; font-weight: 700; color: #334155; margin-bottom: 6px; }
+  .cp-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #cbd5e1; font-size: .92rem; outline: none; transition: border-color .2s; }
+  .cp-input:focus { border-color: #166534; box-shadow: 0 0 0 3px rgba(22,101,52,.1); }
+  .btn-submit { width: 100%; padding: 12px; background: #166534; color: white; border: none; border-radius: 10px; font-weight: 800; font-size: .95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s; }
+  .btn-submit:hover { background: #14532d; }
+
+  /* Table Card */
+  .cp-table-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.03); }
+  .cp-table-head { padding: 18px 22px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+  .cp-table-title { font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+  
+  .cp-table { width: 100%; border-collapse: collapse; text-align: left; }
+  .cp-table th { background: #f8fafc; padding: 12px 20px; font-size: .78rem; font-weight: 800; text-transform: uppercase; color: #475569; border-bottom: 1px solid #e2e8f0; }
+  .cp-table td { padding: 14px 20px; border-bottom: 1px solid #f1f5f9; font-size: .9rem; color: #1e293b; vertical-align: middle; }
+  .cp-table tr:last-child td { border-bottom: none; }
+  .cp-table tr:hover td { background: #fafdfe; }
+
+  .badge-active { background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-inactive { background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
+
+  .action-btns { display: flex; align-items: center; gap: 8px; }
+  .btn-act { padding: 6px 12px; border-radius: 8px; font-size: .78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border: none; }
+  .btn-act-toggle { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+  .btn-act-toggle:hover { background: #e2e8f0; }
+  .btn-act-del { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .btn-act-del:hover { background: #fee2e2; }
+
+  /* ── Custom Center Delete Modal ── */
+  .custom-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; visibility: hidden; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .custom-modal-overlay.active { opacity: 1; visibility: visible; }
+  .custom-modal-box {
+    background: #ffffff; width: 100%; max-width: 440px; border-radius: 24px; padding: 32px 28px;
+    text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    transform: scale(0.9) translateY(20px); transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .custom-modal-overlay.active .custom-modal-box { transform: scale(1) translateY(0); }
+  .modal-header-icon { display: flex; justify-content: center; margin-bottom: 18px; }
+  .modal-icon-circle {
+    width: 68px; height: 68px; border-radius: 50%; background: #fef2f2; color: #dc2626; border: 4px solid #ffe4e4;
+    display: flex; align-items: center; justify-content: center; font-size: 1.7rem; box-shadow: 0 8px 18px rgba(220, 38, 38, 0.15);
+    animation: modalPulse 2s infinite;
+  }
+  @keyframes modalPulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.3); }
+    70% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+  }
+  .modal-title { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 10px 0; }
+  .modal-desc { font-size: 0.95rem; color: #64748b; margin: 0 0 18px 0; line-height: 1.5; }
+  .pincode-highlight { color: #0f172a; background: #f1f5f9; padding: 3px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 800; font-family: monospace; font-size: 1.05rem; }
+  .modal-warning-box {
+    background: #fffbe6; border: 1px solid #ffe58f; border-radius: 14px; padding: 12px 16px; font-size: 0.85rem;
+    color: #d46b08; display: flex; align-items: center; gap: 10px; text-align: left; margin-bottom: 24px; font-weight: 600;
+  }
+  .modal-actions { display: flex; gap: 12px; }
+  .btn-modal-cancel { flex: 1; padding: 13px; border-radius: 14px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: all 0.2s; }
+  .btn-modal-cancel:hover { background: #f1f5f9; color: #0f172a; }
+  .btn-modal-confirm {
+    flex: 1; padding: 13px; border-radius: 14px; border: none; background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff; font-weight: 700; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;
+  }
+  .btn-modal-confirm:hover { background: linear-gradient(135deg, #dc2626, #b91c1c); transform: translateY(-1px); color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <h1>📍 Delivery Pincodes Management</h1>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn-back">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      {% for msg in messages %}
+        <div style="padding:12px 18px;border-radius:12px;margin-bottom:20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:8px;{% if msg.tags == 'error' %}background:#ffebee;color:#c62828;border:1px solid #ffcdd2;{% else %}background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;{% endif %}">
+          <i class="fa-solid {% if msg.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-ico" style="background:#e8f5e9;color:#2e7d32;">📍</div>
+        <div>
+          <div class="stat-num">{{ pincodes|length }}</div>
+          <div class="stat-lbl">Total Deliverable Pincodes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:#e0f2fe;color:#0284c7;">✅</div>
+        <div>
+          <div class="stat-num">{{ active_count }}</div>
+          <div class="stat-lbl">Active Pincodes</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-layout">
+
+      <!-- Left Column: Form -->
+      <div class="cp-card">
+        <div class="cp-card-head">
+          <i class="fa-solid fa-plus-circle" style="color:#166534;"></i> Add Deliverable Pincode
+        </div>
+        <form method="post" action="{% url 'admin_panel:pincodes_manage' %}">
+          {% csrf_token %}
+          
+          <div class="cp-form-grp">
+            <label for="id_pincode">Pincode *</label>
+            <input type="text" id="id_pincode" name="pincode" class="cp-input" placeholder="e.g. 250001, 250002" required pattern="[0-9]{6}">
+          </div>
+
+          <div class="cp-form-grp">
+            <label for="id_area_name">Area / Locality Name (Optional)</label>
+            <input type="text" id="id_area_name" name="area_name" class="cp-input" placeholder="e.g. Meerut Cantt, Main Market">
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <i class="fa-solid fa-check"></i> Add / Activate Pincode
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Table -->
+      <div class="cp-table-card">
+        <div class="cp-table-head">
+          <div class="cp-table-title">
+            <i class="fa-solid fa-map-location-dot"></i> Allowed Delivery Pincodes
+          </div>
+          <span style="font-size:.8rem;font-weight:700;color:#64748b;background:#f1f5f9;padding:4px 12px;border-radius:20px;">
+            {{ pincodes|length }} total
+          </span>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="cp-table">
+            <thead>
+              <tr>
+                <th>Pincode</th>
+                <th>Area / Locality</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in pincodes %}
+              <tr>
+                <td style="font-weight:800;font-size:.95rem;color:#0f172a;">📍 {{ p.pincode }}</td>
+                <td style="color:#475569;font-weight:600;">{{ p.area_name|default:"General Area" }}</td>
+                <td>
+                  {% if p.is_active %}
+                    <span class="badge-active"><i class="fa-solid fa-circle-check"></i> Active</span>
+                  {% else %}
+                    <span class="badge-inactive"><i class="fa-solid fa-circle-xmark"></i> Disabled</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <a href="{% url 'admin_panel:pincode_toggle' p.id %}" class="btn-act btn-act-toggle">
+                      {% if p.is_active %}Disable{% else %}Enable{% endif %}
+                    </a>
+                    <button type="button" class="btn-act btn-act-del" onclick="promptDeletePincode('{{ p.pincode|escapejs }}', '{% url "admin_panel:pincode_delete" p.id %}')">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" style="text-align:center;padding:40px;color:#64748b;">
+                  <div style="font-size:2.5rem;margin-bottom:8px;">📍</div>
+                  <div style="font-weight:700;font-size:1.1rem;color:#0f172a;">No Specific Pincodes Added</div>
+                  <div style="font-size:.85rem;margin-top:4px;">Use the form on the left to restrict delivery to specific pincodes!</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Professional Center Delete Modal -->
+<div id="deleteModal" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="modal-header-icon">
+      <div class="modal-icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+    </div>
+    <h3 class="modal-title">Delete Pincode?</h3>
+    <p class="modal-desc">
+      Are you sure you want to delete delivery pincode <span id="modalPincode" class="pincode-highlight"></span>?
+    </p>
+    <div class="modal-warning-box">
+      <i class="fa-solid fa-circle-info" style="font-size:1.1rem;color:#e67e22;"></i>
+      <span>Customers from this pincode will no longer be allowed to place home delivery orders.</span>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <a href="#" class="btn-modal-confirm" id="confirmDeleteBtn">
+        <i class="fa-solid fa-trash"></i> Delete Pincode
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function promptDeletePincode(pincode, deleteUrl) {
+  document.getElementById('modalPincode').textContent = pincode;
+  document.getElementById('confirmDeleteBtn').setAttribute('href', deleteUrl);
+  
+  const modal = document.getElementById('deleteModal');
+  modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteModal');
+  modal.classList.remove('active');
+}
+
+// Close modal when clicking backdrop
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+</script>
+{% endblock %}

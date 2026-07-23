@@ -1,0 +1,121 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Return & Refund Policy — Shivank Kirana Store{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/policy.css' %}">{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <div class="policy-layout">
+
+      <aside class="policy-sidebar">
+        <h3>Customer Care</h3>
+        <nav class="policy-nav">
+          <a href="{% url 'about-us' %}"><i class="fa-solid fa-store"></i> About Us</a>
+          <a href="{% url 'privacy-policy' %}"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="{% url 'return-policy' %}" class="active"><i class="fa-solid fa-rotate-left"></i> Return Policy</a>
+          <a href="{% url 'shipping-policy' %}"><i class="fa-solid fa-truck"></i> Shipping Policy</a>
+          <a href="{% url 'faqs' %}"><i class="fa-solid fa-circle-question"></i> FAQs</a>
+          <a href="{% url 'contact-us' %}"><i class="fa-solid fa-headset"></i> Contact Us</a>
+        </nav>
+        <div style="height:1px;background:#eee;margin:14px 0;"></div>
+        <div class="policy-nav">
+          <a href="#return-window"><i class="fa-solid fa-calendar"></i> Return Window</a>
+          <a href="#eligible-items"><i class="fa-solid fa-check-circle"></i> Eligible Items</a>
+          <a href="#non-returnable"><i class="fa-solid fa-ban"></i> Non-Returnable</a>
+          <a href="#return-process"><i class="fa-solid fa-list-ol"></i> Return Process</a>
+          <a href="#refund-process"><i class="fa-solid fa-money-bill"></i> Refund Process</a>
+          <a href="#damaged-items"><i class="fa-solid fa-box-open"></i> Damaged Items</a>
+        </div>
+      </aside>
+
+      <div class="policy-content">
+        <div class="policy-hero">
+          <div class="policy-hero-icon">↩️</div>
+          <div>
+            <h1>Return & Refund Policy</h1>
+            <p>Hassle-free returns — aapki satisfaction hamari priority hai</p>
+          </div>
+        </div>
+
+        <section class="policy-section" id="return-window">
+          <h2><span class="sec-icon">📅</span> Return Window</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon">⚡</div>
+              <h4>Same-Day Returns</h4>
+              <p>Damaged/Wrong item — delivery ke time pe hi report karein</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">📅</div>
+              <h4>7-Day Returns</h4>
+              <p>Quality issue ya wrong product</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">❌</div>
+              <h4>No Return</h4>
+              <p>Perishable items (bread, dairy) — delivery ke baad</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="policy-section" id="eligible-items">
+          <h2><span class="sec-icon">✅</span> Return Eligible Items</h2>
+          <ul>
+            <li>Sealed/unopened packaged products (FMCG, snacks, beverages)</li>
+            <li>Wrong product received (e.g., 500g ki jagah 250g deliver hua)</li>
+            <li>Damaged packaging — product delivery ke time damaged tha</li>
+            <li>Expired product — expiry date pehle se cross ho chuki thi</li>
+            <li>Missing items from order</li>
+          </ul>
+          <div class="highlight-box">✅ Return eligible items ki original packaging honi chahiye.</div>
+        </section>
+
+        <section class="policy-section" id="non-returnable">
+          <h2><span class="sec-icon">🚫</span> Non-Returnable Items</h2>
+          <ul>
+            <li>Khule hue ya use kiye gaye products</li>
+            <li>Fresh dairy products (milk, curd) — ek baar open hone ke baad</li>
+            <li>Perishable items (fresh bread, vegetables)</li>
+            <li>Cosmetics/personal care — agar sealed packaging khol di gayi ho</li>
+          </ul>
+          <div class="warn-box">⚠️ Agar aapko delivery ke time koi issue dikhe, turant delivery boy ko batayein ya WhatsApp karein.</div>
+        </section>
+
+        <section class="policy-section" id="return-process">
+          <h2><span class="sec-icon">📋</span> Return Process (Step-by-Step)</h2>
+          <ol>
+            <li>Delivery ke time ya baad mein issue notice karein</li>
+            <li>WhatsApp par <strong>+91 7599342112</strong> pe message karein</li>
+            <li>Order number aur product photo bhejein</li>
+            <li>Hamari team 2 hours ke andar respond karegi</li>
+            <li>Return pickup arrange ki jayegi (ya store drop-off)</li>
+            <li>Product inspect hone ke baad refund ya replacement process hoga</li>
+          </ol>
+        </section>
+
+        <section class="policy-section" id="refund-process">
+          <h2><span class="sec-icon">💰</span> Refund Process</h2>
+          <ul>
+            <li><strong>UPI Payments:</strong> 2-3 business days mein original UPI ID par refund</li>
+            <li><strong>COD Orders:</strong> UPI ya bank transfer ke zariye refund</li>
+            <li><strong>Store Credit:</strong> Aap chahein toh wallet mein credit bhi le sakte hain (instant)</li>
+          </ul>
+          <div class="highlight-box">💡 Store credit sabse fast option hai — turant available!</div>
+        </section>
+
+        <section class="policy-section" id="damaged-items">
+          <h2><span class="sec-icon">📦</span> Damaged Items Policy</h2>
+          <p>Agar delivery ke time product damaged mile:</p>
+          <ul>
+            <li>Delivery boy ke saamne hi package check karein</li>
+            <li>Damaged item ki photo lein</li>
+            <li>Delivery accept karne se pehle humse contact karein</li>
+            <li>WhatsApp pe photo bhejein — hum replacement ya full refund denge</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

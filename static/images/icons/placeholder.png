@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" fill="#f0f0f0"/>
+  <g transform="translate(50,40)">
+    <!-- Shopping bag shape -->
+    <rect x="10" y="40" width="80" height="70" rx="6" ry="6" fill="#cccccc"/>
+    <path d="M30 40 Q30 15 50 15 Q70 15 70 40" stroke="#cccccc" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <!-- Handle hole -->
+    <rect x="35" y="32" width="30" height="14" rx="7" fill="#f0f0f0"/>
+  </g>
+  <text x="100" y="175" font-family="Arial" font-size="13" fill="#aaaaaa" text-anchor="middle">No Image</text>
+</svg>

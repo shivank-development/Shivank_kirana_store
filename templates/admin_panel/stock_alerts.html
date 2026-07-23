@@ -1,0 +1,289 @@
+{% extends 'base/base.html' %}
+{% block title %}Stock Alerts — Admin{% endblock %}
+{% block content %}
+<style>
+.sa-page { padding:36px 0; }
+
+/* Header */
+.sa-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; gap:12px; flex-wrap:wrap; }
+.sa-header h1 { font-size:1.9rem; font-weight:800; color:#b71c1c; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* ── KPI Chips ── */
+.kpi-row { display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+.kpi-chip { flex:1; min-width:160px; border-radius:18px; padding:20px 22px; display:flex; align-items:center; gap:14px; border:1px solid; box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+.kpi-chip .k-icon { font-size:1.8rem; width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.kpi-chip .k-num { font-size:2rem; font-weight:900; line-height:1; }
+.kpi-chip .k-label { font-size:.8rem; font-weight:600; margin-top:4px; }
+.kpi-critical { background:#fff5f5; border-color:#ffcdd2; }
+.kpi-critical .k-icon { background:#ffebee; }
+.kpi-critical .k-num { color:#c62828; }
+.kpi-critical .k-label { color:#e57373; }
+.kpi-low { background:#fffde7; border-color:#fff9c4; }
+.kpi-low .k-icon { background:#fff9c4; }
+.kpi-low .k-num { color:#f57f17; }
+.kpi-low .k-label { color:#fbc02d; }
+.kpi-out { background:#fafafa; border-color:#e0e0e0; }
+.kpi-out .k-icon { background:#f5f5f5; }
+.kpi-out .k-num { color:#757575; }
+.kpi-out .k-label { color:#9e9e9e; }
+
+/* ── Threshold Filter ── */
+.filter-card { background:#fff; border-radius:16px; padding:16px 22px; border:1px solid #e0e8e0; box-shadow:0 2px 12px rgba(0,0,0,0.04); margin-bottom:28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.filter-card label { font-size:.85rem; font-weight:700; color:#555; }
+.filter-card input { padding:8px 14px; border:2px solid #dce8dc; border-radius:10px; font-size:.92rem; width:80px; outline:none; color:#333; }
+.filter-card input:focus { border-color:#226b2e; box-shadow:0 0 0 3px rgba(34,107,46,0.1); }
+.filter-card button { background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; padding:9px 22px; border-radius:10px; font-size:.88rem; font-weight:700; border:none; cursor:pointer; box-shadow:0 3px 10px rgba(34,107,46,0.2); transition:all .2s; }
+.filter-card button:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(34,107,46,0.3); }
+
+/* ── Section Cards ── */
+.sa-section { margin-bottom:28px; }
+.sa-section-head { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-radius:14px 14px 0 0; font-weight:700; font-size:1rem; }
+.sh-critical { background:linear-gradient(135deg,#ffebee,#ffcdd2); color:#c62828; border:1px solid #ffcdd2; }
+.sh-low      { background:linear-gradient(135deg,#fffde7,#fff9c4); color:#f57f17; border:1px solid #ffe082; }
+.sh-out      { background:linear-gradient(135deg,#f5f5f5,#eeeeee); color:#616161; border:1px solid #e0e0e0; }
+.sa-count { font-size:.78rem; padding:3px 10px; border-radius:20px; font-weight:700; }
+.sc-critical { background:#ffcdd2; color:#b71c1c; }
+.sc-low      { background:#fff9c4; color:#e65100; }
+.sc-out      { background:#e0e0e0; color:#555; }
+
+/* ── Table ── */
+.sa-table-wrap { background:#fff; border-radius:0 0 14px 14px; overflow:hidden; border:1px solid; border-top:none; }
+.tw-critical { border-color:#ffcdd2; }
+.tw-low      { border-color:#ffe082; }
+.tw-out      { border-color:#e0e0e0; }
+.sa-table { width:100%; border-collapse:collapse; }
+.sa-table th { background:#f9f9f9; padding:11px 18px; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; }
+.sa-table td { padding:13px 18px; border-top:1px solid #f0f0f0; font-size:.9rem; vertical-align:middle; }
+.sa-table tr:hover td { background:#fafcfa; }
+
+/* Stock pill */
+.stock-pill { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; font-size:.8rem; font-weight:800; }
+.sp-critical { background:#ffebee; color:#c62828; }
+.sp-low      { background:#fff8e1; color:#e65100; }
+.sp-out      { background:#eeeeee; color:#616161; }
+
+/* ── Action Buttons ── */
+.btn-update-stock {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 18px; border-radius:10px;
+  font-size:.83rem; font-weight:700; text-decoration:none;
+  transition:all .2s; border:2px solid;
+}
+.btn-update-critical {
+  background:#fff5f5; color:#c62828; border-color:#ffcdd2;
+}
+.btn-update-critical:hover { background:#ffebee; transform:translateY(-1px); box-shadow:0 4px 12px rgba(198,40,40,0.15); }
+.btn-update-low {
+  background:#fffde7; color:#e65100; border-color:#ffe082;
+}
+.btn-update-low:hover { background:#fff9c4; transform:translateY(-1px); box-shadow:0 4px 12px rgba(245,127,23,0.15); }
+.btn-restock {
+  background:linear-gradient(135deg,#226b2e,#1a5d1a); color:#fff; border-color:transparent;
+  box-shadow:0 3px 10px rgba(34,107,46,0.2);
+}
+.btn-restock:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(34,107,46,0.3); }
+
+.empty-msg { text-align:center; padding:40px; color:#aaa; }
+.empty-msg .e-icon { font-size:2rem; margin-bottom:8px; }
+
+@media(max-width:700px){ .kpi-row { flex-direction:column; } }
+</style>
+
+<div class="sa-page container">
+  <div class="sa-header">
+    <h1>
+      <span style="background:#ffebee;border-radius:12px;padding:8px 12px;font-size:1.6rem;">⚠️</span>
+      Stock Alerts
+    </h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-chip kpi-critical">
+      <div class="k-icon">🔴</div>
+      <div>
+        <div class="k-num">{{ critical_count }}</div>
+        <div class="k-label">Critical (≤5 units)</div>
+      </div>
+    </div>
+    <div class="kpi-chip kpi-low">
+      <div class="k-icon">🟡</div>
+      <div>
+        <div class="k-num">{{ low_count }}</div>
+        <div class="k-label">Low Stock (≤{{ threshold }})</div>
+      </div>
+    </div>
+    <div class="kpi-chip kpi-out">
+      <div class="k-icon">⭕</div>
+      <div>
+        <div class="k-num">{{ out_count }}</div>
+        <div class="k-label">Out of Stock</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Threshold Filter -->
+  <form class="filter-card" method="get">
+    <label for="threshold-input"><i class="fa-solid fa-sliders"></i> Show low stock below:</label>
+    <input type="number" id="threshold-input" name="threshold" value="{{ threshold }}" min="1" max="200">
+    <span style="font-size:.82rem;color:#aaa;">units</span>
+    <button type="submit"><i class="fa-solid fa-check"></i> Apply Filter</button>
+  </form>
+
+  <!-- ── Critical Stock ── -->
+  <div class="sa-section">
+    <div class="sa-section-head sh-critical">
+      <span>🔴 Critical Stock — ≤ 5 units</span>
+      <span class="sa-count sc-critical">{{ critical_count }} products</span>
+    </div>
+    <div class="sa-table-wrap tw-critical">
+      {% if critical_stock %}
+      <table class="sa-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Selling Price</th>
+            <th>Stock Level</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in critical_stock %}
+          <tr>
+            <td>
+              <div style="font-weight:700;color:#333;">{{ p.name|truncatechars:40 }}</div>
+              {% if p.weight %}<div style="font-size:.76rem;color:#aaa;">{{ p.weight }}</div>{% endif %}
+            </td>
+            <td style="font-size:.85rem;color:#666;">{{ p.category.name|default:"—" }}</td>
+            <td style="font-size:.85rem;color:#666;">{{ p.brand.name|default:"—" }}</td>
+            <td style="font-weight:800;color:#226b2e;font-size:1rem;">₹{{ p.discount_price }}</td>
+            <td>
+              <span class="stock-pill sp-critical">
+                ⚠️ {{ p.stock }} left
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'admin_panel:product_edit' p.pk %}" class="btn-update-stock btn-update-critical">
+                <i class="fa-solid fa-pen"></i> Update Stock
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-msg">
+        <div class="e-icon">✅</div>
+        <p style="color:#4caf50;font-weight:600;">No critical stock products!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Low Stock ── -->
+  <div class="sa-section">
+    <div class="sa-section-head sh-low">
+      <span>🟡 Low Stock — 6 to {{ threshold }} units</span>
+      <span class="sa-count sc-low">{{ low_count }} products</span>
+    </div>
+    <div class="sa-table-wrap tw-low">
+      {% if low_stock %}
+      <table class="sa-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Selling Price</th>
+            <th>Stock Level</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in low_stock %}
+          <tr>
+            <td>
+              <div style="font-weight:700;color:#333;">{{ p.name|truncatechars:40 }}</div>
+              {% if p.weight %}<div style="font-size:.76rem;color:#aaa;">{{ p.weight }}</div>{% endif %}
+            </td>
+            <td style="font-size:.85rem;color:#666;">{{ p.category.name|default:"—" }}</td>
+            <td style="font-size:.85rem;color:#666;">{{ p.brand.name|default:"—" }}</td>
+            <td style="font-weight:800;color:#226b2e;font-size:1rem;">₹{{ p.discount_price }}</td>
+            <td>
+              <span class="stock-pill sp-low">
+                📦 {{ p.stock }} left
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'admin_panel:product_edit' p.pk %}" class="btn-update-stock btn-update-low">
+                <i class="fa-solid fa-pen"></i> Update Stock
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-msg">
+        <div class="e-icon">✅</div>
+        <p style="color:#4caf50;font-weight:600;">No low stock products in this range!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Out of Stock ── -->
+  <div class="sa-section">
+    <div class="sa-section-head sh-out">
+      <span>⭕ Out of Stock — 0 units</span>
+      <span class="sa-count sc-out">{{ out_count }} products</span>
+    </div>
+    <div class="sa-table-wrap tw-out">
+      {% if out_of_stock %}
+      <table class="sa-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Selling Price</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in out_of_stock %}
+          <tr>
+            <td>
+              <div style="font-weight:700;color:#333;">{{ p.name|truncatechars:40 }}</div>
+              {% if p.weight %}<div style="font-size:.76rem;color:#aaa;">{{ p.weight }}</div>{% endif %}
+            </td>
+            <td style="font-size:.85rem;color:#666;">{{ p.category.name|default:"—" }}</td>
+            <td style="font-size:.85rem;color:#666;">{{ p.brand.name|default:"—" }}</td>
+            <td style="font-weight:800;color:#226b2e;font-size:1rem;">₹{{ p.discount_price }}</td>
+            <td>
+              <span class="stock-pill sp-out">⭕ OUT OF STOCK</span>
+            </td>
+            <td>
+              <a href="{% url 'admin_panel:product_edit' p.pk %}" class="btn-update-stock btn-restock">
+                <i class="fa-solid fa-boxes-stacked"></i> Restock Now
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-msg">
+        <div class="e-icon">🎉</div>
+        <p style="color:#4caf50;font-weight:600;">All products are in stock!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

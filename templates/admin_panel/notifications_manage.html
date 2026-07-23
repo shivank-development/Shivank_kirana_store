@@ -1,0 +1,205 @@
+{% extends 'base/base.html' %}
+{% block title %}Notification Center — Admin Panel{% endblock %}
+
+{% block content %}
+<style>
+.admin-page { padding: 36px 0 60px; background: #f5f8f5; min-height: 80vh; }
+.admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 12px; flex-wrap: wrap; }
+.admin-header h1 { font-size: 1.8rem; font-weight: 900; color: #1a3a1a; margin: 0; display: flex; align-items: center; gap: 10px; }
+
+.notif-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 28px; margin-bottom: 28px;
+}
+.notif-card h3 { font-size: 1.15rem; font-weight: 900; color: #1a5d1a; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-grp { display: flex; flex-direction: column; gap: 6px; }
+.form-grp label { font-size: .85rem; font-weight: 700; color: #444; }
+.form-ctrl {
+  padding: 11px 16px; border: 1.5px solid #dce8dc; border-radius: 12px;
+  background: #fff; font-size: .92rem; color: #333; outline: none; transition: border .2s; width: 100%;
+}
+.form-ctrl:focus { border-color: #226b2e; }
+
+.btn-send-notif {
+  background: linear-gradient(135deg,#226b2e,#1a5d1a); color: #fff;
+  border: none; padding: 13px 28px; border-radius: 14px; font-weight: 800; font-size: .95rem;
+  cursor: pointer; box-shadow: 0 4px 16px rgba(34,107,46,0.25); transition: all .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-send-notif:hover { transform: translateY(-1px); color: #fff; }
+
+/* History list */
+.history-card { background: #fff; border-radius: 20px; border: 1px solid #e4ece4; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+.history-head { padding: 18px 24px; background: #f9fcf9; border-bottom: 1px solid #eef3ee; font-weight: 800; font-size: 1.05rem; color: #1a5d1a; display: flex; justify-content: space-between; align-items: center; }
+
+.notif-row { display: flex; align-items: flex-start; gap: 16px; padding: 18px 24px; border-bottom: 1px solid #f0f5f0; transition: background .15s; }
+.notif-row:last-child { border-bottom: none; }
+.notif-row:hover { background: #fafcfa; }
+
+.notif-ico {
+  width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; flex-shrink: 0; background: #f5f8f5; border: 1px solid #e8ede8;
+}
+.type-order    { background: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
+.type-payment  { background: #ede7f6; color: #4527a0; border-color: #d1c4e9; }
+.type-delivery { background: #fff8e1; color: #bf6a00; border-color: #ffe0b2; }
+.type-stock    { background: #ffebee; color: #b71c1c; border-color: #ffcdd2; }
+.type-promo    { background: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+
+.notif-info { flex: 1; }
+.notif-t { font-weight: 800; font-size: .95rem; color: #1a3a1a; margin-bottom: 3px; }
+.notif-m { font-size: .88rem; color: #555; line-height: 1.4; }
+.notif-sub { font-size: .78rem; color: #aaa; margin-top: 6px; display: flex; gap: 12px; }
+
+@media(max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="admin-page">
+  <div class="container">
+
+    <div class="admin-header">
+      <h1>🔔 Notification Center</h1>
+      <a href="{% url 'admin_panel:dashboard' %}" class="btn-send-notif" style="background:#fff;border:1px solid #c8e6c9;color:#226b2e;padding:8px 18px;font-size:.88rem;box-shadow:none;">
+        ← Back to Dashboard
+      </a>
+    </div>
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:12px;padding:12px 18px;margin-bottom:20px;font-weight:700;color:#2e7d32;">
+          ✓ {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Create Notification Form Card -->
+    <div class="notif-card">
+      <h3>📣 Send Personal or Broadcast Notification</h3>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="send_notification">
+
+        <div class="form-grid">
+          <div class="form-grp">
+            <label>Notification Target</label>
+            <select name="target_type" class="form-ctrl" id="target-select" onchange="toggleUserSelect()">
+              <option value="all">📢 All Customers (Broadcast)</option>
+              <option value="specific">👤 Personal Notification (Specific User)</option>
+              <option value="delivery">🚴 All Delivery Partners</option>
+            </select>
+          </div>
+
+          <div class="form-grp" id="user-select-grp" style="display:none;">
+            <label>Select Recipient User</label>
+            <select name="user_id" class="form-ctrl">
+              <option value="">-- Choose User --</option>
+              {% for u in all_users %}
+                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.email }} | {{ u.phone }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-grp">
+            <label>Notification Type</label>
+            <select name="type" class="form-ctrl">
+              <option value="promo">🎁 Promotion / Offer</option>
+              <option value="order">📦 Order Update</option>
+              <option value="payment">💳 Payment Update</option>
+              <option value="delivery">🚴 Delivery Alert</option>
+              <option value="stock">⚠️ Stock Alert</option>
+              <option value="system">⚙️ System Message</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-grp">
+            <label>Notification Title</label>
+            <input type="text" name="title" class="form-ctrl" placeholder="e.g. Special Discount for You! 🎉" required>
+          </div>
+          <div class="form-grp">
+            <label>Action URL (Optional)</label>
+            <input type="text" name="action_url" class="form-ctrl" placeholder="e.g. /shop/ or /orders/">
+          </div>
+        </div>
+
+        <div class="form-grp" style="margin-bottom:20px;">
+          <label>Notification Message</label>
+          <textarea name="message" class="form-ctrl" rows="3" placeholder="Write message here..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-send-notif">
+          <i class="fa-solid fa-paper-plane"></i> Send Notification Now
+        </button>
+      </form>
+    </div>
+
+    <!-- Notification History Card -->
+    <div class="history-card">
+      <div class="history-head">
+        <span>📜 Notification History (Recent 50)</span>
+        <span style="font-size:.85rem;color:#888;">Total: {{ notifications|length }}</span>
+      </div>
+
+      {% if notifications %}
+        {% for notif in notifications %}
+        <div class="notif-row">
+          <div class="notif-ico type-{{ notif.notif_type }}">
+            {% if notif.notif_type == 'order' %}📦
+            {% elif notif.notif_type == 'payment' %}💳
+            {% elif notif.notif_type == 'delivery' %}🚴
+            {% elif notif.notif_type == 'stock' %}⚠️
+            {% elif notif.notif_type == 'promo' %}🎁
+            {% else %}🔔{% endif %}
+          </div>
+          <div class="notif-info">
+            <div class="notif-t">{{ notif.title }}</div>
+            <div class="notif-m">{{ notif.message }}</div>
+            <div class="notif-sub">
+              <span>Recipient: <strong>{% if notif.user %}{{ notif.user.full_name }} ({{ notif.user.email }}){% else %}Broadcast (All Users){% endif %}</strong></span>
+              <span>•</span>
+              <span>Sent {{ notif.created_at|timesince }} ago</span>
+              {% if notif.action_url %}
+                <span>•</span>
+                <span>Link: <code>{{ notif.action_url }}</code></span>
+              {% endif %}
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            {% if not notif.is_read %}
+              <span style="font-size:.7rem;background:#ffebee;color:#c62828;padding:2px 8px;border-radius:10px;font-weight:800;">Unread</span>
+            {% else %}
+              <span style="font-size:.7rem;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;font-weight:800;">Read</span>
+            {% endif %}
+
+            <form method="post" action="{% url 'admin_panel:notification_delete' notif.id %}" style="display:inline;" onsubmit="return confirm('Delete this notification?');">
+              {% csrf_token %}
+              <button type="submit" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;padding:5px 12px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;" title="Delete Notification">
+                <i class="fa-solid fa-trash-can"></i> Delete
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="text-align:center;padding:48px 20px;color:#aaa;">
+          <div style="font-size:3rem;margin-bottom:8px;">🔔</div>
+          <p>No notifications sent yet.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toggleUserSelect() {
+  const sel = document.getElementById('target-select').value;
+  const userGrp = document.getElementById('user-select-grp');
+  if (userGrp) userGrp.style.display = (sel === 'specific') ? 'flex' : 'none';
+}
+</script>
+{% endblock %}

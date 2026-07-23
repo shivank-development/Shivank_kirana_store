@@ -1,0 +1,84 @@
+<!-- ★ MOBILE BOTTOM NAVIGATION -->
+<nav class="bottom-nav" id="bottom-nav">
+  <a href="/" class="bottom-nav-item {% if request.path == '/' %}active{% endif %}" id="bn-home">
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+  </a>
+  <button class="bottom-nav-item" id="bn-categories" onclick="toggleSidebar()">
+    <i class="fa-solid fa-grip"></i>
+    <span>Categories</span>
+  </button>
+  <a href="/cart/" class="bottom-nav-item {% if '/cart/' in request.path %}active{% endif %}" id="bn-cart">
+    <div style="position:relative; display:inline-block;">
+      <i class="fa-solid fa-cart-shopping"></i>
+      {% if cart_count > 0 %}
+        <span class="cart-badge" style="position:absolute;top:-8px;right:-8px;">{{ cart_count }}</span>
+      {% endif %}
+    </div>
+    <span>Cart</span>
+  </a>
+  <a href="/wishlist/" class="bottom-nav-item {% if '/wishlist/' in request.path %}active{% endif %}" id="bn-wish">
+    <i class="fa-regular fa-heart"></i>
+    <span>Wishlist</span>
+  </a>
+  <a href="{% if request.user.is_authenticated %}/auth/profile/{% else %}/auth/login/{% endif %}" 
+     class="bottom-nav-item" id="bn-account">
+    <i class="fa-solid fa-user"></i>
+    <span>Account</span>
+  </a>
+</nav>
+
+<style>
+/* ─── BOTTOM NAV (Mobile only) ─── */
+.bottom-nav {
+  display: none; /* Hidden by default, shown on mobile */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: white;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.12);
+  z-index: 1000;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  text-decoration: none;
+  color: var(--clr-text-light);
+  font-size: 0.6rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bottom-nav-item i {
+  font-size: 1.2rem;
+  transition: transform var(--transition-bounce);
+}
+
+.bottom-nav-item.active,
+.bottom-nav-item:hover {
+  color: var(--clr-primary);
+}
+
+.bottom-nav-item.active i,
+.bottom-nav-item:hover i {
+  transform: translateY(-2px);
+  color: var(--clr-primary);
+}
+
+@media (max-width: 767px) {
+  .bottom-nav { display: flex; }
+}
+</style>

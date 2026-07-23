@@ -1,0 +1,147 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}FAQs — Shivank Kirana Store{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/policy.css' %}">{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <div class="policy-layout">
+
+      <aside class="policy-sidebar">
+        <h3>Customer Care</h3>
+        <nav class="policy-nav">
+          <a href="{% url 'about-us' %}"><i class="fa-solid fa-store"></i> About Us</a>
+          <a href="{% url 'privacy-policy' %}"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="{% url 'return-policy' %}"><i class="fa-solid fa-rotate-left"></i> Return Policy</a>
+          <a href="{% url 'shipping-policy' %}"><i class="fa-solid fa-truck"></i> Shipping Policy</a>
+          <a href="{% url 'faqs' %}" class="active"><i class="fa-solid fa-circle-question"></i> FAQs</a>
+          <a href="{% url 'contact-us' %}"><i class="fa-solid fa-headset"></i> Contact Us</a>
+        </nav>
+        <div style="height:1px;background:#eee;margin:14px 0;"></div>
+        <div class="policy-nav">
+          <a href="#faq-orders"><i class="fa-solid fa-cart-shopping"></i> Orders</a>
+          <a href="#faq-payment"><i class="fa-solid fa-credit-card"></i> Payment</a>
+          <a href="#faq-delivery"><i class="fa-solid fa-truck"></i> Delivery</a>
+          <a href="#faq-returns"><i class="fa-solid fa-rotate-left"></i> Returns</a>
+          <a href="#faq-account"><i class="fa-solid fa-user"></i> Account</a>
+        </div>
+      </aside>
+
+      <div class="policy-content">
+        <div class="policy-hero">
+          <div class="policy-hero-icon">❓</div>
+          <div>
+            <h1>Frequently Asked Questions</h1>
+            <p>Aapke sabse common sawaalon ke jawab — ek jagah</p>
+          </div>
+        </div>
+
+        <!-- Orders FAQs -->
+        <section class="policy-section" id="faq-orders">
+          <h2><span class="sec-icon">🛒</span> Orders</h2>
+
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Order kaise place karein? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Products ko cart mein add karein → Checkout pe jaayein → Address aur payment method choose karein → Order confirm karein. Bas!</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Order cancel ho sakta hai? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Haan! Agar order abhi "Placed" ya "Confirmed" status mein hai toh hum WhatsApp par contact karne par cancel kar sakte hain. "Packed" ho gaye order cancel nahi ho sakte.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Minimum order amount kya hai? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Koi minimum order amount nahi hai! Lekin ₹799 se upar order karein toh delivery free milegi.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Order confirmation kaise milega? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Order place hone ke baad aapke registered number par WhatsApp message aayega, aur website par bhi notification milegi.</div>
+          </div>
+        </section>
+
+        <!-- Payment FAQs -->
+        <section class="policy-section" id="faq-payment">
+          <h2><span class="sec-icon">💳</span> Payment</h2>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Kaunse payment methods accepted hain? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Hum UPI (Google Pay, PhonePe, Paytm, etc.) aur Cash on Delivery (COD) accept karte hain. COD orders ke liye ₹49 advance fee (UPI se) zaroori hai.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">UPI payment fail ho jaaye toh? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Agar payment fail ho toh phir se try karein ya COD option chunein. Agar amount kaat gaya lekin order confirm nahi hua, toh 24 hours mein automatically refund ho jayega.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">COD advance kyu lagta hai? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">₹49 COD advance isliye lagta hai taaki delivery confirm ho. Yeh amount final bill mein adjust ho jata hai — sirf ek confirmation fee hai.</div>
+          </div>
+        </section>
+
+        <!-- Delivery FAQs -->
+        <section class="policy-section" id="faq-delivery">
+          <h2><span class="sec-icon">🚚</span> Delivery</h2>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Delivery kitne samay mein hogi? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">4 PM se pehle order karein toh same day delivery. 4 PM ke baad — next day morning. Delivery time 7 AM – 9 PM ke beech hota hai.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Kya hum live track kar sakte hain? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Bilkul! "Out for Delivery" status mein aate hi aap orders section mein ja kar delivery boy ki live GPS location dekh sakte hain.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Free delivery kaise milegi? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">₹799 ya usse zyada ka order karein — delivery bilkul free! Isse kam order par ₹49 delivery charge lagega.</div>
+          </div>
+        </section>
+
+        <!-- Returns FAQs -->
+        <section class="policy-section" id="faq-returns">
+          <h2><span class="sec-icon">↩️</span> Returns</h2>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Return kaise karte hain? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">WhatsApp par +91 7599342112 pe message karein. Order number aur product ki photo bhejein. Hamari team 2 hours mein respond karegi aur return pickup arrange karegi.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Refund kab milega? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Product return hone ke baad UPI mein 2-3 business days. Agar store credit chahiye toh instant milega!</div>
+          </div>
+        </section>
+
+        <!-- Account FAQs -->
+        <section class="policy-section" id="faq-account">
+          <h2><span class="sec-icon">👤</span> Account</h2>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Account kaise banayein? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Register page par jaayein, apna email, phone number aur password enter karein. Bus ek click mein account ban jayega!</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Password bhool gaye? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Login page par "Forgot Password" click karein ya WhatsApp par contact karein — hum aapka password reset kar denge.</div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(this)">Kya guest user bhi order kar sakta hai? <i class="fa-solid fa-chevron-down"></i></button>
+            <div class="faq-answer">Abhi orders ke liye account zaroori hai, lekin products browse karna sab ke liye free hai!</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-question').forEach(q => q.classList.remove('open'));
+  document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+  // Open current
+  if (!isOpen) {
+    btn.classList.add('open');
+    answer.classList.add('open');
+  }
+}
+</script>
+{% endblock %}

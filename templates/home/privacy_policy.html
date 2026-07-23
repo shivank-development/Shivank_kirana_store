@@ -1,0 +1,112 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Privacy Policy — Shivank Kirana Store{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/policy.css' %}">{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <div class="policy-layout">
+
+      <!-- ── SIDEBAR ── -->
+      <aside class="policy-sidebar">
+        <h3>Customer Care</h3>
+        <nav class="policy-nav">
+          <a href="{% url 'about-us' %}"><i class="fa-solid fa-store"></i> About Us</a>
+          <a href="{% url 'privacy-policy' %}" class="active"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="{% url 'return-policy' %}"><i class="fa-solid fa-rotate-left"></i> Return Policy</a>
+          <a href="{% url 'shipping-policy' %}"><i class="fa-solid fa-truck"></i> Shipping Policy</a>
+          <a href="{% url 'faqs' %}"><i class="fa-solid fa-circle-question"></i> FAQs</a>
+          <a href="{% url 'contact-us' %}"><i class="fa-solid fa-headset"></i> Contact Us</a>
+        </nav>
+        <div style="height:1px;background:#eee;margin:14px 0;"></div>
+        <div class="policy-nav">
+          <a href="#data-collection"><i class="fa-solid fa-database"></i> Data Collection</a>
+          <a href="#data-use"><i class="fa-solid fa-gear"></i> How We Use Data</a>
+          <a href="#data-sharing"><i class="fa-solid fa-share-nodes"></i> Data Sharing</a>
+          <a href="#cookies"><i class="fa-solid fa-cookie"></i> Cookies</a>
+          <a href="#your-rights"><i class="fa-solid fa-user-shield"></i> Your Rights</a>
+          <a href="#contact-privacy"><i class="fa-solid fa-envelope"></i> Contact</a>
+        </div>
+      </aside>
+
+      <!-- ── MAIN CONTENT ── -->
+      <div class="policy-content">
+        <div class="policy-hero">
+          <div class="policy-hero-icon">🔒</div>
+          <div>
+            <h1>Privacy Policy</h1>
+            <p>Effective Date: 1 July 2026 — Last updated: 14 July 2026</p>
+          </div>
+        </div>
+
+        <section class="policy-section" id="data-collection">
+          <h2><span class="sec-icon">📋</span> Data We Collect</h2>
+          <p>Jab aap Shivank Kirana Store use karte hain, hum kuch zaroori information collect karte hain:</p>
+          <ul>
+            <li><strong>Personal Info:</strong> Naam, email address, phone number</li>
+            <li><strong>Delivery Info:</strong> Delivery address, pincode, GPS location (agar aap allow karein)</li>
+            <li><strong>Order Info:</strong> Aapke past orders, cart items, wishlist</li>
+            <li><strong>Payment Info:</strong> UPI transaction ID ya COD advance confirmation (hum card details store nahi karte)</li>
+            <li><strong>Device Info:</strong> Browser type, IP address, device model</li>
+          </ul>
+          <div class="highlight-box">🔐 Hum aapka password kabhi plain text mein store nahi karte — sirf encrypted form mein.</div>
+        </section>
+
+        <section class="policy-section" id="data-use">
+          <h2><span class="sec-icon">⚙️</span> How We Use Your Data</h2>
+          <p>Collected data ka use sirf in kamon ke liye hota hai:</p>
+          <ul>
+            <li>Orders process karna aur delivery arrange karna</li>
+            <li>Customer support provide karna</li>
+            <li>Order status notifications bhejne ke liye (SMS/WhatsApp)</li>
+            <li>Website experience improve karna</li>
+            <li>Fraud prevention aur security</li>
+          </ul>
+          <div class="warn-box">⚠️ Hum aapka data kisi third-party marketing company ko nahi bechte.</div>
+        </section>
+
+        <section class="policy-section" id="data-sharing">
+          <h2><span class="sec-icon">🔗</span> Data Sharing</h2>
+          <p>Hum kuch limited cases mein data share karte hain:</p>
+          <ul>
+            <li><strong>Delivery Partners:</strong> Aapka naam aur address delivery boy ko order deliver karne ke liye</li>
+            <li><strong>Payment Gateways:</strong> UPI transaction verify karne ke liye</li>
+            <li><strong>Legal Requirements:</strong> Agar court ya government order aaye</li>
+          </ul>
+        </section>
+
+        <section class="policy-section" id="cookies">
+          <h2><span class="sec-icon">🍪</span> Cookies Policy</h2>
+          <p>Hamari website cookies use karti hai jo aapke browser mein store hoti hain. Cookies help karti hain:</p>
+          <ul>
+            <li>Login session maintain karne mein</li>
+            <li>Cart ka data save karne mein</li>
+            <li>Website traffic analyze karne mein</li>
+          </ul>
+          <p>Aap apne browser settings mein ja kar cookies disable kar sakte hain, lekin kuch features kaam nahi karenge.</p>
+        </section>
+
+        <section class="policy-section" id="your-rights">
+          <h2><span class="sec-icon">🛡️</span> Your Rights</h2>
+          <ul>
+            <li><strong>Access:</strong> Aap apna stored data dekh sakte hain</li>
+            <li><strong>Delete:</strong> Account delete karne par saara data hata diya jayega</li>
+            <li><strong>Update:</strong> Aap kabhi bhi apni profile update kar sakte hain</li>
+            <li><strong>Opt-out:</strong> Marketing messages se unsubscribe karne ka haq</li>
+          </ul>
+        </section>
+
+        <section class="policy-section" id="contact-privacy">
+          <h2><span class="sec-icon">📧</span> Privacy Contact</h2>
+          <p>Koi bhi privacy concern ke liye humse contact karein:</p>
+          <ul>
+            <li><strong>Email:</strong> support@shivankkirana.com</li>
+            <li><strong>WhatsApp:</strong> +91 7599342112</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

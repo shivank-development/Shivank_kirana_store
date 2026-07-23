@@ -1,0 +1,170 @@
+<!-- ★ FLOATING CART (Desktop) -->
+<div class="floating-cart" id="floating-cart">
+  <button class="floating-cart-btn" onclick="toggleCartDrawer()" id="floating-cart-btn">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span class="floating-cart-badge" id="floating-cart-count">{{ cart_count }}</span>
+  </button>
+</div>
+
+<!-- Cart Sidebar Drawer -->
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-drawer-header">
+    <h3>🛒 My Cart (<span id="drawer-item-count">{{ cart_count }}</span> items)</h3>
+    <button onclick="toggleCartDrawer()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="cart-drawer-body" id="cart-drawer-body">
+    <div class="cart-empty-state">
+      <div style="font-size: 3rem;">🛒</div>
+      <p>Your cart is empty!</p>
+      <a href="/shop/" class="btn btn-primary btn-sm">Start Shopping</a>
+    </div>
+  </div>
+  <div class="cart-drawer-footer">
+    <div class="cart-total-row">
+      <span>Total:</span>
+      <span class="cart-total-amount" id="drawer-total">₹{{ cart_total }}</span>
+    </div>
+    <a href="/checkout/" class="btn btn-primary btn-full">Proceed to Checkout →</a>
+  </div>
+</div>
+<div class="cart-drawer-overlay" id="cart-overlay" onclick="toggleCartDrawer()"></div>
+
+<style>
+/* ─── FLOATING CART ─── */
+.floating-cart {
+  position: fixed;
+  bottom: 32px;
+  right: 24px;
+  z-index: var(--z-cart);
+}
+
+.floating-cart-btn {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  box-shadow: var(--shadow-float);
+  transition: all var(--transition-bounce);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-cart-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 20px 60px rgba(26,93,26,0.4);
+}
+
+.floating-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--clr-discount-orange);
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+/* ─── CART DRAWER ─── */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100vh;
+  background: white;
+  z-index: var(--z-modal);
+  transform: translateX(100%);
+  transition: transform var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-float);
+}
+
+.cart-drawer.open {
+  transform: translateX(0);
+}
+
+.cart-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: calc(var(--z-modal) - 1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.cart-drawer-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.cart-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--clr-border);
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.cart-drawer-header h3 { font-size: var(--fs-md); color: white; }
+.cart-drawer-header button { color: white; font-size: var(--fs-lg); }
+
+.cart-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+}
+
+.cart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  height: 100%;
+  color: var(--clr-text-light);
+  text-align: center;
+}
+
+.cart-drawer-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--clr-border);
+  background: var(--clr-off-white);
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  font-weight: 600;
+}
+
+.cart-total-amount {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--clr-primary-dark);
+}
+
+/* Hide floating cart on mobile */
+@media (max-width: 767px) {
+  .floating-cart { display: none; }
+  .cart-drawer { width: 100%; }
+}
+</style>

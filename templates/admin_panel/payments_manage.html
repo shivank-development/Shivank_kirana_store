@@ -1,0 +1,287 @@
+{% extends 'base/base.html' %}
+{% block title %}Payments Management — Admin{% endblock %}
+{% block content %}
+<style>
+.pm-page { padding: 36px 0; }
+
+/* Header */
+.pm-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+.pm-header h1 { font-size:1.9rem; font-weight:800; color:#1a3a1a; margin:0; display:flex; align-items:center; gap:12px; }
+
+/* KPI Cards */
+.pm-kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
+.pm-kpi-card { background:#fff; border-radius:18px; padding:20px 24px; display:flex; align-items:center; gap:16px; border:1px solid; box-shadow:0 4px 16px rgba(0,0,0,0.05); }
+.pm-ki { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+.pm-num { font-size:2rem; font-weight:900; line-height:1; }
+.pm-lbl { font-size:.8rem; font-weight:600; margin-top:4px; }
+.kpi-pending  { border-color:#fff9c4; }
+.kpi-pending .pm-ki  { background:#fff9c4; }
+.kpi-pending .pm-num { color:#f57f17; }
+.kpi-pending .pm-lbl { color:#fbc02d; }
+.kpi-approved { border-color:#c8e6c9; }
+.kpi-approved .pm-ki { background:#e8f5e9; }
+.kpi-approved .pm-num { color:#2e7d32; }
+.kpi-approved .pm-lbl { color:#66bb6a; }
+.kpi-rejected { border-color:#ffcdd2; }
+.kpi-rejected .pm-ki { background:#ffebee; }
+.kpi-rejected .pm-num { color:#c62828; }
+.kpi-rejected .pm-lbl { color:#ef9a9a; }
+
+/* Filter bar */
+.pm-filter { background:#fff; border-radius:16px; padding:16px 22px; margin-bottom:24px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; border:1px solid #e4ece4; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+.pm-filter label { font-size:.82rem; font-weight:700; color:#666; white-space:nowrap; }
+.pm-select { padding:9px 14px; border:2px solid #dce8dc; border-radius:10px; font-size:.88rem; color:#333; background:#f8faf8; outline:none; transition:all .2s; cursor:pointer; }
+.pm-select:focus { border-color:#226b2e; }
+.pm-filter-sep { color:#ddd; font-size:1.2rem; }
+
+/* Table card */
+.pm-card { background:#fff; border-radius:18px; overflow:hidden; border:1px solid #e4ece4; box-shadow:0 4px 20px rgba(0,0,0,0.05); }
+.pm-table { width:100%; border-collapse:collapse; }
+.pm-table th { background:#f5f8f5; padding:12px 16px; font-size:.73rem; text-transform:uppercase; letter-spacing:.06em; color:#888; font-weight:700; text-align:left; white-space:nowrap; }
+.pm-table td { padding:14px 16px; border-top:1px solid #f0f5f0; vertical-align:middle; font-size:.9rem; }
+.pm-table tr:hover td { background:#fafcfa; }
+
+/* Row ID */
+.row-id { font-size:.78rem; color:#ccc; font-weight:700; }
+
+/* Order link */
+.ord-link { font-weight:800; color:#226b2e; text-decoration:none; font-size:.92rem; }
+.ord-link:hover { text-decoration:underline; }
+
+/* Customer */
+.cust-name { font-weight:600; color:#333; }
+.cust-ph { font-size:.76rem; color:#aaa; margin-top:2px; }
+
+/* Method badge */
+.method-badge { display:inline-flex; align-items:center; gap:4px; padding:4px 11px; border-radius:8px; font-size:.75rem; font-weight:800; }
+.mb-upi { background:#e3f2fd; color:#1565c0; }
+.mb-cod { background:#f3e5f5; color:#6a1b9a; }
+
+/* Amount */
+.pm-amount { font-weight:900; color:#1a7a1a; font-size:1rem; }
+
+/* UTR box */
+.utr-box { font-family:monospace; background:#f0f4f0; border:1px dashed #b0ccb0; padding:4px 10px; border-radius:8px; font-size:.82rem; color:#226b2e; max-width:140px; word-break:break-all; }
+
+/* Status badge */
+.status-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:800; white-space:nowrap; }
+.sb-pending  { background:#fff8e1; color:#e65100; }
+.sb-received { background:#e8f5e9; color:#2e7d32; }
+.sb-rejected { background:#ffebee; color:#c62828; }
+.sb-refunded { background:#f3e5f5; color:#6a1b9a; }
+
+/* Date */
+.pm-date { font-size:.8rem; color:#aaa; white-space:nowrap; }
+
+/* Action buttons */
+.actions-wrap { display:flex; flex-direction:column; gap:6px; min-width:120px; }
+.btn-approve {
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  padding:7px 14px; border-radius:10px; font-size:.78rem; font-weight:700;
+  background:linear-gradient(135deg,#2e7d32,#226b2e); color:#fff;
+  border:none; cursor:pointer; box-shadow:0 3px 10px rgba(46,125,50,0.25);
+  transition:all .2s;
+}
+.btn-approve:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(46,125,50,0.3); }
+.btn-reject {
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  padding:7px 14px; border-radius:10px; font-size:.78rem; font-weight:700;
+  background:#ffebee; color:#c62828; border:2px solid #ffcdd2;
+  cursor:pointer; transition:all .2s;
+}
+.btn-reject:hover { background:#ffcdd2; transform:translateY(-1px); }
+.action-done { font-size:.78rem; color:#aaa; line-height:1.5; }
+.action-done strong { color:#555; }
+
+/* Empty state */
+.pm-empty { text-align:center; padding:64px 20px; color:#aaa; }
+.pm-empty .ei { font-size:3rem; margin-bottom:12px; }
+
+/* Pagination */
+.pm-pagination { display:flex; gap:8px; justify-content:center; padding:20px; flex-wrap:wrap; }
+.pg-btn { padding:8px 18px; border-radius:10px; background:#f5f8f5; border:1px solid #e0eae0; color:#333; font-weight:600; font-size:.88rem; text-decoration:none; transition:all .2s; }
+.pg-btn:hover { background:#e8f5e9; border-color:#c8e6c9; }
+.pg-cur { background:#e8f5e9; border-color:#a5d6a7; color:#226b2e; font-weight:800; pointer-events:none; }
+
+@media(max-width:768px){ .pm-kpi { grid-template-columns:1fr; } }
+</style>
+
+<div class="pm-page container">
+  <div class="pm-header">
+    <h1>
+      <span style="background:#e8f5e9;border-radius:12px;padding:8px 12px;font-size:1.5rem;">💳</span>
+      Payments Management
+    </h1>
+    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline" style="font-size:.9rem;">← Dashboard</a>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="pm-kpi">
+    <div class="pm-kpi-card kpi-pending">
+      <div class="pm-ki">⏳</div>
+      <div>
+        <div class="pm-num">{{ pending_count }}</div>
+        <div class="pm-lbl">Pending Verification</div>
+      </div>
+    </div>
+    <div class="pm-kpi-card kpi-approved">
+      <div class="pm-ki">✅</div>
+      <div>
+        <div class="pm-num">{{ received_count }}</div>
+        <div class="pm-lbl">Approved Payments</div>
+      </div>
+    </div>
+    <div class="pm-kpi-card kpi-rejected">
+      <div class="pm-ki">❌</div>
+      <div>
+        <div class="pm-num">{{ rejected_count }}</div>
+        <div class="pm-lbl">Rejected Payments</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <form class="pm-filter" method="get">
+    <label><i class="fa-solid fa-sliders"></i> Filter by:</label>
+    <select name="status" class="pm-select" onchange="this.form.submit()">
+      <option value="">All Statuses</option>
+      <option value="pending"  {% if status_filter == 'pending'  %}selected{% endif %}>⏳ Pending</option>
+      <option value="received" {% if status_filter == 'received' %}selected{% endif %}>✅ Approved</option>
+      <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>❌ Rejected</option>
+      <option value="refunded" {% if status_filter == 'refunded' %}selected{% endif %}>💸 Refunded</option>
+    </select>
+    <span class="pm-filter-sep">|</span>
+    <select name="method" class="pm-select" onchange="this.form.submit()">
+      <option value="">All Methods</option>
+      <option value="UPI" {% if method_filter == 'UPI' %}selected{% endif %}>📱 UPI</option>
+      <option value="COD" {% if method_filter == 'COD' %}selected{% endif %}>💵 COD</option>
+    </select>
+    {% if status_filter or method_filter %}
+      <a href="{% url 'admin_panel:payments_manage' %}" style="font-size:.82rem;color:#c62828;font-weight:600;text-decoration:none;margin-left:4px;">✕ Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- Table -->
+  <div class="pm-card">
+    {% if page_obj.object_list %}
+    <div style="overflow-x:auto;">
+      <table class="pm-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Method</th>
+            <th>Amount</th>
+            <th>UTR / TXN ID</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for payment in page_obj %}
+          <tr>
+            <td><span class="row-id">{{ payment.id }}</span></td>
+            <td>
+              <a href="{% url 'admin_panel:order_detail' payment.order.pk %}" class="ord-link">
+                {{ payment.order.order_number }}
+              </a>
+            </td>
+            <td>
+              <div class="cust-name">{{ payment.order.user.full_name }}</div>
+              <div class="cust-ph">{{ payment.order.user.phone }}</div>
+            </td>
+            <td>
+              {% if payment.payment_method == 'UPI' %}
+                <span class="method-badge mb-upi"><i class="fa-solid fa-mobile-screen-button" style="font-size:.7rem;"></i> UPI</span>
+              {% else %}
+                <span class="method-badge mb-cod"><i class="fa-solid fa-money-bill-wave" style="font-size:.7rem;"></i> COD</span>
+              {% endif %}
+            </td>
+            <td><span class="pm-amount">₹{{ payment.amount }}</span></td>
+            <td>
+              {% if payment.upi_txn_id %}
+                <span class="utr-box">{{ payment.upi_txn_id }}</span>
+              {% else %}
+                <span style="color:#ddd;">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if payment.status == 'pending' %}
+                <span class="status-badge sb-pending">⏳ Pending</span>
+              {% elif payment.status == 'received' %}
+                <span class="status-badge sb-received">✅ Approved</span>
+              {% elif payment.status == 'rejected' %}
+                <span class="status-badge sb-rejected">❌ Rejected</span>
+              {% elif payment.status == 'refunded' %}
+                <span class="status-badge sb-refunded">💸 Refunded</span>
+              {% else %}
+                <span class="status-badge">{{ payment.status|title }}</span>
+              {% endif %}
+            </td>
+            <td><span class="pm-date">{{ payment.created_at|date:"d M, H:i" }}</span></td>
+            <td>
+              {% if payment.status == 'pending' %}
+              <div class="actions-wrap">
+                <form method="post" action="{% url 'admin_panel:payment_action' payment.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn-approve" onclick="return confirm('Approve this payment?')">
+                    <i class="fa-solid fa-check"></i> Approve
+                  </button>
+                </form>
+                <form method="post" action="{% url 'admin_panel:payment_action' payment.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reject">
+                  <button type="submit" class="btn-reject" onclick="return confirm('Reject this payment?')">
+                    <i class="fa-solid fa-xmark"></i> Reject
+                  </button>
+                </form>
+              </div>
+              {% else %}
+              <div class="action-done">
+                <strong>{{ payment.admin_action|default:"—" }}</strong><br>
+                {% if payment.admin_action_by %}
+                  <span>by {{ payment.admin_action_by.full_name }}</span>
+                {% endif %}
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pm-pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&method={{ method_filter }}" class="pg-btn">← Prev</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="pg-btn pg-cur">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}&status={{ status_filter }}&method={{ method_filter }}" class="pg-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&method={{ method_filter }}" class="pg-btn">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="pm-empty">
+      <div class="ei">💳</div>
+      <p style="font-weight:600;">No payments found for the selected filter.</p>
+      {% if status_filter or method_filter %}
+        <a href="{% url 'admin_panel:payments_manage' %}" style="color:#226b2e;font-weight:600;">Clear filters →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

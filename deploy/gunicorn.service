@@ -1,0 +1,12 @@
+[Unit]
+Description=gunicorn daemon for Shivank Kirana Store
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/Shivank-Kirana-Store
+ExecStart=/home/ubuntu/Shivank-Kirana-Store/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ubuntu/Shivank-Kirana-Store/app.sock config.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

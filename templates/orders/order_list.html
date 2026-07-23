@@ -1,0 +1,210 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}My Orders — Shivank Kirana Store{% endblock %}
+
+{% block content %}
+<style>
+.ol-page { padding: 36px 0 60px; background: #f5f8f5; min-height: 75vh; }
+
+.ol-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.ol-title { font-size: 1.8rem; font-weight: 900; color: #1a3a1a; margin: 0; display: flex; align-items: center; gap: 12px; }
+
+/* ── Order Card ── */
+.ol-card {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px;
+  transition: all .2s;
+}
+.ol-card:hover { border-color: #c8e6c9; box-shadow: 0 8px 28px rgba(34,107,46,0.1); }
+
+.ol-card-head {
+  padding: 18px 24px; background: #f9fcf9; border-bottom: 1px solid #eef3ee;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.ol-ord-num { font-size: 1.05rem; font-weight: 900; color: #226b2e; }
+.ol-ord-date { font-size: .8rem; color: #888; margin-top: 2px; }
+
+/* Status Badges */
+.st-badge { padding: 5px 14px; border-radius: 20px; font-size: .78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+.st-placed    { background: #e3f2fd; color: #1565c0; }
+.st-confirmed { background: #ede7f6; color: #4527a0; }
+.st-packed    { background: #fff3e0; color: #e65100; }
+.st-out_for_delivery { background: #fff8e1; color: #bf6a00; }
+.st-delivered { background: #e8f5e9; color: #1b5e20; }
+.st-cancelled { background: #ffebee; color: #b71c1c; }
+
+/* Card Body */
+.ol-card-body { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+
+/* Items preview */
+.ol-items-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; min-width: 260px; }
+.ol-item-img {
+  width: 56px; height: 56px; border-radius: 12px; background: #f5f8f5; border: 1px solid #e8ede8;
+  display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px; flex-shrink: 0;
+}
+.ol-item-img img { width: 100%; height: 100%; object-fit: contain; }
+.ol-items-info { display: flex; flex-direction: column; gap: 2px; }
+.ol-item-title { font-size: .92rem; font-weight: 700; color: #333; }
+.ol-item-qty { font-size: .8rem; color: #888; }
+
+/* Total & Actions */
+.ol-card-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.ol-total { font-size: 1.3rem; font-weight: 900; color: #1a7a1a; }
+.ol-pay-tag { font-size: .75rem; background: #f3f4f6; color: #555; padding: 3px 8px; border-radius: 6px; font-weight: 700; }
+
+/* Footer / Action bar */
+.ol-card-foot {
+  padding: 14px 24px; background: #fafcfa; border-top: 1px solid #f0f5f0;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.ol-foot-left { font-size: .82rem; color: #888; display: flex; align-items: center; gap: 8px; }
+.ol-foot-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn-ol-act {
+  padding: 8px 16px; border-radius: 10px; font-size: .82rem; font-weight: 800;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all .2s;
+  border: 1px solid transparent;
+}
+.btn-ol-view { background: #226b2e; color: #fff; box-shadow: 0 2px 8px rgba(34,107,46,0.2); }
+.btn-ol-view:hover { background: #1a5d1a; color: #fff; }
+
+.btn-ol-pdf { background: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
+.btn-ol-pdf:hover { background: #bbdefb; }
+
+.btn-ol-track { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
+.btn-ol-track:hover { background: #ffe0b2; }
+
+.btn-ol-cancel { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+.btn-ol-cancel:hover { background: #ffcdd2; }
+
+/* Empty state */
+.ol-empty {
+  background: #fff; border-radius: 20px; border: 1px solid #e4ece4;
+  padding: 72px 24px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.ol-empty .ei { font-size: 4.5rem; margin-bottom: 16px; }
+</style>
+
+<div class="ol-page">
+  <div class="container">
+
+    <div class="ol-header">
+      <h1 class="ol-title">
+        📦 My Orders
+      </h1>
+      <a href="{% url 'accounts:profile' %}" class="btn-ol-act btn-ol-pdf" style="font-size:.9rem;padding:9px 18px;">
+        ← Back to Profile
+      </a>
+    </div>
+
+    {% if orders %}
+      {% for order in orders %}
+      <div class="ol-card">
+        <!-- Header -->
+        <div class="ol-card-head">
+          <div>
+            <div class="ol-ord-num">{{ order.order_number }}</div>
+            <div class="ol-ord-date">Placed on {{ order.placed_at|date:"d M Y, h:i A" }}</div>
+          </div>
+          <div>
+            <span class="st-badge st-{{ order.status }}">
+              {% if order.status == 'delivered' %}🟢{% elif order.status == 'cancelled' %}🔴{% else %}⏳{% endif %}
+              {{ order.get_status_display }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="ol-card-body">
+          <!-- Items List Preview -->
+          <div class="ol-items-wrap">
+            {% for item in order.items.all|slice:":3" %}
+            <div class="ol-item-img" title="{{ item.product_name }}">
+              {% if item.product and item.product.image_main %}
+                <img src="{{ item.product.image_main.url }}" alt="{{ item.product_name }}">
+              {% else %}
+                <span style="font-size:1.4rem;">📦</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="ol-items-info">
+              <div class="ol-item-title">
+                {% for item in order.items.all|slice:":2" %}
+                  {{ item.product_name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                {% if order.items.count > 2 %}
+                  <span style="color:#226b2e;font-weight:800;">+{{ order.items.count|add:"-2" }} more</span>
+                {% endif %}
+              </div>
+              <div class="ol-item-qty">
+                Total {{ order.items.count }} item{{ order.items.count|pluralize }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Total & Payment Method -->
+          <div class="ol-card-meta">
+            <div class="ol-total">₹{{ order.total_amount }}</div>
+            <span class="ol-pay-tag">{{ order.payment_method }} • {{ order.get_payment_status_display }}</span>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="ol-card-foot">
+          <div class="ol-foot-left">
+            {% if order.address %}
+              <span><i class="fa-solid fa-location-dot" style="color:#226b2e;"></i> {{ order.address.city }}, {{ order.address.pincode }}</span>
+            {% endif %}
+          </div>
+
+          <div class="ol-foot-actions">
+            <!-- Details -->
+            <a href="{% url 'orders:detail' order.id %}" class="btn-ol-act btn-ol-view">
+              <i class="fa-solid fa-eye"></i> View Details
+            </a>
+
+            <!-- Live Track -->
+            {% if order.status != 'delivered' and order.status != 'cancelled' %}
+            <a href="{% url 'orders:tracking' order.id %}" class="btn-ol-act btn-ol-track">
+              <i class="fa-solid fa-location-arrow"></i> Track Live
+            </a>
+            {% endif %}
+
+            <!-- PDF Invoice Download -->
+            <a href="{% url 'orders:pdf' order.id %}" class="btn-ol-act btn-ol-pdf">
+              <i class="fa-solid fa-file-pdf"></i> Download PDF
+            </a>
+
+            <!-- Cancel Button (Only if placed or confirmed) -->
+            {% if order.status == 'placed' or order.status == 'confirmed' %}
+            <form method="post" action="{% url 'orders:cancel' order.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-ol-act btn-ol-cancel">
+                <i class="fa-solid fa-xmark"></i> Cancel Order
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+    <div class="ol-empty">
+      <div class="ei">📦</div>
+      <h2 style="font-weight:900;color:#1a3a1a;margin-bottom:8px;">No orders found!</h2>
+      <p style="color:#888;margin-bottom:24px;">You haven't placed any orders yet.</p>
+      <a href="/shop/" class="btn-ol-act btn-ol-view" style="font-size:1rem;padding:12px 28px;">
+        <i class="fa-solid fa-cart-shopping"></i> Start Shopping
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

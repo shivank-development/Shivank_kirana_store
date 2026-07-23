@@ -1,0 +1,149 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ n.title }} — Notification Details{% endblock %}
+
+{% block extra_css %}
+<style>
+  .nd-page { padding: 40px 0 60px; background: #f8fafc; min-height: 80vh; }
+  
+  .nd-header { margin-bottom: 24px; }
+  .btn-back-nd { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: #475569; text-decoration: none; background: white; padding: 10px 18px; border-radius: 10px; border: 1px solid #e2e8f0; transition: all .2s; }
+  .btn-back-nd:hover { background: #f1f5f9; color: #0f172a; }
+
+  /* Main Detail Box */
+  .nd-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 32px; max-width: 720px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+  
+  .nd-top-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; flex-wrap: wrap; }
+  .nd-type-badge { font-size: .8rem; font-weight: 800; padding: 6px 14px; border-radius: 20px; text-transform: uppercase; letter-spacing: .03em; }
+  .badge-promo { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .badge-order { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .badge-delivery { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .badge-system { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+  .exp-badge { font-size: .78rem; font-weight: 800; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+  .exp-safe { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .exp-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .exp-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+
+  .nd-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; line-height: 1.3; }
+  .nd-date { font-size: .85rem; color: #64748b; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 6px; }
+  .nd-msg { font-size: 1rem; color: #334155; line-height: 1.6; background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 28px; white-space: pre-line; }
+
+  /* Coupon Ticket Box */
+  .coupon-box { background: linear-gradient(135deg, #166534 0%, #15803d 100%); color: white; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 28px; box-shadow: 0 8px 24px rgba(22,101,52,0.25); position: relative; border: 2px dashed #86efac; }
+  .coupon-title { font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; opacity: .9; font-weight: 800; margin-bottom: 8px; }
+  .coupon-code { font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; font-family: monospace; background: rgba(0,0,0,0.25); padding: 8px 20px; border-radius: 12px; display: inline-block; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.2); }
+  
+  .btn-copy-code { background: #ffffff; color: #166534; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 800; font-size: .95rem; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .btn-copy-code:hover { background: #f0fdf4; transform: translateY(-1px); }
+
+  /* Actions */
+  .nd-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-nd-primary { flex: 1; min-width: 200px; padding: 14px 20px; background: #166534; color: white; border-radius: 12px; font-weight: 800; text-align: center; text-decoration: none; transition: background .2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-nd-primary:hover { background: #14532d; color: white; }
+  
+  /* Expiration Notice Bar */
+  .expiry-notice { background: #fff8e1; border: 1px solid #ffe0b2; color: #b45309; padding: 12px 16px; border-radius: 12px; font-size: .85rem; font-weight: 700; margin-top: 24px; display: flex; align-items: center; gap: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nd-page">
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <div class="nd-header" style="max-width:720px; margin: 0 auto 20px;">
+      <a href="{% url 'notifications:home' %}" class="btn-back-nd">
+        <i class="fa-solid fa-arrow-left"></i> Back to Notifications
+      </a>
+    </div>
+
+    <!-- Detail Card -->
+    <div class="nd-card">
+      <div class="nd-top-bar">
+        <span class="nd-type-badge {% if n.notif_type == 'promo' %}badge-promo{% elif n.notif_type == 'order' %}badge-order{% elif n.notif_type == 'delivery' %}badge-delivery{% else %}badge-system{% endif %}">
+          {% if n.notif_type == 'promo' %}
+            📢 Exclusive Offer
+          {% elif n.notif_type == 'order' %}
+            📦 Order Update
+          {% elif n.notif_type == 'delivery' %}
+            🚚 Delivery Alert
+          {% else %}
+            🔔 Store Announcement
+          {% endif %}
+        </span>
+
+        <span class="exp-badge {{ expires_class }}">
+          {{ expires_label }}
+        </span>
+      </div>
+
+      <h1 class="nd-title">{{ n.title }}</h1>
+      <div class="nd-date">
+        <i class="fa-regular fa-clock"></i> Sent on {{ n.created_at|date:"F j, Y at h:i A" }}
+      </div>
+
+      <!-- Message Content -->
+      <div class="nd-msg">
+        {{ n.message }}
+      </div>
+
+      <!-- IF PROMO / COUPON NOTIFICATION -> SHOW STYLED TICKET WITH COPY BUTTON -->
+      {% if promo_code or n.notif_type == 'promo' %}
+      <div class="coupon-box">
+        <div class="coupon-title">🎁 Exclusive Promo Code</div>
+        <div class="coupon-code" id="target-promo-code">{{ promo_code|default:"SPECIALOFFER" }}</div>
+        <br>
+        <button class="btn-copy-code" id="btn-copy-promo" onclick="copyPromoCode('{{ promo_code|default:"SPECIALOFFER" }}')">
+          <i class="fa-solid fa-copy"></i> Copy Promo Code
+        </button>
+      </div>
+      {% endif %}
+
+      <!-- Action Buttons -->
+      <div class="nd-actions">
+        {% if promo_code or n.notif_type == 'promo' %}
+          <a href="/shop/" class="btn-nd-primary">
+            <i class="fa-solid fa-cart-shopping"></i> Shop Now &amp; Apply Coupon
+          </a>
+        {% elif n.action_url %}
+          <a href="{{ n.action_url }}" class="btn-nd-primary">
+            View Details <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        {% else %}
+          <a href="/" class="btn-nd-primary">
+            <i class="fa-solid fa-house"></i> Continue Shopping
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Policy Notice -->
+      <div class="expiry-notice">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Admin Notification Policy: This message is stored for 3 days (72 hours) and will automatically expire.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function copyPromoCode(code) {
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('btn-copy-promo');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check" style="color:#059669;"></i> Copied to Clipboard!';
+    btn.style.background = '#dcfce7';
+    btn.style.color = '#15803d';
+    setTimeout(() => {
+      btn.innerHTML = origHTML;
+      btn.style.background = '#ffffff';
+      btn.style.color = '#166534';
+    }, 2500);
+  }).catch(() => {
+    alert('Code: ' + code);
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Notifications — Shivank Kirana Store{% endblock %}
+
+{% block extra_css %}
+<style>
+  .notif-page { padding: 36px 0 60px; background: #f8fafc; min-height: 80vh; }
+  
+  /* Header */
+  .notif-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 14px; }
+  .notif-title-wrap h1 { font-size: 1.7rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 10px; }
+  .notif-count-badge { background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: .8rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
+
+  /* Info Banner */
+  .info-banner { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 14px 20px; border-radius: 14px; font-size: .88rem; font-weight: 600; display: flex; align-items: center; gap: 10px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(30,64,175,0.05); }
+
+  /* Notification Cards Container */
+  .notif-list { display: flex; flex-direction: column; gap: 16px; max-width: 800px; }
+  
+  .notif-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 3px 12px rgba(0,0,0,0.03); transition: transform .2s, box-shadow .2s; position: relative; overflow: hidden; }
+  .notif-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+  
+  .notif-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .notif-card-body { display: flex; gap: 16px; align-items: flex-start; }
+  
+  .notif-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .ico-promo { background: #fef3c7; color: #b45309; }
+  .ico-order { background: #e0f2fe; color: #0369a1; }
+  .ico-delivery { background: #dcfce7; color: #15803d; }
+  .ico-system { background: #f1f5f9; color: #475569; }
+
+  .notif-title { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
+  .notif-msg { font-size: .92rem; color: #334155; line-height: 1.5; margin: 0; }
+  .notif-time { font-size: .78rem; color: #94a3b8; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+
+  /* Expiration Badges */
+  .exp-badge { font-size: .75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .exp-safe { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .exp-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .exp-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; animation: pulse-exp 2s infinite; }
+
+  @keyframes pulse-exp {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  .btn-notif-action { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: .85rem; font-weight: 700; color: #166534; text-decoration: none; background: #e8f5e9; padding: 6px 14px; border-radius: 8px; transition: background .2s; }
+  .btn-notif-action:hover { background: #c8e6c9; color: #14532d; }
+
+  /* Empty State */
+  .notif-empty { background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 60px 24px; text-align: center; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+  .notif-empty-icon { font-size: 3.5rem; margin-bottom: 14px; display: inline-block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notif-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="notif-header">
+      <div class="notif-title-wrap">
+        <h1>🔔 Admin Notifications &amp; Alerts</h1>
+        <span class="notif-count-badge">{{ total_count }} active</span>
+      </div>
+    </div>
+
+    <!-- Expiration Banner Notice -->
+    <div class="info-banner">
+      <i class="fa-solid fa-clock-history" style="font-size:1.2rem;"></i>
+      <div>
+        <strong>3-Day Auto Expiration Policy:</strong> Admin messages and store announcements are stored for <strong>3 days (72 hours)</strong>. Old notifications automatically expire after 3 days.
+      </div>
+    </div>
+
+    <!-- Notification List -->
+    <div class="notif-list">
+      {% for n in notifications %}
+      <div class="notif-card">
+        <div class="notif-card-top">
+          <div class="notif-card-body">
+            <!-- Icon -->
+            <div class="notif-ico {% if n.notif_type == 'promo' %}ico-promo{% elif n.notif_type == 'order' %}ico-order{% elif n.notif_type == 'delivery' %}ico-delivery{% else %}ico-system{% endif %}">
+              {% if n.notif_type == 'promo' %}
+                <i class="fa-solid fa-bullhorn"></i>
+              {% elif n.notif_type == 'order' %}
+                <i class="fa-solid fa-box"></i>
+              {% elif n.notif_type == 'delivery' %}
+                <i class="fa-solid fa-motorcycle"></i>
+              {% else %}
+                <i class="fa-solid fa-bell"></i>
+              {% endif %}
+            </div>
+
+            <!-- Content -->
+            <div>
+              <h3 class="notif-title">{{ n.title }}</h3>
+              <p class="notif-msg">{{ n.message }}</p>
+              
+              <div class="notif-time">
+                <i class="fa-regular fa-clock"></i> Sent on {{ n.created_at|date:"d M, Y at h:i A" }}
+              </div>
+
+              <a href="{% if n.action_url and '/' in n.action_url %}{{ n.action_url }}{% else %}{% url 'notifications:detail' n.id %}{% endif %}" class="btn-notif-action">
+                View Details <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Expiration Pill -->
+          <div>
+            <span class="exp-badge {{ n.expires_class }}">
+              {{ n.expires_label }}
+            </span>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <!-- Empty State -->
+      <div class="notif-empty">
+        <div class="notif-empty-icon">🔔</div>
+        <h2 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">No Active Notifications</h2>
+        <p style="color: #64748b; font-size: .92rem; margin: 0;">
+          You have no notifications received in the last 3 days. Check back later for store updates, coupons, and order tracking announcements!
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

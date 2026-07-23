@@ -1,0 +1,452 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Shivank Kirana Store — Daily Essentials, Delivered to Your Door{% endblock %}
+{% block meta_description %}Order groceries, snacks, dairy, and FMCG brands online in Meerut. Free delivery on orders above ₹799. UPI & COD accepted.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ★ HERO SECTION ──────────────────────────────────── -->
+<section class="hero-section" id="hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="fa-solid fa-truck-fast"></i>
+        Free Delivery on ₹799+
+      </div>
+      <h1 class="hero-title">
+        Daily Essentials,<br>
+        <span class="hero-title-accent">Delivered to</span><br>
+        <span class="hero-title-highlight">Your Door!</span>
+      </h1>
+      <p class="hero-subtitle">
+        Fresh groceries, snacks, and FMCG brands — 
+        Lay's, KitKat, Haldiram's, Amul &amp; more. 
+        Serving <strong>325+ happy families</strong> in Meerut.
+      </p>
+      <div class="hero-cta">
+        <a href="/shop/" class="btn-cta">
+          <i class="fa-solid fa-bag-shopping"></i>
+          Shop Now
+        </a>
+        <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hi!%20I%20want%20to%20order"
+           class="btn-whatsapp" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Order on WhatsApp
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="stat-num">325+</span>
+          <span class="stat-label">Happy Customers</span>
+        </div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat">
+          <span class="stat-num">500+</span>
+          <span class="stat-label">Products</span>
+        </div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat">
+          <span class="stat-num">20+</span>
+          <span class="stat-label">Brands</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Image -->
+    <div class="hero-visual">
+      <div class="hero-image-wrap">
+        <div class="hero-banner-img" style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7)); display: flex; align-items: center; justify-content: center; aspect-ratio: 1; backdrop-filter: blur(10px); border-radius: var(--radius-xl);">
+          <svg width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="url(#heroGrad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <defs>
+              <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1a5d1a"/>
+                <stop offset="100%" stop-color="#4CAF50"/>
+              </linearGradient>
+            </defs>
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <div class="hero-float-badge badge-top-left">
+          <i class="fa-solid fa-truck-fast"></i>
+          Fast Delivery
+        </div>
+        <div class="hero-float-badge badge-bottom-right">
+          <i class="fa-solid fa-tag"></i>
+          Best Prices
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Wave -->
+  <div class="hero-wave">
+    <svg viewBox="0 0 1200 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,40 C300,80 600,0 900,40 C1050,60 1150,30 1200,40 L1200,80 L0,80 Z" fill="white"/>
+    </svg>
+  </div>
+</section>
+
+
+<!-- ★ TRUST BADGES ───────────────────────────────── -->
+<section class="trust-section">
+  <div class="trust-badges">
+    <div class="trust-badge">
+      <div class="trust-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="trust-text">
+        <strong>100% Original Products</strong>
+        <span>Best Quality Guaranteed</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon"><i class="fa-solid fa-truck-fast"></i></div>
+      <div class="trust-text">
+        <strong>Free Delivery</strong>
+        <span>On orders above ₹799</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon"><i class="fa-solid fa-rotate-left"></i></div>
+      <div class="trust-text">
+        <strong>Easy Returns</strong>
+        <span>Within 7 Days</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon"><i class="fa-solid fa-lock"></i></div>
+      <div class="trust-text">
+        <strong>Secure Payments</strong>
+        <span>100% Safe &amp; Secure</span>
+      </div>
+    </div>
+    <div class="trust-badge">
+      <div class="trust-icon"><i class="fa-solid fa-headset"></i></div>
+      <div class="trust-text">
+        <strong>Contact Support</strong>
+        <span>+91 75993 42112</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ★ CATEGORIES SECTION ─────────────────────────── -->
+<section class="section categories-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Shop by <span>Category</span></h2>
+      <a href="/shop/" class="btn btn-outline-primary btn-sm">View All →</a>
+    </div>
+    <div class="categories-grid">
+      {% for category in categories %}
+      <a href="/category/{{ category.slug }}/" class="category-card reveal-on-scroll">
+        <div class="category-card-icon">
+          {% if category.icon_svg %}
+            {{ category.icon_svg|safe }}
+          {% else %}
+            <i class="fa-solid fa-box" style="font-size:1.8rem;color:#226b2e;"></i>
+          {% endif %}
+        </div>
+        <div class="category-card-info">
+          <span class="category-name">{{ category.name }}</span>
+          <span class="category-count">{{ category.product_count }} items</span>
+        </div>
+      </a>
+      {% empty %}
+        {% for i in "123456789012"|make_list %}
+        <div class="category-card skeleton" style="height:110px;border-radius:18px;"></div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ★ FEATURED PRODUCTS ──────────────────────────── -->
+{% if featured_products %}
+<section class="section products-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">🌟 Featured <span>Products</span></h2>
+      <a href="/shop/" class="btn btn-outline-primary btn-sm">View All →</a>
+    </div>
+    <div class="swiper products-swiper" id="featured-swiper">
+      <div class="swiper-wrapper">
+        {% for product in featured_products %}
+        <div class="swiper-slide">
+          {% include 'products/product_card.html' with product=product %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev products-prev"></div>
+      <div class="swiper-button-next products-next"></div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ★ PROMO BANNER ───────────────────────────────── -->
+<section class="promo-banner-section">
+  <div class="promo-banner">
+    <div class="promo-content">
+      <div class="promo-text">
+        <h2 class="promo-title">🌿 Fresh Groceries at Your Doorstep</h2>
+        <p class="promo-subtitle">Order above ₹799 and get <strong>FREE delivery</strong> anywhere in Meerut!</p>
+        <div class="promo-highlights">
+          <span><i class="fa-solid fa-check"></i> Same-day delivery</span>
+          <span><i class="fa-solid fa-check"></i> UPI &amp; COD accepted</span>
+          <span><i class="fa-solid fa-check"></i> No hidden charges</span>
+        </div>
+        <a href="/shop/" class="btn-cta" style="display:inline-flex;width:fit-content;">
+          <i class="fa-solid fa-bag-shopping"></i>
+          Shop Now &amp; Save!
+        </a>
+      </div>
+      <div class="promo-upi-box">
+        <div class="upi-info">
+          <div class="upi-qr-small">
+            <img src="{% static 'images/payment/Qr_code_image.jpeg' %}" alt="UPI QR Code — Shivank Kirana Store" loading="lazy">
+          </div>
+          <div class="upi-details">
+            <p class="upi-label">Pay via UPI</p>
+            <p class="upi-id">7060169850@ptyes</p>
+            <p class="upi-name">Shivank So Om Pal</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="promo-leaf promo-leaf-1">🌿</div>
+    <div class="promo-leaf promo-leaf-2">🍃</div>
+    <div class="promo-leaf promo-leaf-3">🌱</div>
+  </div>
+</section>
+
+
+<!-- ★ NEW LAUNCHES ───────────────────────────────── -->
+{% if new_products %}
+<section class="section products-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">🚀 New <span>Launches</span></h2>
+      <a href="/shop/?filter=new" class="btn btn-outline-primary btn-sm">See All →</a>
+    </div>
+    <div class="swiper products-swiper" id="new-swiper">
+      <div class="swiper-wrapper">
+        {% for product in new_products %}
+        <div class="swiper-slide">
+          {% include 'products/product_card.html' with product=product %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ★ BRAND PRODUCT SECTIONS ─────────────────────── -->
+{% for brand_section in brand_sections %}
+<section class="section products-section" style="background:{% cycle '#fff' '#f9fcf9' %};">
+  <div class="container">
+    <div class="section-header">
+      <div class="brand-section-header">
+        {% if brand_section.brand.logo %}
+          <img src="{{ brand_section.brand.logo.url }}" alt="{{ brand_section.brand.name }}" class="brand-section-logo">
+        {% endif %}
+        <h2 class="section-title">{{ brand_section.brand.name }} <span>Products</span></h2>
+      </div>
+      <a href="/brand/{{ brand_section.brand.slug }}/" class="btn btn-outline-primary btn-sm">
+        View All {{ brand_section.brand.name }} →
+      </a>
+    </div>
+    <div class="swiper products-swiper brand-swiper">
+      <div class="swiper-wrapper">
+        {% for product in brand_section.products %}
+        <div class="swiper-slide">
+          {% include 'products/product_card.html' with product=product %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+</section>
+{% endfor %}
+
+
+<!-- ★ BRAND LOGOS SLIDER ─────────────────────────── -->
+<section class="section brand-logos-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">🏆 Our <span>Trusted Brands</span></h2>
+    </div>
+
+    <style>
+    .brand-logo-item { display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff; border-radius:16px; padding:12px 10px; height:95px; box-shadow:0 2px 12px rgba(0,0,0,0.06); transition:all .25s; text-decoration:none; gap:6px; border:1px solid #f1f5f9; }
+    .brand-logo-item:hover { transform:translateY(-5px) scale(1.04); box-shadow:0 10px 28px rgba(0,0,0,0.12); border-color:#dcfce7; }
+    .brand-logo-item img { max-height:58px; max-width:120px; width:auto; height:auto; object-fit:contain; filter:none; transition:transform .2s; }
+    .brand-logo-item:hover img { transform:scale(1.06); }
+
+    /* Brand Icon Badge */
+    .brand-icon-badge {
+      width: 54px; height: 54px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: .82rem; letter-spacing: .02em;
+      text-transform: uppercase; line-height: 1.1; text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12); transition: all .25s;
+      font-family: 'Segoe UI', system-ui, sans-serif; padding: 0 4px;
+    }
+    .brand-logo-item:hover .brand-icon-badge { transform: scale(1.08); }
+
+    .brand-label { font-size: .72rem; font-weight: 700; color: #555; text-align: center; line-height: 1.2; }
+
+    /* Per-brand colors */
+    .b-haldiram  { background: linear-gradient(135deg,#FF8C00,#FFC200); color:#fff; }
+    .b-dabur     { background: linear-gradient(135deg,#1b6b2e,#2e8b44); color:#fff; }
+    .b-nestle    { background: linear-gradient(135deg,#003087,#0056b3); color:#fff; }
+    .b-parle     { background: linear-gradient(135deg,#c62828,#e53935); color:#fff; }
+    .b-itc       { background: linear-gradient(135deg,#1a237e,#283593); color:#fff; }
+    .b-maggi     { background: linear-gradient(135deg,#b71c1c,#c62828); color:#ffeb3b; }
+    .b-bingo     { background: linear-gradient(135deg,#e65100,#ff6d00); color:#fff; }
+    .b-lifebuoy  { background: linear-gradient(135deg,#b71c1c,#e53935); color:#fff; }
+    .b-amul      { background: linear-gradient(135deg,#1565c0,#1976d2); color:#FFD600; }
+    .b-tata      { background: linear-gradient(135deg,#004d9f,#0061be); color:#fff; }
+    .b-britannia { background: linear-gradient(135deg,#d32f2f,#e53935); color:#ffeb3b; }
+    .b-cadbury   { background: linear-gradient(135deg,#4a148c,#6a1b9a); color:#fff; }
+    .b-lay       { background: linear-gradient(135deg,#f57c00,#ff9800); color:#fff; }
+    .b-mccain    { background: linear-gradient(135deg,#2e7d32,#388e3c); color:#fff; }
+    .b-sunfeast  { background: linear-gradient(135deg,#e65100,#ef6c00); color:#fff; }
+    .b-pepsi     { background: linear-gradient(135deg,#0d47a1,#1976d2); color:#e53935; }
+    .b-cocacola  { background: linear-gradient(135deg,#b71c1c,#c62828); color:#fff; }
+    .b-default   { background: linear-gradient(135deg,#226b2e,#2e8b44); color:#fff; }
+    </style>
+
+    <div class="swiper brand-slider" id="brand-swiper">
+      <div class="swiper-wrapper">
+        {% for brand in all_brands %}
+        <div class="swiper-slide">
+          <a href="/brand/{{ brand.slug }}/" class="brand-logo-item">
+            {% if brand.logo %}
+              <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" loading="lazy">
+            {% else %}
+              {% with bname=brand.name|lower %}
+              <div class="brand-icon-badge
+                {% if 'haldiram' in bname %}b-haldiram
+                {% elif 'dabur' in bname %}b-dabur
+                {% elif 'nestl' in bname or 'nestle' in bname %}b-nestle
+                {% elif 'parle' in bname %}b-parle
+                {% elif 'itc' in bname %}b-itc
+                {% elif 'maggi' in bname %}b-maggi
+                {% elif 'bingo' in bname %}b-bingo
+                {% elif 'lifebuoy' in bname %}b-lifebuoy
+                {% elif 'amul' in bname %}b-amul
+                {% elif 'tata' in bname %}b-tata
+                {% elif 'britannia' in bname %}b-britannia
+                {% elif 'cadbury' in bname %}b-cadbury
+                {% elif "lay" in bname %}b-lay
+                {% elif 'mccain' in bname %}b-mccain
+                {% elif 'sunfeast' in bname %}b-sunfeast
+                {% elif 'pepsi' in bname %}b-pepsi
+                {% elif 'coca' in bname or 'coke' in bname %}b-cocacola
+                {% else %}b-default{% endif %}
+              ">
+                {% if 'haldiram' in bname %}HDR
+                {% elif 'dabur' in bname %}DAB
+                {% elif 'nestl' in bname %}NST
+                {% elif 'parle' in bname %}PAR
+                {% elif 'itc' in bname %}ITC
+                {% elif 'maggi' in bname %}MAG
+                {% elif 'bingo' in bname %}BGO
+                {% elif 'lifebuoy' in bname %}LBY
+                {% elif 'amul' in bname %}AML
+                {% elif 'tata' in bname %}TATA
+                {% elif 'britannia' in bname %}BRT
+                {% elif 'cadbury' in bname %}CDY
+                {% elif "lay" in bname %}LAY
+                {% elif 'mccain' in bname %}MCC
+                {% elif 'sunfeast' in bname %}SNF
+                {% elif 'pepsi' in bname %}PEP
+                {% elif 'coca' in bname or 'coke' in bname %}COK
+                {% else %}{{ brand.name|slice:":3"|upper }}{% endif %}
+              </div>
+              {% endwith %}
+              <span class="brand-label">{{ brand.name }}</span>
+            {% endif %}
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+  .products-swiper .swiper-slide { width: 230px; height: auto; }
+  @media (max-width: 480px) { .products-swiper .swiper-slide { width: 185px; } }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Featured Products
+  if (document.getElementById('featured-swiper')) {
+    new Swiper('#featured-swiper', {
+      slidesPerView: 'auto', spaceBetween: 16, loop: true,
+      autoplay: { delay: 3200, disableOnInteraction: false, pauseOnMouseEnter: true },
+      navigation: { prevEl: '.products-prev', nextEl: '.products-next' },
+      pagination: { el: '.swiper-pagination', clickable: true },
+      breakpoints: { 640: { spaceBetween: 20 }, 1024: { spaceBetween: 24 } }
+    });
+  }
+
+  // New Products
+  if (document.getElementById('new-swiper')) {
+    new Swiper('#new-swiper', {
+      slidesPerView: 'auto', spaceBetween: 16, loop: true,
+      navigation: { prevEl: '#new-swiper .swiper-button-prev', nextEl: '#new-swiper .swiper-button-next' },
+      breakpoints: { 640: { spaceBetween: 20 }, 1024: { spaceBetween: 24 } }
+    });
+  }
+
+  // Brand Logos (auto-scroll)
+  if (document.getElementById('brand-swiper')) {
+    new Swiper('#brand-swiper', {
+      slidesPerView: 3, spaceBetween: 14, loop: true,
+      autoplay: { delay: 0, disableOnInteraction: false },
+      speed: 3000, freeMode: true,
+      breakpoints: {
+        480:  { slidesPerView: 4 },
+        768:  { slidesPerView: 5 },
+        1024: { slidesPerView: 7 },
+        1280: { slidesPerView: 8 },
+      }
+    });
+  }
+
+  // Per-brand swipers
+  document.querySelectorAll('.brand-swiper').forEach(el => {
+    new Swiper(el, {
+      slidesPerView: 'auto', spaceBetween: 16, loop: true,
+      navigation: {
+        prevEl: el.querySelector('.swiper-button-prev'),
+        nextEl: el.querySelector('.swiper-button-next')
+      },
+      breakpoints: { 640: { spaceBetween: 20 }, 1024: { spaceBetween: 24 } }
+    });
+  });
+});
+</script>
+{% endblock %}

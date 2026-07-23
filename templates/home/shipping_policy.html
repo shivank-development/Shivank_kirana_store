@@ -1,0 +1,130 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Shipping Policy — Shivank Kirana Store{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/policy.css' %}">{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+  <div class="container">
+    <div class="policy-layout">
+
+      <aside class="policy-sidebar">
+        <h3>Customer Care</h3>
+        <nav class="policy-nav">
+          <a href="{% url 'about-us' %}"><i class="fa-solid fa-store"></i> About Us</a>
+          <a href="{% url 'privacy-policy' %}"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+          <a href="{% url 'return-policy' %}"><i class="fa-solid fa-rotate-left"></i> Return Policy</a>
+          <a href="{% url 'shipping-policy' %}" class="active"><i class="fa-solid fa-truck"></i> Shipping Policy</a>
+          <a href="{% url 'faqs' %}"><i class="fa-solid fa-circle-question"></i> FAQs</a>
+          <a href="{% url 'contact-us' %}"><i class="fa-solid fa-headset"></i> Contact Us</a>
+        </nav>
+        <div style="height:1px;background:#eee;margin:14px 0;"></div>
+        <div class="policy-nav">
+          <a href="#delivery-areas"><i class="fa-solid fa-map"></i> Delivery Areas</a>
+          <a href="#delivery-time"><i class="fa-solid fa-clock"></i> Delivery Time</a>
+          <a href="#delivery-charges"><i class="fa-solid fa-indian-rupee-sign"></i> Charges</a>
+          <a href="#free-delivery"><i class="fa-solid fa-gift"></i> Free Delivery</a>
+          <a href="#order-tracking"><i class="fa-solid fa-location-dot"></i> Tracking</a>
+          <a href="#delivery-issues"><i class="fa-solid fa-triangle-exclamation"></i> Issues</a>
+        </div>
+      </aside>
+
+      <div class="policy-content">
+        <div class="policy-hero">
+          <div class="policy-hero-icon">🚚</div>
+          <div>
+            <h1>Shipping Policy</h1>
+            <p>Fast, safe aur reliable delivery — Meerut ke liye</p>
+          </div>
+        </div>
+
+        <section class="policy-section" id="delivery-areas">
+          <h2><span class="sec-icon">🗺️</span> Delivery Areas</h2>
+          <p>Hum abhi Meerut city aur surrounding areas mein deliver karte hain:</p>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon">📍</div>
+              <h4>Pincode 250001</h4>
+              <p>Meerut City (Central)</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">📍</div>
+              <h4>Pincode 250002</h4>
+              <p>Meerut Cantt</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">📍</div>
+              <h4>Pincode 250003</h4>
+              <p>Meerut South</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">📍</div>
+              <h4>Pincode 250404</h4>
+              <p>Mawana Road Area</p>
+            </div>
+          </div>
+          <div class="warn-box">⚠️ Checkout pe apna pincode zaroor check karein. Agar aapka area covered nahi hai toh hum jald expand kar rahe hain!</div>
+        </section>
+
+        <section class="policy-section" id="delivery-time">
+          <h2><span class="sec-icon">⏱️</span> Delivery Time</h2>
+          <ul>
+            <li><strong>Same-Day Delivery:</strong> Orders placed before 4:00 PM — same day deliver honge (selected areas)</li>
+            <li><strong>Next-Day Delivery:</strong> Orders after 4:00 PM — agले din subah deliver honge</li>
+            <li><strong>Express Delivery:</strong> Coming soon — 2 hours mein delivery!</li>
+          </ul>
+          <div class="highlight-box">🎯 Order karne ke baad live tracking se aap apne delivery boy ki location dekhte reh sakte hain!</div>
+        </section>
+
+        <section class="policy-section" id="delivery-charges">
+          <h2><span class="sec-icon">💵</span> Delivery Charges</h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="card-icon">🆓</div>
+              <h4>FREE Delivery</h4>
+              <p>Orders above ₹799</p>
+            </div>
+            <div class="info-card">
+              <div class="card-icon">₹</div>
+              <h4>₹49 Charge</h4>
+              <p>Orders below ₹799</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="policy-section" id="free-delivery">
+          <h2><span class="sec-icon">🎁</span> Free Delivery Tips</h2>
+          <p>₹799 se upar order karein aur delivery free paayein! Kuch simple tips:</p>
+          <ul>
+            <li>Family ke sath milkar bulk order karein</li>
+            <li>Weekly grocery ek saath order karein</li>
+            <li>Combo deals checkout karein — extra savings!</li>
+          </ul>
+        </section>
+
+        <section class="policy-section" id="order-tracking">
+          <h2><span class="sec-icon">📡</span> Order Tracking</h2>
+          <p>Hamara live tracking system aapko real-time update deta hai:</p>
+          <ol>
+            <li><strong>Order Placed:</strong> Aapko confirmation notification milega</li>
+            <li><strong>Order Confirmed:</strong> Jab payment verify ho jayegi</li>
+            <li><strong>Packed:</strong> Jab order pack kiya jayega</li>
+            <li><strong>Out for Delivery:</strong> Delivery boy rawal hoga — GPS tracking start</li>
+            <li><strong>Delivered:</strong> Delivery complete notification</li>
+          </ol>
+        </section>
+
+        <section class="policy-section" id="delivery-issues">
+          <h2><span class="sec-icon">⚠️</span> Delivery Issues</h2>
+          <ul>
+            <li><strong>Order Late Hai?</strong> WhatsApp pe order number bhejein — hum check karenge</li>
+            <li><strong>Wrong Address?</strong> Order place karte samay address carefully enter karein</li>
+            <li><strong>Delivery Boy Available Nahi?</strong> Rescheduling karein — agle available slot mein deliver karenge</li>
+            <li><strong>Item Missing?</strong> Delivery ke time hi check karein aur report karein</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

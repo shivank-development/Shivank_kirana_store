@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Search: {{ query }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/shop.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container section" style="margin-top: 30px;">
+
+  {% if products %}
+    <div class="products-grid">
+      {% for product in products %}
+        {% include 'products/product_card.html' with product=product %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="text-align:center;padding:60px;">
+      <div style="font-size:4rem">🔍</div>
+      <p>No products found for "{{ query }}"</p>
+      <a href="/shop/" class="btn btn-primary" style="margin-top:20px">Browse All</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
